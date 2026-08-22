@@ -1,8 +1,20 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #050505;
+  --bg-soft: #0a0a0a;
+  --panel: #111111;
+  --red: #dc0000;
+  --red-deep: #7f0000;
+  --white: #ffffff;
+  --soft-white: #f4f4f4;
+  --muted: #c6c6c6;
+  --gold: #f5c542;
+  --border: rgba(220, 0, 0, 0.55);
+  --shadow: rgba(220, 0, 0, 0.25);
+}
 
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
@@ -11,453 +23,54 @@ html {
 }
 
 body {
-  min-width: 320px;
+  margin: 0;
   min-height: 100vh;
-  font-family: "Inter", sans-serif;
-  background: #09090b;
-  color: #ffffff;
+  background: var(--bg);
+  color: var(--white);
+  font-family: 'Rajdhani', sans-serif;
+  overflow-x: hidden;
 }
 
-button {
-  font-family: inherit;
+img {
+  display: block;
+  max-width: 100%;
 }
 
-/* =========================
-   HERO
-========================= */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
 
-.hero {
-  position: relative;
+button,
+a {
+  transition: all 0.2s ease;
+}
+
+img,
+svg {
+  vertical-align: middle;
+}
+
+#root {
   min-height: 100vh;
-  width: 100%;
-  overflow: hidden;
+}
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
+.app-shell {
+  min-height: 100vh;
   background:
-    radial-gradient(
-      circle at 50% 45%,
-      rgba(220, 38, 38, 0.18),
-      transparent 30%
-    ),
-    radial-gradient(
-      circle at 20% 80%,
-      rgba(37, 99, 235, 0.08),
-      transparent 25%
-    ),
-    #09090b;
+    radial-gradient(circle at top center, rgba(220, 0, 0, 0.08), transparent 28%),
+    linear-gradient(180deg, #050505 0%, #0b0b0b 100%);
+  color: var(--white);
 }
 
-/* =========================
-   BACKGROUND GRID
-========================= */
-
-.hero::before {
-  content: "";
-
-  position: absolute;
-  inset: 0;
-
-  background-image:
-    linear-gradient(
-      rgba(255, 255, 255, 0.035) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.035) 1px,
-      transparent 1px
-    );
-
-  background-size: 50px 50px;
-
-  mask-image: radial-gradient(
-    circle at center,
-    black 0%,
-    transparent 75%
-  );
-
-  pointer-events: none;
+.app-main {
+  width: 100%;
+  overflow-x: hidden;
 }
 
-/* =========================
-   CENTER GLOW
-========================= */
-
-.hero-glow {
-  position: absolute;
-
-  width: 600px;
-  height: 600px;
-
-  border-radius: 50%;
-
-  background: rgba(220, 38, 38, 0.06);
-
-  filter: blur(100px);
-
-  pointer-events: none;
-}
-
-/* =========================
-   DECORATIVE WEB
-========================= */
-
-.web {
-  position: absolute;
-
-  width: 500px;
-  height: 500px;
-
-  border-radius: 50%;
-
-  border: 1px solid rgba(220, 38, 38, 0.09);
-
-  pointer-events: none;
-}
-
-.web::before,
-.web::after {
-  content: "";
-
-  position: absolute;
-
-  border-radius: 50%;
-
-  border: 1px solid rgba(220, 38, 38, 0.07);
-}
-
-.web::before {
-  inset: 12%;
-}
-
-.web::after {
-  inset: 25%;
-}
-
-.web-left {
-  left: -300px;
-  top: -220px;
-}
-
-.web-right {
-  right: -300px;
-  bottom: -220px;
-}
-
-/* =========================
-   HERO CONTENT
-========================= */
-
-.hero-content {
-  position: relative;
-  z-index: 2;
-
-  width: min(900px, 90%);
-
-  text-align: center;
-}
-
-.hero-organizer {
-  margin-bottom: 2rem;
-
-  color: #a1a1aa;
-
-  font-size: 0.7rem;
-  font-weight: 600;
-
-  letter-spacing: 0.3em;
-}
-
-/* =========================
-   TITLE
-========================= */
-
-.hero-title-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.hero-small-title {
-  margin-bottom: 0.7rem;
-
-  color: #71717a;
-
-  font-size: 0.75rem;
-  font-weight: 700;
-
-  letter-spacing: 0.35em;
-}
-
-.hero-title {
-  color: #f4f4f5;
-
-  font-size: clamp(4.5rem, 13vw, 9.5rem);
-
-  font-weight: 900;
-
-  line-height: 0.85;
-
-  letter-spacing: -0.07em;
-
-  text-shadow:
-    0 0 20px rgba(255, 255, 255, 0.04),
-    0 0 50px rgba(220, 38, 38, 0.12);
-}
-
-.hero-title span {
-  color: #dc2626;
-
-  text-shadow:
-    0 0 20px rgba(220, 38, 38, 0.35),
-    0 0 50px rgba(220, 38, 38, 0.15);
-}
-
-/* =========================
-   SUBTITLE
-========================= */
-
-.hero-subtitle {
-  margin-top: 2rem;
-
-  color: #e4e4e7;
-
-  font-size: clamp(0.85rem, 2vw, 1.2rem);
-
-  font-weight: 700;
-
-  letter-spacing: 0.3em;
-}
-
-/* =========================
-   DESCRIPTION
-========================= */
-
-.hero-description {
-  max-width: 620px;
-
-  margin: 1.4rem auto 0;
-
-  color: #a1a1aa;
-
-  font-size: 0.95rem;
-
-  line-height: 1.8;
-}
-
-/* =========================
-   BUTTONS
-========================= */
-
-.hero-actions {
-  display: flex;
-
-  justify-content: center;
-
-  gap: 1rem;
-
-  margin-top: 2.5rem;
-
-  flex-wrap: wrap;
-}
-
-.hero-button {
-  border: none;
-
-  padding: 0.9rem 1.8rem;
-
-  border-radius: 999px;
-
-  font-size: 0.85rem;
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    background 0.25s ease,
-    border-color 0.25s ease;
-}
-
-.hero-button:hover {
-  transform: translateY(-3px);
-}
-
-/* Primary button */
-
-.hero-button.primary {
-  background: #dc2626;
-
-  color: #ffffff;
-
-  box-shadow:
-    0 8px 30px rgba(220, 38, 38, 0.2);
-}
-
-.hero-button.primary:hover {
-  background: #ef4444;
-
-  box-shadow:
-    0 12px 35px rgba(220, 38, 38, 0.3);
-}
-
-/* Secondary button */
-
-.hero-button.secondary {
-  background: transparent;
-
-  color: #e4e4e7;
-
-  border: 1px solid #3f3f46;
-}
-
-.hero-button.secondary:hover {
-  border-color: #dc2626;
-
-  color: #ffffff;
-}
-
-/* =========================
-   STATUS
-========================= */
-
-.hero-status {
-  display: inline-flex;
-
-  align-items: center;
-
-  gap: 0.6rem;
-
-  margin-top: 3rem;
-
-  color: #71717a;
-
-  font-size: 0.7rem;
-
-  letter-spacing: 0.15em;
-
-  text-transform: uppercase;
-}
-
-.status-dot {
-  width: 7px;
-  height: 7px;
-
-  flex-shrink: 0;
-
-  border-radius: 50%;
-
-  background: #dc2626;
-
-  box-shadow:
-    0 0 10px rgba(220, 38, 38, 0.7);
-}
-
-/* =========================
-   BOTTOM BRANDING
-========================= */
-
-.hero-bottom-text {
-  position: absolute;
-
-  bottom: 1.5rem;
-  left: 50%;
-
-  z-index: 2;
-
-  transform: translateX(-50%);
-
-  color: #27272a;
-
-  font-size: 0.65rem;
-  font-weight: 700;
-
-  letter-spacing: 0.4em;
-}
-
-/* =========================
-   MOBILE
-========================= */
-
-@media (max-width: 600px) {
-  .hero-content {
-    width: 88%;
-  }
-
-  .hero-organizer {
-    margin-bottom: 1.5rem;
-
-    font-size: 0.58rem;
-
-    letter-spacing: 0.18em;
-  }
-
-  .hero-small-title {
-    font-size: 0.6rem;
-
-    letter-spacing: 0.25em;
-  }
-
-  .hero-title {
-    font-size: clamp(3.7rem, 19vw, 6rem);
-  }
-
-  .hero-subtitle {
-    font-size: 0.7rem;
-
-    letter-spacing: 0.18em;
-
-    line-height: 1.6;
-  }
-
-  .hero-description {
-    font-size: 0.82rem;
-
-    line-height: 1.7;
-  }
-
-  .hero-actions {
-    width: 100%;
-
-    flex-direction: column;
-
-    align-items: center;
-  }
-
-  .hero-button {
-    width: min(280px, 100%);
-  }
-
-  .hero-status {
-    font-size: 0.58rem;
-
-    letter-spacing: 0.08em;
-
-    text-align: center;
-  }
-
-  .web {
-    width: 300px;
-    height: 300px;
-  }
-
-  .web-left {
-    left: -220px;
-    top: -150px;
-  }
-
-  .web-right {
-    right: -220px;
-    bottom: -150px;
-  }
-
-  .hero-bottom-text {
-    font-size: 0.55rem;
-
-    letter-spacing: 0.25em;
-  }
+::selection {
+  background: rgba(220, 0, 0, 0.5);
+  color: var(--white);
 }
