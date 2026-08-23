@@ -4,14 +4,18 @@ const navItems = [
   { label: "Home", to: "/" },
   { label: "About", to: "/about" },
   { label: "Events", to: "/events" },
-  { label: "FAQ", to: "/faq" },
+  { label: "Sponsors", to: "/sponsors" },
   { label: "Location", to: "/location" },
 ];
 
 function NavSeparator() {
   return (
     <span className="mobile-nav-separator" aria-hidden="true">
-      <span className="mobile-nav-dot" />
+      <svg viewBox="0 0 32 16" preserveAspectRatio="none" focusable="false">
+        <path className="web-strand" d="M1 2.5 L16 8 L31 2.5" />
+        <path className="web-strand" d="M1 13.5 L16 8 L31 13.5" />
+        <circle className="web-node-dot" cx="16" cy="8" r="2.3" />
+      </svg>
     </span>
   );
 }
@@ -217,70 +221,48 @@ export default function MobileWebNav() {
 
 
         /* =====================================================
-           WEB SEPARATOR
+           WEB SEPARATOR (spider-web thread connector)
+           Two strands converge into a glowing node, mirroring
+           the desktop nav's web-line-and-node visual language.
            ===================================================== */
 
         .mobile-nav-separator {
-          position: relative;
-
           display: inline-flex;
 
           align-items: center;
 
           justify-content: center;
 
-          width: 0.28rem;
+          width: 1.15rem;
+          height: 1rem;
 
-          height: 1px;
-
-          margin:
-            0
-            0.03rem;
+          margin: 0 0.02rem;
 
           flex-shrink: 0;
-
-          background:
-            rgba(220, 0, 0, 0.8);
         }
 
+        .mobile-nav-separator svg {
+          width: 100%;
+          height: 100%;
 
-        .mobile-nav-separator::before {
-          content: "";
-
-          position: absolute;
-
-          left: 0;
-          right: 0;
-
-          top: 50%;
-
-          height: 1px;
-
-          background:
-            rgba(220, 0, 0, 0.8);
+          overflow: visible;
         }
 
+        .mobile-nav-separator .web-strand {
+          fill: none;
 
-        /* =====================================================
-           WEB NODE DOT
-           ===================================================== */
+          stroke: rgba(220, 0, 0, 0.75);
 
-        .mobile-nav-dot {
-          position: relative;
+          stroke-width: 1;
 
-          z-index: 2;
+          stroke-linecap: round;
+        }
 
-          width: 4px;
-          height: 4px;
+        .mobile-nav-separator .web-node-dot {
+          fill: #ef1b1b;
 
-          border-radius: 50%;
-
-          background:
-            #ef1b1b;
-
-          box-shadow:
-            0 0 5px rgba(239, 27, 27, 0.9),
-            0 0 9px rgba(239, 27, 27, 0.35);
+          filter:
+            drop-shadow(0 0 4px rgba(239, 27, 27, 0.85));
         }
 
 
@@ -309,7 +291,8 @@ export default function MobileWebNav() {
           }
 
           .mobile-nav-separator {
-            width: 0.4rem;
+            width: 1.5rem;
+            height: 1.15rem;
           }
         }
 
@@ -339,16 +322,10 @@ export default function MobileWebNav() {
           }
 
           .mobile-nav-separator {
-            width: 0.22rem;
+            width: 0.9rem;
+            height: 0.85rem;
 
-            margin:
-              0
-              0.01rem;
-          }
-
-          .mobile-nav-dot {
-            width: 3.5px;
-            height: 3.5px;
+            margin: 0 0.01rem;
           }
         }
 
@@ -378,12 +355,8 @@ export default function MobileWebNav() {
           }
 
           .mobile-nav-separator {
-            width: 0.18rem;
-          }
-
-          .mobile-nav-dot {
-            width: 3px;
-            height: 3px;
+            width: 0.7rem;
+            height: 0.75rem;
           }
         }
 
