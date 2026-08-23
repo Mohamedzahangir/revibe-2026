@@ -1,69 +1,22 @@
 import { Link } from "react-router-dom";
 
 const technicalEvents = [
-  {
-    name: "Paper Presentation",
-    slug: "paper-presentation",
-    description: "Present your ideas and technical work to a panel of judges.",
-  },
-  {
-    name: "Mini Hackathon",
-    slug: "mini-hackathon",
-    description: "A short-format build challenge to test speed and creativity.",
-  },
-  {
-    name: "Technical Quiz",
-    slug: "technical-quiz",
-    description: "Test your knowledge across multiple rounds of technical questions.",
-  },
-  {
-    name: "Coding & Debugging",
-    slug: "coding-debugging",
-    description: "Solve coding challenges and fix broken logic under time pressure.",
-  },
-  {
-    name: "Shark Tank × SGC",
-    slug: "shark-tank-sgc",
-    description: "Pitch an idea and defend it before an expert panel.",
-  },
-  {
-    name: "Prompt Wars",
-    slug: "prompt-wars",
-    description: "A creative challenge that rewards smart prompting and precision.",
-  },
+  { name: "Paper Presentation", slug: "paper-presentation" },
+  { name: "Mini Hackathon", slug: "mini-hackathon" },
+  { name: "Technical Quiz", slug: "technical-quiz" },
+  { name: "Coding & Debugging", slug: "coding-debugging" },
+  { name: "Shark Tank × SGC", slug: "shark-tank-sgc" },
+  { name: "Prompt Wars", slug: "prompt-wars" },
 ];
 
 const nonTechnicalEvents = [
-  { name: "Connections", slug: "connections", description: "A word-association group challenge." },
-  { name: "Chess", slug: "chess", description: "A tactical strategy contest for all skill levels." },
-  { name: "Free Fire", slug: "free-fire", description: "Competitive mobile gaming action." },
-  { name: "Mehandi", slug: "mehandi", description: "A creative mehndi design competition." },
-  { name: "Cooking Without Fire", slug: "cooking-without-fire", description: "No-flame cooking with creativity and presentation." },
-  { name: "Art & Painting", slug: "art-painting", description: "An on-the-spot art challenge." },
-  { name: "IPL Auction", slug: "ipl-auction", description: "A strategy-heavy team auction simulation." },
-];
-
-const faqs = [
-  {
-    question: "How does registration work for REVIBE '26?",
-    answer:
-      "Explore the events, select the preferred option, and complete the registration form through the website.",
-  },
-  {
-    question: "Are both Technical and Non-Technical events available?",
-    answer:
-      "Yes. REVIBE '26 includes both technical and non-technical tracks across the symposium.",
-  },
-  {
-    question: "Can I take part in multiple events?",
-    answer:
-      "Multiple participation is subject to the final event rules and organizer confirmation.",
-  },
-  {
-    question: "How will payment information be shared?",
-    answer:
-      "Payment details and verification status will be provided within the registration flow as the event proceeds.",
-  },
+  { name: "Connections", slug: "connections" },
+  { name: "Chess", slug: "chess" },
+  { name: "Free Fire", slug: "free-fire" },
+  { name: "Mehandi", slug: "mehandi" },
+  { name: "Cooking Without Fire", slug: "cooking-without-fire" },
+  { name: "Art & Painting", slug: "art-painting" },
+  { name: "IPL Auction", slug: "ipl-auction" },
 ];
 
 export default function Home() {
@@ -88,18 +41,7 @@ export default function Home() {
               </div>
 
               <div className="cta-row">
-                <Link to="/events" className="primary-btn">Enter the Web</Link>
-                <Link to="/register" className="secondary-btn">Register</Link>
-              </div>
-            </div>
-
-            <div className="hero-web-panel" aria-hidden="true">
-              <div className="web-frame">
-                <span className="hero-dot hero-dot-a" />
-                <span className="hero-dot hero-dot-b" />
-                <span className="hero-dot hero-dot-c" />
-                <span className="hero-dot hero-dot-d" />
-                <span className="hero-dot hero-dot-e" />
+                <Link to="/about" className="primary-btn">Enter the Web</Link>
               </div>
             </div>
           </div>
@@ -140,54 +82,28 @@ export default function Home() {
 
             <div className="dual-columns">
               <article className="event-group">
-                <h3>Technical Events</h3>
+                <h3>Technical</h3>
                 <ul className="event-list">
                   {technicalEvents.map((event) => (
                     <li key={event.slug}>
-                      <div>
-                        <strong>{event.name}</strong>
-                        <span>{event.description}</span>
-                      </div>
-                      <Link to={`/events/${event.slug}`}>View</Link>
+                      <span>{event.name}</span>
+                      <Link to="/events">View Details</Link>
                     </li>
                   ))}
                 </ul>
               </article>
 
               <article className="event-group">
-                <h3>Non-Technical Events</h3>
+                <h3>Non-Technical</h3>
                 <ul className="event-list">
                   {nonTechnicalEvents.map((event) => (
                     <li key={event.slug}>
-                      <div>
-                        <strong>{event.name}</strong>
-                        <span>{event.description}</span>
-                      </div>
-                      <Link to={`/events/${event.slug}`}>View</Link>
+                      <span>{event.name}</span>
+                      <Link to="/events">View Details</Link>
                     </li>
                   ))}
                 </ul>
               </article>
-            </div>
-          </div>
-        </section>
-
-        <section className="content-panel" aria-labelledby="faq-title">
-          <div className="page-shell">
-            <p className="eyebrow accent">Need to know?</p>
-            <h2 id="faq-title" className="section-title">Frequently Asked Questions</h2>
-
-            <div className="faq-preview">
-              {faqs.map((faq) => (
-                <article key={faq.question} className="faq-item">
-                  <h3>{faq.question}</h3>
-                  <p>{faq.answer}</p>
-                </article>
-              ))}
-            </div>
-
-            <div className="cta-center">
-              <Link to="/faq" className="primary-btn">View All FAQs</Link>
             </div>
           </div>
         </section>
@@ -214,10 +130,13 @@ export default function Home() {
         }
 
         .page-hero .page-shell {
-          display: grid;
-          grid-template-columns: 1.3fr 0.7fr;
-          gap: 2rem;
-          align-items: center;
+          display: flex;
+          justify-content: center;
+        }
+
+        .hero-copy {
+          max-width: 780px;
+          text-align: center;
         }
 
         .eyebrow {
@@ -256,7 +175,7 @@ export default function Home() {
 
         .hero-description {
           max-width: 620px;
-          margin-top: 1rem;
+          margin: 1rem auto 0;
           font-size: 1.05rem;
           line-height: 1.7;
           color: var(--soft-white);
@@ -265,6 +184,7 @@ export default function Home() {
         .hero-meta {
           display: flex;
           flex-wrap: wrap;
+          justify-content: center;
           gap: 0.75rem;
           margin-top: 1.5rem;
         }
@@ -280,9 +200,9 @@ export default function Home() {
           text-transform: uppercase;
         }
 
-        .cta-row,
-        .cta-center {
+        .cta-row {
           display: flex;
+          justify-content: center;
           flex-wrap: wrap;
           gap: 1rem;
           margin-top: 2rem;
@@ -301,7 +221,7 @@ export default function Home() {
           letter-spacing: 0.14em;
           text-transform: uppercase;
           text-decoration: none;
-          transition: all 0.2s ease;
+          transition: transform 0.2s ease;
         }
 
         .primary-btn {
@@ -322,56 +242,6 @@ export default function Home() {
         .secondary-btn:focus-visible {
           transform: translateY(-1px);
         }
-
-        .hero-web-panel {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          min-height: 420px;
-        }
-
-        .web-frame {
-          position: relative;
-          width: min(320px, 88%);
-          aspect-ratio: 1/1.1;
-          border: 1px solid rgba(220, 0, 0, 0.48);
-          background:
-            linear-gradient(180deg, rgba(255,255,255,0.02), rgba(220,0,0,0.04)),
-            rgba(5,5,5,0.9);
-          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
-          overflow: hidden;
-        }
-
-        .web-frame::before,
-        .web-frame::after {
-          content: "";
-          position: absolute;
-          inset: 10% 12%;
-          border: 1px solid rgba(220, 0, 0, 0.35);
-          border-radius: 50%;
-        }
-
-        .web-frame::after {
-          inset: 22% 24%;
-          border-style: dashed;
-          opacity: 0.8;
-        }
-
-        .hero-dot {
-          position: absolute;
-          display: block;
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          background: var(--red);
-          box-shadow: 0 0 12px rgba(220, 0, 0, 0.7);
-        }
-
-        .hero-dot-a { top: 12%; left: 50%; }
-        .hero-dot-b { top: 36%; right: 18%; }
-        .hero-dot-c { bottom: 18%; left: 22%; }
-        .hero-dot-d { bottom: 12%; right: 30%; }
-        .hero-dot-e { top: 50%; left: 12%; }
 
         .content-panel {
           padding: 1.5rem 0 3rem;
@@ -453,15 +323,15 @@ export default function Home() {
           margin: 0;
           display: flex;
           flex-direction: column;
-          gap: 0.8rem;
+          gap: 0.7rem;
         }
 
         .event-list li {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) auto;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
           gap: 0.75rem;
-          align-items: start;
-          padding-top: 0.85rem;
+          padding-top: 0.7rem;
           border-top: 1px solid rgba(220, 0, 0, 0.2);
         }
 
@@ -470,52 +340,25 @@ export default function Home() {
           padding-top: 0;
         }
 
-        .event-list strong {
-          display: block;
-          margin-bottom: 0.2rem;
+        .event-list li span {
           color: var(--white);
           font-size: 1rem;
         }
 
-        .event-list span {
-          display: block;
-          color: var(--soft-white);
-          line-height: 1.5;
-        }
-
-        .event-list a {
+        .event-list li a {
+          flex-shrink: 0;
           color: var(--gold);
           text-decoration: none;
           font-family: 'Orbitron', sans-serif;
-          font-size: 0.7rem;
-          letter-spacing: 0.12em;
+          font-size: 0.66rem;
+          letter-spacing: 0.1em;
           text-transform: uppercase;
           white-space: nowrap;
         }
 
-        .faq-preview {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 1rem;
-          margin-top: 1.5rem;
-        }
-
-        .faq-item {
-          border-left: 2px solid rgba(220, 0, 0, 0.7);
-          background: rgba(255, 255, 255, 0.01);
-          padding: 1rem 1.1rem;
-        }
-
-        .faq-item h3 {
-          margin: 0 0 0.5rem;
-          font-size: 1.05rem;
+        .event-list li a:hover,
+        .event-list li a:focus-visible {
           color: var(--white);
-        }
-
-        .faq-item p {
-          margin: 0;
-          color: var(--soft-white);
-          line-height: 1.6;
         }
 
         /* =========================================================
@@ -525,10 +368,6 @@ export default function Home() {
         @media (max-width: 1024px) {
           .page-hero {
             padding: 4rem 0 2.5rem;
-          }
-
-          .hero-web-panel {
-            min-height: 340px;
           }
 
           .content-panel {
@@ -541,24 +380,13 @@ export default function Home() {
         ========================================================= */
 
         @media (max-width: 768px) {
-          .page-hero .page-shell,
           .dual-columns,
-          .text-grid,
-          .faq-preview {
+          .text-grid {
             grid-template-columns: 1fr;
           }
 
           .page-hero {
             padding: 3.5rem 0 2rem;
-          }
-
-          .hero-web-panel {
-            min-height: 260px;
-            order: -1;
-          }
-
-          .web-frame {
-            width: min(240px, 70%);
           }
 
           .hero-description {
@@ -592,14 +420,6 @@ export default function Home() {
             letter-spacing: 0.02em;
           }
 
-          .hero-web-panel {
-            min-height: 200px;
-          }
-
-          .web-frame {
-            width: min(190px, 62%);
-          }
-
           .hero-meta span,
           .mini-feature-list span {
             padding: 0.5rem 0.7rem;
@@ -612,8 +432,7 @@ export default function Home() {
             min-height: 48px;
           }
 
-          .cta-row,
-          .cta-center {
+          .cta-row {
             flex-direction: column;
           }
 
@@ -621,27 +440,10 @@ export default function Home() {
             padding: 1rem;
           }
 
-          .faq-item {
-            padding: 0.9rem 1rem;
-          }
-        }
-
-        /* =========================================================
-           RESPONSIVE — 375px and below
-        ========================================================= */
-
-        @media (max-width: 375px) {
           .event-list li {
-            grid-template-columns: 1fr;
-            gap: 0.35rem;
-          }
-
-          .event-list a {
-            justify-self: start;
-          }
-
-          .display-title {
-            font-size: clamp(2.4rem, 12vw, 4rem);
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.3rem;
           }
         }
 
@@ -653,10 +455,6 @@ export default function Home() {
           .hero-meta,
           .mini-feature-list {
             gap: 0.5rem;
-          }
-
-          .web-frame {
-            width: min(160px, 58%);
           }
         }
 

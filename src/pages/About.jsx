@@ -1,23 +1,17 @@
-const technicalEvents = [
-  "Paper Presentation",
-  "Mini Hackathon",
-  "Technical Quiz",
-  "Coding & Debugging",
-  "Shark Tank × SGC",
-  "Prompt Wars",
-];
-
-const nonTechnicalEvents = [
-  "Connections",
-  "Chess",
-  "Free Fire",
-  "Mehandi",
-  "Cooking Without Fire",
-  "Art & Painting",
-  "IPL Auction",
-];
+import { Link } from "react-router-dom";
 
 const galleryItems = [1, 2, 3, 4];
+
+// Placeholder names — mirror the actual list in Sponsors.jsx.
+// Update both together once real sponsors are confirmed.
+const sponsorNames = [
+  "Sponsor 01",
+  "Sponsor 02",
+  "Sponsor 03",
+  "Sponsor 04",
+  "Sponsor 05",
+  "Sponsor 06",
+];
 
 export default function About() {
   return (
@@ -41,27 +35,19 @@ export default function About() {
 
         <section className="content-panel muted-panel">
           <div className="page-shell">
-            <p className="eyebrow accent">About the events</p>
-            <h2 className="section-title">Technical and Non-Technical Events</h2>
+            <p className="eyebrow accent">Previous edition</p>
+            <h2 className="section-title">Previous REVIBE Gallery</h2>
+            <p className="lead-copy">
+              Highlights and photos from REVIBE '24 will be published here
+              once finalized.
+            </p>
 
-            <div className="dual-columns about-columns">
-              <article className="info-card">
-                <h3>Technical Events</h3>
-                <ul>
-                  {technicalEvents.map((event) => (
-                    <li key={event}>{event}</li>
-                  ))}
-                </ul>
-              </article>
-
-              <article className="info-card">
-                <h3>Non-Technical Events</h3>
-                <ul>
-                  {nonTechnicalEvents.map((event) => (
-                    <li key={event}>{event}</li>
-                  ))}
-                </ul>
-              </article>
+            <div className="gallery-grid" aria-label="Gallery placeholder">
+              {galleryItems.map((item) => (
+                <div key={item} className="gallery-slot">
+                  Gallery images will be added.
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -70,12 +56,15 @@ export default function About() {
 
         <section className="content-panel">
           <div className="page-shell">
-            <p className="eyebrow accent">Previous edition</p>
-            <h2 className="section-title">Previous REVIBE '24</h2>
-            <p className="lead-copy">
-              Highlights and details from REVIBE '24 will be published here
-              once finalized.
-            </p>
+            <p className="eyebrow accent">Recognition</p>
+            <h2 className="section-title">Prizes &amp; Certificates</h2>
+
+            <div className="info-card">
+              <ul className="simple-list">
+                <li>1st and 2nd place prizes will be issued for every event.</li>
+                <li>Certificates of participation will be provided to all participants.</li>
+              </ul>
+            </div>
           </div>
         </section>
 
@@ -83,15 +72,32 @@ export default function About() {
 
         <section className="content-panel muted-panel">
           <div className="page-shell">
-            <p className="eyebrow accent">Gallery</p>
-            <h2 className="section-title">Gallery</h2>
-            <div className="gallery-grid" aria-label="Gallery placeholder">
-              {galleryItems.map((item) => (
-                <div key={item} className="gallery-slot">
-                  Gallery images will be added.
-                </div>
-              ))}
+            <p className="eyebrow accent">Backed by</p>
+            <h2 className="section-title">Sponsors</h2>
+
+            <div className="info-card">
+              <ul className="name-list">
+                {sponsorNames.map((name) => (
+                  <li key={name}>
+                    <span>{name}</span>
+                    <Link to="/sponsors">View Details</Link>
+                  </li>
+                ))}
+              </ul>
             </div>
+          </div>
+        </section>
+
+        <span className="web-divider" aria-hidden="true" />
+
+        <section className="content-panel">
+          <div className="page-shell">
+            <p className="eyebrow accent">Organized by</p>
+            <h2 className="section-title">About SGC</h2>
+            <p className="lead-copy">
+              REVIBE '26 is organized by the Student Guidance Cell (SGC),
+              C. Abdul Hakeem College of Engineering &amp; Technology (CAHCET).
+            </p>
           </div>
         </section>
       </main>
@@ -109,7 +115,7 @@ export default function About() {
 
         .content-panel {
           width: 100%;
-          padding: 4rem 1.5rem;
+          padding: 3.25rem 1.5rem;
         }
 
         .muted-panel {
@@ -176,24 +182,15 @@ export default function About() {
         }
 
         /* =========================================================
-           EVENT COLUMNS
+           GENERIC CARD
         ========================================================= */
-
-        .dual-columns {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 1.25rem;
-        }
-
-        .about-columns {
-          margin-top: 1.5rem;
-        }
 
         .info-card {
           position: relative;
           border: 1px solid rgba(220, 0, 0, 0.35);
           background: rgba(255, 255, 255, 0.01);
           padding: 1.4rem 1.2rem;
+          margin-top: 1.5rem;
           transition: border-color 0.25s ease, box-shadow 0.25s ease;
         }
 
@@ -203,27 +200,65 @@ export default function About() {
           box-shadow: 0 0 24px var(--shadow);
         }
 
-        .info-card h3 {
-          margin: 0 0 1rem;
-          font-family: 'Orbitron', sans-serif;
-          font-size: 0.95rem;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          color: var(--white);
-        }
-
-        .info-card ul {
+        .simple-list {
           margin: 0;
           padding-left: 1.1rem;
           display: grid;
-          gap: 0.55rem;
+          gap: 0.6rem;
           color: var(--soft-white);
           line-height: 1.7;
           font-size: 0.98rem;
         }
 
-        .info-card li::marker {
+        .simple-list li::marker {
           color: var(--red);
+        }
+
+        /* =========================================================
+           NAME LIST (sponsors)
+        ========================================================= */
+
+        .name-list {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          display: grid;
+          gap: 0.75rem;
+        }
+
+        .name-list li {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.75rem;
+          padding-top: 0.75rem;
+          border-top: 1px solid rgba(220, 0, 0, 0.2);
+        }
+
+        .name-list li:first-child {
+          border-top: 0;
+          padding-top: 0;
+        }
+
+        .name-list li span {
+          color: var(--white);
+          font-size: 1rem;
+        }
+
+        .name-list li a {
+          flex-shrink: 0;
+          color: var(--gold);
+          text-decoration: none;
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.66rem;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
+
+        .name-list li a:hover,
+        .name-list li a:focus-visible {
+          color: var(--white);
         }
 
         /* =========================================================
@@ -256,7 +291,7 @@ export default function About() {
 
         @media (max-width: 1024px) {
           .content-panel {
-            padding: 3.25rem 1.25rem;
+            padding: 2.75rem 1.25rem;
           }
 
           .gallery-grid {
@@ -270,15 +305,11 @@ export default function About() {
 
         @media (max-width: 768px) {
           .content-panel {
-            padding: 2.75rem 1.1rem;
+            padding: 2.25rem 1.1rem;
           }
 
           .section-title {
             font-size: clamp(1.6rem, 5vw, 2.1rem);
-          }
-
-          .dual-columns {
-            grid-template-columns: 1fr;
           }
 
           .gallery-grid {
@@ -292,7 +323,7 @@ export default function About() {
 
         @media (max-width: 430px) {
           .content-panel {
-            padding: 2.25rem 0.9rem;
+            padding: 1.9rem 0.9rem;
           }
 
           .eyebrow {
@@ -312,6 +343,12 @@ export default function About() {
           .gallery-slot {
             min-height: 140px;
             font-size: 0.82rem;
+          }
+
+          .name-list li {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.3rem;
           }
         }
 

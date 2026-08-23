@@ -269,26 +269,30 @@ export default function Header() {
 
         /* =====================================================
            REVIBE 26
+           Grid-centered via justify-self (NOT position:absolute).
+           An earlier version used position:absolute here, which
+           removed this element from the 3-column grid entirely —
+           that collapsed the grid to 2 items and pushed the
+           Register/Login actions into the middle column, on top
+           of the title. Keep this centered via the grid, not
+           positioning tricks.
            ===================================================== */
 
-       .sgc-brand-event {
-  justify-self: center;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+        .sgc-brand-event {
+          justify-self: center;
 
-  font-family: "Bangers", cursive;
-  font-size: clamp(2rem, 6vw, 5rem);
-  line-height: 1;
-  letter-spacing: 0.05em;
-  color: #ffffff;
-  white-space: nowrap;
-  text-align: center;
-  text-decoration: none;
+          font-family: "Bangers", cursive;
+          font-size: clamp(1.3rem, 2.6vw, 2.2rem);
+          line-height: 1;
+          letter-spacing: 0.05em;
+          color: #ffffff;
+          white-space: nowrap;
+          text-align: center;
+          text-decoration: none;
 
-  text-shadow:
-    0 0 10px rgba(220, 0, 0, 0.35);
-}
+          text-shadow:
+            0 0 10px rgba(220, 0, 0, 0.35);
+        }
 
 
         /* =====================================================
@@ -484,7 +488,7 @@ export default function Header() {
             grid-template-columns:
               minmax(0, 1fr)
               auto
-              auto;
+              minmax(0, 1fr);
 
             gap: 0.3rem;
           }
@@ -528,7 +532,7 @@ export default function Header() {
           /* REVIBE */
 
           .sgc-brand-event {
-            font-size: 0.92rem;
+            font-size: clamp(1rem, 5.5vw, 1.4rem);
 
             padding:
               0 0.15rem;
@@ -617,13 +621,6 @@ export default function Header() {
           }
 
 
-          .sgc-brand-event {
-            font-size: 0.82rem;
-
-            padding: 0 0.1rem;
-          }
-
-
           .header-actions-slot {
             gap: 0.15rem;
           }
@@ -656,11 +653,6 @@ export default function Header() {
 
           .sgc-brand-name {
             font-size: 0.6rem;
-          }
-
-
-          .sgc-brand-event {
-            font-size: 0.74rem;
           }
 
 
