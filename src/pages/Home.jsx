@@ -521,6 +521,20 @@ export default function Home() {
           .hero-description {
             font-size: 1rem;
           }
+
+          .display-title {
+            font-size: clamp(4.4rem, 15vw, 10rem);
+          }
+
+          .display-year {
+            font-size: clamp(2.4rem, 8vw, 4.5rem);
+          }
+
+          .countdown-block {
+            max-width: 420px;
+            padding: 1.4rem 1rem;
+            margin: 1.8rem auto 0;
+          }
         }
 
         @media (max-width: 430px) {
@@ -530,6 +544,24 @@ export default function Home() {
 
           .page-hero {
             padding: 3rem 0 2rem;
+          }
+
+          .display-title {
+            font-size: clamp(5rem, 19vw, 10rem);
+          }
+
+          .display-year {
+            font-size: clamp(2.7rem, 10vw, 4.5rem);
+          }
+
+          .countdown-block {
+            max-width: 300px;
+            padding: 1.1rem 0.8rem;
+            margin: 1.5rem auto 0;
+          }
+
+          .countdown-heading {
+            font-size: 1.05rem;
           }
 
           .hero-meta span {

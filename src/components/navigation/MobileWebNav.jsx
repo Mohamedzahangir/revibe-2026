@@ -64,7 +64,7 @@ export default function MobileWebNav() {
           border-radius: 999px;
 
           box-shadow:
-            0 2px 10px rgba(0, 0, 0, 0.12),
+            0 6px 14px rgba(0, 0, 0, 0.28),
             inset 0 0 0 1px rgba(255, 255, 255, 0.6);
         }
 

@@ -179,14 +179,14 @@ export default function SoundToggle() {
 
         @media (max-width: 899px) {
           .sound-toggle {
-            top: 11px;
+            top: 54px;
             right: 0.8rem;
           }
         }
 
         @media (max-width: 430px) {
           .sound-toggle {
-            top: 9px;
+            top: 52px;
             right: 0.7rem;
 
             width: 42px;
@@ -206,7 +206,7 @@ export default function SoundToggle() {
 
         @media (max-width: 340px) {
           .sound-toggle {
-            top: 7px;
+            top: 48px;
             right: 0.6rem;
           }
         }

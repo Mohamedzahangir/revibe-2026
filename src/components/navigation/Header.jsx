@@ -246,24 +246,28 @@ export default function Header() {
 
         @media (max-width: 899px) {
 
+          /* Blend navbar with the page off-white — no separation shadow */
+          .site-header {
+            background: #f4f1ec;
+            border-bottom: none;
+            box-shadow: none;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+          }
+
+          .site-header::before {
+            display: none;
+          }
+
           .header-inner {
             padding:
               0.4rem
               0;
           }
 
-          /* Logo only — hide name on mobile */
-          .nav-brand-copy {
-            display: none;
-          }
-
-          .nav-brand-logo {
-            width: 30px;
-            height: 30px;
-          }
-
+          /* Hide SGC brand entirely on mobile */
           .nav-brand {
-            gap: 0;
+            display: none;
           }
 
           /*
