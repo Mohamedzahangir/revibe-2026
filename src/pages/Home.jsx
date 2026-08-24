@@ -109,8 +109,6 @@ export default function Home() {
           </div>
           <div className="page-shell">
             <div className="hero-copy">
-              <p className="eyebrow">Student Guidance Cell • CAHCET</p>
-
               <h1 id="hero-title" className="display-title">Revibe <span className="display-year">'26</span></h1>
               <p className="hero-subtitle">National Level Symposium</p>
 
@@ -150,6 +148,7 @@ export default function Home() {
 
               <div className="cta-row">
                 <Link to="/events" className="primary-btn">Enter the Web</Link>
+                <Link to="/register" className="secondary-btn">Register</Link>
               </div>
             </div>
           </div>
@@ -189,38 +188,6 @@ export default function Home() {
           text-align: center;
           position: relative;
           z-index: 1;
-        }
-
-        .eyebrow {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.55rem;
-          margin: 0 0 1rem;
-          padding: 0.4rem 0.9rem;
-          border: 1px solid rgba(220, 0, 0, 0.3);
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.5);
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 0.82rem;
-          font-weight: 400;
-          letter-spacing: 0.16em;
-          color: #b02418;
-          text-transform: uppercase;
-        }
-
-        .eyebrow::before {
-          content: "";
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          background: #dc0000;
-          box-shadow: 0 0 8px rgba(220, 0, 0, 0.6);
-          animation: eyebrow-pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes eyebrow-pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(0.75); }
         }
 
         .display-title {
@@ -508,6 +475,34 @@ export default function Home() {
           transform: translateX(4px);
         }
 
+        .secondary-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          min-height: 50px;
+          padding: 0.95rem 1.9rem;
+          border: 2px solid #0d0d0d;
+          border-radius: 999px;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1.1rem;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          text-decoration: none;
+          background: transparent;
+          color: #0d0d0d;
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+          transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+        }
+
+        .secondary-btn:hover,
+        .secondary-btn:focus-visible {
+          transform: translateY(-3px);
+          background: #0d0d0d;
+          color: #ffffff;
+          box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3);
+        }
+
         /* =====================================================
            RESPONSIVE
            ===================================================== */
@@ -537,23 +532,20 @@ export default function Home() {
             padding: 3rem 0 2rem;
           }
 
-          .eyebrow {
-            font-size: 0.68rem;
-            letter-spacing: 0.12em;
-          }
-
           .hero-meta span {
             padding: 0.5rem 0.7rem;
             font-size: 0.74rem;
           }
 
-          .primary-btn {
-            width: 100%;
-            min-height: 50px;
+          .primary-btn,
+          .secondary-btn {
+            min-height: 46px;
+            padding: 0.75rem 1.3rem;
+            font-size: 0.98rem;
           }
 
           .cta-row {
-            flex-direction: column;
+            gap: 0.7rem;
           }
 
           .timer-unit {
@@ -582,8 +574,7 @@ export default function Home() {
             transition: none;
           }
 
-          .hero-particle,
-          .eyebrow::before {
+          .hero-particle {
             animation: none;
           }
         }

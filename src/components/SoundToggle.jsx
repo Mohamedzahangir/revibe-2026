@@ -104,7 +104,7 @@ export default function SoundToggle() {
       <style>{`
         .sound-toggle {
           position: fixed;
-          top: 92px;
+          top: 13px;
           right: 1.25rem;
           z-index: 30;
 
@@ -179,15 +179,15 @@ export default function SoundToggle() {
 
         @media (max-width: 899px) {
           .sound-toggle {
-            top: 148px;
-            right: 1rem;
+            top: 11px;
+            right: 0.8rem;
           }
         }
 
         @media (max-width: 430px) {
           .sound-toggle {
-            top: 140px;
-            right: 0.9rem;
+            top: 9px;
+            right: 0.7rem;
 
             width: 42px;
             height: 42px;
@@ -201,6 +201,13 @@ export default function SoundToggle() {
           .sound-toggle-icon {
             width: 26px;
             height: 26px;
+          }
+        }
+
+        @media (max-width: 340px) {
+          .sound-toggle {
+            top: 7px;
+            right: 0.6rem;
           }
         }
 
