@@ -1,18 +1,6 @@
-import { useState } from "react";
-
-/* ─────────────────────────────────────────────────────────────
-   TODO #1 — REAL EVENTS DATA
-   Replace this placeholder array with your real event list
-   (paste it from Events.jsx / eventsData.js). Each event needs
-   at least: slug, name, category, fee (number, in INR).
-   Until real fees exist, leave fee: null and the UI will show
-   "Fee to be announced" and let registration continue without
-   blocking on payment.
-───────────────────────────────────────────────────────────── */
-const EVENTS = [
-  { slug: "sample-event-1", name: "Sample Event 1 (replace with real data)", category: "Technical", fee: null },
-  { slug: "sample-event-2", name: "Sample Event 2 (replace with real data)", category: "Non-Technical", fee: null },
-];
+import { useEffect, useState } from "react";
+import { supabase } from "../services/supabase";
+import { submitRegistration } from "../services/registrationService";
 
 /* ─────────────────────────────────────────────────────────────
    TODO #2 — REAL UPI PAYEE DETAILS
@@ -20,20 +8,6 @@ const EVENTS = [
 ───────────────────────────────────────────────────────────── */
 const UPI_VPA = "PLACEHOLDER_UPI_ID@upi";
 const UPI_PAYEE_NAME = "REVIBE 26 - SGC CAHCET";
-
-/* ─────────────────────────────────────────────────────────────
-   TODO #3 — SUPABASE WIRING
-   Right now, submitting the form just generates a client-side
-   placeholder registration number. Replace generateRegistrationNumber()
-   and the handleSubmit() body with a real insert into
-   registrations / registration_members / payments once
-   services/supabase.js + registrationService.js exist. The real
-   registration number should come back from that insert.
-───────────────────────────────────────────────────────────── */
-function generateRegistrationNumber() {
-  const rand = Math.floor(100000 + Math.random() * 900000);
-  return `REVIBE26-${rand}`;
-}
 
 function buildUpiLink({ amount, note, refId }) {
   const params = new URLSearchParams({
@@ -50,6 +24,39 @@ function buildUpiLink({ amount, note, refId }) {
 const emptyMember = () => ({ name: "", email: "" });
 
 export default function Register() {
+  const [events, setEvents] = useState([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
+  const [eventsError, setEventsError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadEvents() {
+      setEventsLoading(true);
+      setEventsError(null);
+
+      const { data, error } = await supabase
+        .from("events")
+        .select("id, name, slug, category, fee, registration_status")
+        .eq("registration_status", "open")
+        .order("name");
+
+      if (cancelled) return;
+
+      if (error) {
+        setEventsError("Couldn't load events. Please refresh the page.");
+      } else {
+        setEvents(data ?? []);
+      }
+      setEventsLoading(false);
+    }
+
+    loadEvents();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -66,8 +73,10 @@ export default function Register() {
   const [submitted, setSubmitted] = useState(false);
   const [registrationNumber, setRegistrationNumber] = useState(null);
   const [upiAppClicked, setUpiAppClicked] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
-  const selectedEvent = EVENTS.find((e) => e.slug === form.eventSlug) || null;
+  const selectedEvent = events.find((e) => e.slug === form.eventSlug) || null;
   const feeKnown = selectedEvent && typeof selectedEvent.fee === "number";
   const paymentRequired = feeKnown && selectedEvent.fee > 0;
 
@@ -130,16 +139,45 @@ export default function Register() {
     window.location.href = link;
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!validateAll()) {
       const firstErrorField = document.querySelector(".register-field-error");
       firstErrorField?.closest(".register-field")?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
-    // TODO: replace with real Supabase insert (see TODO #3 above)
-    setRegistrationNumber(generateRegistrationNumber());
-    setSubmitted(true);
+
+    setSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const isTeam = form.teamSize > 1;
+
+      const { registrationNumber: realRegistrationNumber } = await submitRegistration({
+        eventId: selectedEvent.id,
+        registrationType: isTeam ? "team" : "individual",
+        teamName: null,
+        primary: {
+          fullName: form.name.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+          college: form.college.trim(),
+          department: form.department.trim(),
+          year: form.year.trim(),
+        },
+        members: form.members.map((m) => ({
+          fullName: m.name.trim(),
+          email: m.email.trim(),
+        })),
+      });
+
+      setRegistrationNumber(realRegistrationNumber);
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (submitted) {
@@ -245,14 +283,19 @@ export default function Register() {
               <h2>Event &amp; Team</h2>
               <div className="register-field-grid">
                 <Field label="Event" error={errors.eventSlug}>
-                  <select value={form.eventSlug} onChange={(e) => update("eventSlug", e.target.value)}>
-                    <option value="">Select an event</option>
-                    {EVENTS.map((ev) => (
+                  <select
+                    value={form.eventSlug}
+                    onChange={(e) => update("eventSlug", e.target.value)}
+                    disabled={eventsLoading || !!eventsError}
+                  >
+                    <option value="">{eventsLoading ? "Loading events..." : "Select an event"}</option>
+                    {events.map((ev) => (
                       <option key={ev.slug} value={ev.slug}>
                         {ev.name} ({ev.category})
                       </option>
                     ))}
                   </select>
+                  {eventsError && <span className="register-field-error">{eventsError}</span>}
                 </Field>
                 <Field label="Number of Members" error={errors.teamSize}>
                   <input
@@ -356,9 +399,15 @@ export default function Register() {
               )}
             </div>
 
+            {submitError && <p className="register-note register-note-error">{submitError}</p>}
+
             <div className="register-actions">
-              <button type="submit" className="primary-btn register-submit-btn">
-                Complete Registration
+              <button
+                type="submit"
+                className="primary-btn register-submit-btn"
+                disabled={submitting || eventsLoading}
+              >
+                {submitting ? "Submitting..." : "Complete Registration"}
               </button>
             </div>
           </form>
@@ -467,6 +516,10 @@ const formStyles = `
     font-size: 0.8rem;
     line-height: 1.5;
     margin: 0.5rem 0;
+  }
+
+  .register-note-error {
+    color: var(--red, #dc0000);
   }
 
   .register-amount {
