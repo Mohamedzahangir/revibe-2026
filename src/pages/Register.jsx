@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../services/supabase";
 import { submitRegistration } from "../services/registrationService";
+import { validateRegistrationForm } from "../services/validation";
 
 /* ─────────────────────────────────────────────────────────────
    TODO #2 — REAL UPI PAYEE DETAILS
@@ -37,7 +38,7 @@ export default function Register() {
 
       const { data, error } = await supabase
         .from("events")
-        .select("id, name, slug, category, fee, registration_status")
+        .select("id, name, slug, category, fee, max_participants, registration_status")
         .eq("registration_status", "open")
         .order("name");
 
@@ -85,28 +86,14 @@ export default function Register() {
   }
 
   function validateAll() {
-    const next = {};
-
-    if (!form.name.trim()) next.name = "Required";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) next.email = "Enter a valid email";
-    if (!/^\d{10}$/.test(form.phone)) next.phone = "Enter a 10-digit mobile number";
-    if (!form.college.trim()) next.college = "Required";
-    if (!form.department.trim()) next.department = "Required";
-    if (!form.year.trim()) next.year = "Required";
-
-    if (!form.eventSlug) next.eventSlug = "Select an event";
-    if (!form.teamSize || form.teamSize < 1) next.teamSize = "Minimum 1 member";
-    form.members.forEach((m, i) => {
-      if (!m.name.trim()) next[`member-${i}-name`] = "Required";
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m.email)) next[`member-${i}-email`] = "Enter a valid email";
+    const nextErrors = validateRegistrationForm({
+      form,
+      selectedEvent,
     });
 
-    if (paymentRequired && !form.referenceId.trim()) {
-      next.referenceId = "Enter your UPI transaction reference after paying";
-    }
+    setErrors(nextErrors);
 
-    setErrors(next);
-    return Object.keys(next).length === 0;
+    return Object.keys(nextErrors).length === 0;
   }
 
   function handleTeamSizeChange(rawValue) {
@@ -155,6 +142,7 @@ export default function Register() {
 
       const { registrationNumber: realRegistrationNumber } = await submitRegistration({
         eventId: selectedEvent.id,
+        maxParticipants: selectedEvent.max_participants,
         registrationType: isTeam ? "team" : "individual",
         teamName: null,
         primary: {
@@ -269,12 +257,16 @@ export default function Register() {
                   />
                 </Field>
                 <Field label="Year of Study" error={errors.year}>
-                  <input
-                    type="text"
-                    value={form.year}
-                    onChange={(e) => update("year", e.target.value)}
-                    placeholder="e.g. 2nd Year"
-                  />
+                  <select
+                        value={form.year}
+                        onChange={(e) => update("year", e.target.value)}
+                    >
+                        <option value="">Select year</option>
+                        <option value="1st Year">1st Year</option>
+                        <option value="2nd Year">2nd Year</option>
+                        <option value="3rd Year">3rd Year</option>
+                        <option value="4th Year">4th Year</option>
+                    </select>
                 </Field>
               </div>
             </div>

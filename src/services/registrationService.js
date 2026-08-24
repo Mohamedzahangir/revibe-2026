@@ -1,5 +1,26 @@
 import { supabase } from "./supabase";
 
+async function ensureEventCapacity(eventId, maxParticipants, participantCount) {
+  if (maxParticipants == null) return;
+
+  const { data, error } = await supabase
+    .from("registrations")
+    .select("registration_members(count)")
+    .eq("event_id", eventId);
+
+  if (error) throw new Error(`Failed to check event availability: ${error.message}`);
+
+  const registeredParticipants = (data ?? []).reduce(
+    (total, registration) =>
+      total + (registration.registration_members?.[0]?.count ?? 0),
+    0
+  );
+
+  if (registeredParticipants + participantCount > Number(maxParticipants)) {
+    throw new Error("This event is full. Please select another event.");
+  }
+}
+
 /**
  * Generates a REVIBE26-XXXXXX style registration number.
  * Collision is unlikely but not impossible; insertRegistrationWithRetry
@@ -93,11 +114,24 @@ async function insertRegistrationMember({ registrationId, participantId, role })
  *
  * @returns {Promise<{ registrationId: string, registrationNumber: string }>}
  */
-export async function submitRegistration({ eventId, registrationType, teamName, primary, members = [] }) {
+export async function submitRegistration({
+  eventId,
+  maxParticipants,
+  registrationType,
+  teamName,
+  primary,
+  members = [],
+}) {
   if (!eventId) throw new Error("eventId is required");
   if (!primary?.fullName || !primary?.email || !primary?.phone) {
     throw new Error("Primary participant needs fullName, email, and phone");
   }
+
+  await ensureEventCapacity(
+    eventId,
+    maxParticipants,
+    members.length + 1
+  );
 
   const primaryParticipantId = await insertParticipant(primary);
 
