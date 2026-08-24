@@ -1,34 +1,117 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-const technicalEvents = [
-  { name: "Paper Presentation", slug: "paper-presentation" },
-  { name: "Mini Hackathon", slug: "mini-hackathon" },
-  { name: "Technical Quiz", slug: "technical-quiz" },
-  { name: "Coding & Debugging", slug: "coding-debugging" },
-  { name: "Shark Tank × SGC", slug: "shark-tank-sgc" },
-  { name: "Prompt Wars", slug: "prompt-wars" },
-];
+const COUNTDOWN_TARGET = new Date("2026-09-12T09:00:00").getTime();
 
-const nonTechnicalEvents = [
-  { name: "Connections", slug: "connections" },
-  { name: "Chess", slug: "chess" },
-  { name: "Free Fire", slug: "free-fire" },
-  { name: "Mehandi", slug: "mehandi" },
-  { name: "Cooking Without Fire", slug: "cooking-without-fire" },
-  { name: "Art & Painting", slug: "art-painting" },
-  { name: "IPL Auction", slug: "ipl-auction" },
-];
+function useCountdown(target) {
+  const getRemaining = () => {
+    const diff = Math.max(0, target - Date.now());
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+    return { diff, days, hours, minutes, seconds };
+  };
+
+  const [remaining, setRemaining] = useState(getRemaining);
+
+  useEffect(() => {
+    const id = setInterval(() => setRemaining(getRemaining()), 1000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return remaining;
+}
+
+function TimerUnit({ value, label }) {
+  return (
+    <div className="timer-unit">
+      <span className="timer-value">
+        {String(value).padStart(2, "0")}
+      </span>
+      <span className="timer-label">{label}</span>
+    </div>
+  );
+}
+
+function CornerWeb({ className = "" }) {
+  return (
+    <svg
+      className={`corner-web ${className}`}
+      viewBox="0 0 160 160"
+      preserveAspectRatio="xMidYMid meet"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <g
+        stroke="rgba(220, 0, 0, 0.45)"
+        strokeWidth="0.9"
+        strokeLinecap="round"
+        fill="none"
+      >
+        {/* radial strands from the corner origin (0,0) */}
+        <path d="M0 0 L160 12" />
+        <path d="M0 0 L160 34" />
+        <path d="M0 0 L160 58" />
+        <path d="M0 0 L160 86" />
+        <path d="M0 0 L160 116" />
+        <path d="M0 0 L160 150" />
+        <path d="M0 0 L12 160" />
+        <path d="M0 0 L34 160" />
+        <path d="M0 0 L58 160" />
+        <path d="M0 0 L86 160" />
+        <path d="M0 0 L116 160" />
+        <path d="M0 0 L150 160" />
+        {/* concentric arcs — irregular for organic feel */}
+        <path d="M22 0 A22 22 0 0 1 0 22" />
+        <path d="M44 0 A44 44 0 0 1 0 44" strokeWidth="0.7" />
+        <path d="M68 0 A68 68 0 0 1 0 68" />
+        <path d="M94 0 A94 94 0 0 1 0 94" strokeWidth="0.7" />
+        <path d="M122 0 A122 122 0 0 1 0 122" />
+        {/* tiny dewdrops on strands */}
+        <circle cx="18" cy="6" r="1.1" fill="rgba(220,0,0,0.35)" stroke="none" />
+        <circle cx="6" cy="38" r="0.9" fill="rgba(220,0,0,0.3)" stroke="none" />
+        <circle cx="40" cy="40" r="1" fill="rgba(220,0,0,0.28)" stroke="none" />
+      </g>
+      {/* small spider hanging on the web */}
+      <g transform="translate(30 30)" opacity="0.6">
+        <ellipse cx="0" cy="0" rx="3.2" ry="2.4" fill="#0d0d0d" />
+        <circle cx="0" cy="-2.4" r="1.6" fill="#0d0d0d" />
+        <g stroke="#0d0d0d" strokeWidth="0.6" strokeLinecap="round" fill="none">
+          <path d="M-2.6 -0.8 L-6 -2.4" />
+          <path d="M2.6 -0.8 L6 -2.4" />
+          <path d="M-2.4 0.8 L-6.4 1.2" />
+          <path d="M2.4 0.8 L6.4 1.2" />
+          <path d="M-2 1.8 L-5 4" />
+          <path d="M2 1.8 L5 4" />
+        </g>
+      </g>
+    </svg>
+  );
+}
 
 export default function Home() {
+  const { diff, days, hours, minutes, seconds } = useCountdown(COUNTDOWN_TARGET);
+  const ended = diff <= 0;
+
   return (
     <>
       <main className="theme-page home-page">
         <section className="page-hero home-hero" aria-labelledby="hero-title">
+          <CornerWeb className="corner-web hero-web-tl" />
+          <div className="hero-particles" aria-hidden="true">
+            <span className="hero-particle" />
+            <span className="hero-particle" />
+            <span className="hero-particle" />
+            <span className="hero-particle" />
+            <span className="hero-particle" />
+          </div>
           <div className="page-shell">
             <div className="hero-copy">
-              <p className="eyebrow">Student Guidance Cell • CAHCET</p>
-              <h1 id="hero-title" className="display-title">REVIBE '26</h1>
+              <h1 id="hero-title" className="display-title">Revibe <span className="display-year">'26</span></h1>
               <p className="hero-subtitle">National Level Symposium</p>
+
               <p className="hero-description">
                 A student-driven national symposium that brings together creativity,
                 technology and participation under one web-powered experience.
@@ -40,70 +123,33 @@ export default function Home() {
                 <span>7 Non-Technical</span>
               </div>
 
-              <div className="cta-row">
-                <Link to="/about" className="primary-btn">Enter the Web</Link>
+              <div className="countdown-block" aria-label="Time until REVIBE '26 begins">
+                <CornerWeb className="corner-web timer-web-tr" />
+                {ended ? (
+                  <p className="countdown-ended">The web has awakened.</p>
+                ) : (
+                  <>
+                    <p className="countdown-heading">Symposium begins in</p>
+                    <div className="timer-row">
+                      <TimerUnit value={days} label="Days" />
+                      <span className="timer-sep" aria-hidden="true">:</span>
+                      <TimerUnit value={hours} label="Hours" />
+                      <span className="timer-sep" aria-hidden="true">:</span>
+                      <TimerUnit value={minutes} label="Mins" />
+                      <span className="timer-sep" aria-hidden="true">:</span>
+                      <TimerUnit value={seconds} label="Secs" />
+                    </div>
+                    <p className="countdown-target">
+                      12 September 2026 • 9:00 AM
+                    </p>
+                  </>
+                )}
               </div>
-            </div>
-          </div>
-        </section>
 
-        <section className="content-panel" aria-labelledby="about-title">
-          <div className="page-shell compact-layout">
-            <div>
-              <p className="eyebrow accent">About REVIBE</p>
-              <h2 id="about-title" className="section-title">Discover. Participate. REVIBE.</h2>
-            </div>
-
-            <div className="text-grid">
-              <p>
-                REVIBE '26 is a National Level Symposium organized by the Student
-                Guidance Cell (SGC), C. Abdul Hakeem College of Engineering &amp;
-                Technology.
-              </p>
-              <p>
-                The symposium brings together technical and non-technical events that
-                highlight innovation, teamwork, creativity, and problem-solving.
-              </p>
-            </div>
-
-            <div className="mini-feature-list">
-              <span>Explore events</span>
-              <span>Compare categories</span>
-              <span>Register online</span>
-              <span>Track confirmation</span>
-            </div>
-          </div>
-        </section>
-
-        <section className="content-panel muted-panel" aria-labelledby="events-title">
-          <div className="page-shell">
-            <p className="eyebrow accent">Explore the web</p>
-            <h2 id="events-title" className="section-title">Event Highlights</h2>
-
-            <div className="dual-columns">
-              <article className="event-group">
-                <h3>Technical</h3>
-                <ul className="event-list">
-                  {technicalEvents.map((event) => (
-                    <li key={event.slug}>
-                      <span>{event.name}</span>
-                      <Link to="/events">View Details</Link>
-                    </li>
-                  ))}
-                </ul>
-              </article>
-
-              <article className="event-group">
-                <h3>Non-Technical</h3>
-                <ul className="event-list">
-                  {nonTechnicalEvents.map((event) => (
-                    <li key={event.slug}>
-                      <span>{event.name}</span>
-                      <Link to="/events">View Details</Link>
-                    </li>
-                  ))}
-                </ul>
-              </article>
+              <div className="cta-row">
+                <Link to="/events" className="primary-btn">Enter the Web</Link>
+                <Link to="/register" className="secondary-btn">Register</Link>
+              </div>
             </div>
           </div>
         </section>
@@ -112,8 +158,9 @@ export default function Home() {
       <style>{`
         .theme-page {
           width: 100%;
-          color: var(--white);
+          color: #1a1a1a;
           overflow-x: hidden;
+          background: #f4f1ec;
         }
 
         .page-shell {
@@ -123,10 +170,12 @@ export default function Home() {
 
         .page-hero {
           position: relative;
-          padding: 5rem 0 3rem;
+          padding: 5rem 0 4rem;
           background:
-            radial-gradient(circle at center, rgba(220, 0, 0, 0.12), transparent 28%),
-            linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(220, 0, 0, 0.04));
+            radial-gradient(circle at 20% 30%, rgba(220, 0, 0, 0.10), transparent 32%),
+            radial-gradient(circle at 80% 70%, rgba(220, 0, 0, 0.08), transparent 30%),
+            linear-gradient(180deg, #f7f4ef 0%, #ece7df 100%);
+          overflow: hidden;
         }
 
         .page-hero .page-shell {
@@ -135,50 +184,51 @@ export default function Home() {
         }
 
         .hero-copy {
-          max-width: 780px;
+          max-width: 820px;
           text-align: center;
-        }
-
-        .eyebrow {
-          margin: 0 0 1rem;
-          font-family: 'Orbitron', sans-serif;
-          font-size: 0.76rem;
-          letter-spacing: 0.16em;
-          color: var(--muted);
-          text-transform: uppercase;
-        }
-
-        .eyebrow.accent {
-          color: var(--gold);
+          position: relative;
+          z-index: 1;
         }
 
         .display-title {
-          margin: 0;
-          font-family: 'Bangers', cursive;
-          font-size: clamp(3rem, 8vw, 8rem);
-          line-height: 0.9;
-          letter-spacing: 0.06em;
-          color: var(--white);
-          text-transform: uppercase;
-          text-shadow: 0 0 20px rgba(220, 0, 0, 0.18);
+          margin: 1.4rem 0 0;
+          font-family: 'Brusher', cursive;
+          font-size: clamp(4rem, 13vw, 10rem);
+          line-height: 1;
+          letter-spacing: 0.04em;
+          color: #0d0d0d;
           word-break: break-word;
+          display: flex;
+          align-items: baseline;
+          justify-content: center;
+          gap: 0.1em;
+        }
+
+        .display-year {
+          font-family: 'Brusher', cursive;
+          font-size: clamp(2.2rem, 7vw, 4.5rem);
+          line-height: 1;
+          letter-spacing: 0.06em;
+          color: #dc0000;
         }
 
         .hero-subtitle {
           margin: 0.5rem 0 0;
-          font-family: 'Orbitron', sans-serif;
-          font-size: clamp(0.9rem, 2vw, 1.25rem);
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: clamp(1rem, 2.2vw, 1.4rem);
+          font-weight: 400;
           letter-spacing: 0.18em;
-          color: var(--red);
+          color: #dc0000;
           text-transform: uppercase;
         }
 
         .hero-description {
           max-width: 620px;
           margin: 1rem auto 0;
+          font-family: 'Inter', sans-serif;
           font-size: 1.05rem;
           line-height: 1.7;
-          color: var(--soft-white);
+          color: #3a3a3a;
         }
 
         .hero-meta {
@@ -190,15 +240,192 @@ export default function Home() {
         }
 
         .hero-meta span {
-          padding: 0.55rem 0.8rem;
-          border: 1px solid rgba(220, 0, 0, 0.5);
-          background: rgba(255, 255, 255, 0.02);
-          color: var(--white);
-          font-family: 'Orbitron', sans-serif;
-          font-size: 0.68rem;
-          letter-spacing: 0.12em;
+          padding: 0.55rem 0.9rem;
+          border: 1px solid rgba(220, 0, 0, 0.45);
+          background: linear-gradient(135deg, rgba(255,255,255,0.7), rgba(220, 0, 0, 0.06));
+          color: #0d0d0d;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 0.82rem;
+          font-weight: 400;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .hero-meta span:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 14px rgba(220, 0, 0, 0.15);
+        }
+
+        /* =====================================================
+           COUNTDOWN
+           ===================================================== */
+
+        .countdown-block {
+          position: relative;
+          margin: 2.25rem auto 0;
+          max-width: 640px;
+          padding: 1.75rem 1.25rem;
+          border: 1px solid rgba(220, 0, 0, 0.35);
+          border-radius: 16px;
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
+          box-shadow:
+            0 10px 30px rgba(0, 0, 0, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+          overflow: hidden;
+        }
+
+        .countdown-block::after {
+          content: "";
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 3px;
+          background: linear-gradient(90deg, transparent, rgba(220, 0, 0, 0.5), transparent);
+        }
+
+        /* =====================================================
+           CORNER WEB DECORATIONS
+           ===================================================== */
+
+        .corner-web {
+          position: absolute;
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        .hero-web-tl {
+          top: 0;
+          left: 0;
+          width: 220px;
+          height: 220px;
+          opacity: 0.55;
+        }
+
+        .hero-particles {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        .hero-particle {
+          position: absolute;
+          width: 4px;
+          height: 4px;
+          border-radius: 50%;
+          background: rgba(220, 0, 0, 0.25);
+          box-shadow: 0 0 6px rgba(220, 0, 0, 0.3);
+          animation: hero-float 9s ease-in-out infinite;
+        }
+
+        .hero-particle:nth-child(1) { top: 18%; left: 12%; animation-delay: 0s; }
+        .hero-particle:nth-child(2) { top: 32%; left: 82%; animation-delay: 1.4s; }
+        .hero-particle:nth-child(3) { top: 58%; left: 22%; animation-delay: 2.8s; }
+        .hero-particle:nth-child(4) { top: 72%; left: 68%; animation-delay: 4.2s; }
+        .hero-particle:nth-child(5) { top: 44%; left: 50%; animation-delay: 5.6s; }
+
+        @keyframes hero-float {
+          0%, 100% { transform: translateY(0) scale(1); opacity: 0.25; }
+          50% { transform: translateY(-14px) scale(1.4); opacity: 0.5; }
+        }
+
+        .timer-web-tr {
+          top: -10px;
+          right: -10px;
+          width: 110px;
+          height: 110px;
+          transform: scaleX(-1);
+          opacity: 0.5;
+        }
+
+        .countdown-block > *:not(.corner-web) {
+          position: relative;
+          z-index: 1;
+        }
+
+        .countdown-heading {
+          margin: 0 0 0.9rem;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1.3rem;
+          letter-spacing: 0.1em;
+          color: #0d0d0d;
           text-transform: uppercase;
         }
+
+        .timer-row {
+          display: flex;
+          align-items: flex-start;
+          justify-content: center;
+          gap: 0.5rem;
+          flex-wrap: nowrap;
+        }
+
+        .timer-unit {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.3rem;
+          min-width: 3.2rem;
+        }
+
+        .timer-value {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: clamp(2rem, 6vw, 3.2rem);
+          line-height: 1;
+          color: #dc0000;
+          background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
+          border: 1px solid rgba(220, 0, 0, 0.3);
+          border-radius: 10px;
+          padding: 0.55rem 0.65rem;
+          min-width: 2.6rem;
+          text-align: center;
+          box-shadow:
+            0 4px 12px rgba(0, 0, 0, 0.2),
+            inset 0 1px 0 rgba(220, 0, 0, 0.15);
+        }
+
+        .timer-label {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 0.72rem;
+          font-weight: 400;
+          letter-spacing: 0.1em;
+          color: #3a3a3a;
+          text-transform: uppercase;
+        }
+
+        .timer-sep {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: clamp(2rem, 6vw, 3.2rem);
+          line-height: 1;
+          color: #0d0d0d;
+          padding-top: 0.5rem;
+        }
+
+        .countdown-target {
+          margin: 1rem 0 0;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 0.88rem;
+          font-weight: 400;
+          letter-spacing: 0.1em;
+          color: #6a6a6a;
+          text-transform: uppercase;
+        }
+
+        .countdown-ended {
+          margin: 0;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 2rem;
+          letter-spacing: 0.08em;
+          color: #dc0000;
+          text-transform: uppercase;
+        }
+
+        /* =====================================================
+           CTA
+           ===================================================== */
 
         .cta-row {
           display: flex;
@@ -208,199 +435,107 @@ export default function Home() {
           margin-top: 2rem;
         }
 
-        .primary-btn,
+        .primary-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          min-height: 50px;
+          padding: 0.95rem 1.9rem;
+          border: 2px solid #0d0d0d;
+          border-radius: 999px;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1.1rem;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          text-decoration: none;
+          background: #dc0000;
+          color: #ffffff;
+          box-shadow: 0 8px 22px rgba(220, 0, 0, 0.35);
+          transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .primary-btn::after {
+          content: "→";
+          font-family: 'Inter', sans-serif;
+          font-size: 1rem;
+          transition: transform 0.2s ease;
+        }
+
+        .primary-btn:hover,
+        .primary-btn:focus-visible {
+          transform: translateY(-3px);
+          background: #0d0d0d;
+          color: #ffffff;
+          box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        .primary-btn:hover::after,
+        .primary-btn:focus-visible::after {
+          transform: translateX(4px);
+        }
+
         .secondary-btn {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          min-height: 46px;
-          padding: 0.8rem 1.25rem;
-          border: 1px solid transparent;
-          font-family: 'Orbitron', sans-serif;
-          font-size: 0.72rem;
-          letter-spacing: 0.14em;
+          gap: 0.5rem;
+          min-height: 50px;
+          padding: 0.95rem 1.9rem;
+          border: 2px solid #0d0d0d;
+          border-radius: 999px;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 1.1rem;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           text-decoration: none;
-          transition: transform 0.2s ease;
+          background: transparent;
+          color: #0d0d0d;
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+          transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
         }
 
-        .primary-btn {
-          background: var(--red);
-          color: var(--white);
-          box-shadow: 0 0 18px rgba(220, 0, 0, 0.25);
-        }
-
-        .secondary-btn {
-          border-color: rgba(220, 0, 0, 0.7);
-          background: rgba(255, 255, 255, 0.01);
-          color: var(--white);
-        }
-
-        .primary-btn:hover,
-        .primary-btn:focus-visible,
         .secondary-btn:hover,
         .secondary-btn:focus-visible {
-          transform: translateY(-1px);
+          transform: translateY(-3px);
+          background: #0d0d0d;
+          color: #ffffff;
+          box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3);
         }
 
-        .content-panel {
-          padding: 1.5rem 0 3rem;
-        }
-
-        .muted-panel {
-          background: rgba(255, 255, 255, 0.01);
-          border-top: 1px solid rgba(220, 0, 0, 0.25);
-          border-bottom: 1px solid rgba(220, 0, 0, 0.25);
-        }
-
-        .compact-layout {
-          display: grid;
-          gap: 1.5rem;
-        }
-
-        .section-title {
-          margin: 0;
-          font-size: clamp(1.8rem, 4vw, 3rem);
-          color: var(--white);
-          font-family: 'Orbitron', sans-serif;
-          letter-spacing: 0.04em;
-        }
-
-        .text-grid {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 1.25rem;
-          color: var(--soft-white);
-        }
-
-        .text-grid p {
-          margin: 0;
-          line-height: 1.7;
-        }
-
-        .mini-feature-list {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.75rem;
-        }
-
-        .mini-feature-list span {
-          padding: 0.6rem 0.8rem;
-          border: 1px solid rgba(220, 0, 0, 0.5);
-          background: rgba(220, 0, 0, 0.04);
-          color: var(--white);
-          font-family: 'Orbitron', sans-serif;
-          font-size: 0.68rem;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-        }
-
-        .dual-columns {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 1.5rem;
-          margin-top: 1.5rem;
-        }
-
-        .event-group {
-          border: 1px solid rgba(220, 0, 0, 0.4);
-          background: rgba(255, 255, 255, 0.01);
-          padding: 1.2rem;
-        }
-
-        .event-group h3 {
-          margin: 0 0 1rem;
-          font-family: 'Orbitron', sans-serif;
-          color: var(--white);
-          font-size: 1rem;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-        }
-
-        .event-list {
-          list-style: none;
-          padding: 0;
-          margin: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 0.7rem;
-        }
-
-        .event-list li {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 0.75rem;
-          padding-top: 0.7rem;
-          border-top: 1px solid rgba(220, 0, 0, 0.2);
-        }
-
-        .event-list li:first-child {
-          border-top: 0;
-          padding-top: 0;
-        }
-
-        .event-list li span {
-          color: var(--white);
-          font-size: 1rem;
-        }
-
-        .event-list li a {
-          flex-shrink: 0;
-          color: var(--gold);
-          text-decoration: none;
-          font-family: 'Orbitron', sans-serif;
-          font-size: 0.66rem;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          white-space: nowrap;
-        }
-
-        .event-list li a:hover,
-        .event-list li a:focus-visible {
-          color: var(--white);
-        }
-
-        /* =========================================================
-           RESPONSIVE — 1024px and below
-        ========================================================= */
+        /* =====================================================
+           RESPONSIVE
+           ===================================================== */
 
         @media (max-width: 1024px) {
           .page-hero {
-            padding: 4rem 0 2.5rem;
-          }
-
-          .content-panel {
-            padding: 1.25rem 0 2.5rem;
+            padding: 4rem 0 3rem;
           }
         }
 
-        /* =========================================================
-           RESPONSIVE — 768px and below (tablet)
-        ========================================================= */
-
         @media (max-width: 768px) {
-          .dual-columns,
-          .text-grid {
-            grid-template-columns: 1fr;
-          }
-
           .page-hero {
-            padding: 3.5rem 0 2rem;
+            padding: 3.5rem 0 2.5rem;
           }
 
           .hero-description {
             font-size: 1rem;
           }
 
-          .content-panel {
-            padding: 1rem 0 2.25rem;
+          .display-title {
+            font-size: clamp(4.4rem, 15vw, 10rem);
+          }
+
+          .display-year {
+            font-size: clamp(2.4rem, 8vw, 4.5rem);
+          }
+
+          .countdown-block {
+            max-width: 420px;
+            padding: 1.4rem 1rem;
+            margin: 1.8rem auto 0;
           }
         }
-
-        /* =========================================================
-           RESPONSIVE — 430px and below (phones)
-        ========================================================= */
 
         @media (max-width: 430px) {
           .page-shell {
@@ -408,60 +543,71 @@ export default function Home() {
           }
 
           .page-hero {
-            padding: 3rem 0 1.75rem;
-          }
-
-          .eyebrow {
-            font-size: 0.68rem;
-            letter-spacing: 0.12em;
+            padding: 3rem 0 2rem;
           }
 
           .display-title {
-            letter-spacing: 0.02em;
+            font-size: clamp(5rem, 19vw, 10rem);
           }
 
-          .hero-meta span,
-          .mini-feature-list span {
+          .display-year {
+            font-size: clamp(2.7rem, 10vw, 4.5rem);
+          }
+
+          .countdown-block {
+            max-width: 300px;
+            padding: 1.1rem 0.8rem;
+            margin: 1.5rem auto 0;
+          }
+
+          .countdown-heading {
+            font-size: 1.05rem;
+          }
+
+          .hero-meta span {
             padding: 0.5rem 0.7rem;
-            font-size: 0.64rem;
+            font-size: 0.74rem;
           }
 
           .primary-btn,
           .secondary-btn {
-            width: 100%;
-            min-height: 48px;
+            min-height: 46px;
+            padding: 0.75rem 1.3rem;
+            font-size: 0.98rem;
           }
 
           .cta-row {
-            flex-direction: column;
+            gap: 0.7rem;
           }
 
-          .event-group {
-            padding: 1rem;
+          .timer-unit {
+            min-width: 2.4rem;
           }
 
-          .event-list li {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.3rem;
+          .timer-value {
+            padding: 0.4rem 0.45rem;
+            min-width: 2rem;
           }
         }
 
-        /* =========================================================
-           RESPONSIVE — 320px (smallest supported)
-        ========================================================= */
+        @media (max-width: 360px) {
+          .timer-row {
+            gap: 0.25rem;
+          }
 
-        @media (max-width: 320px) {
-          .hero-meta,
-          .mini-feature-list {
-            gap: 0.5rem;
+          .timer-sep {
+            display: none;
           }
         }
 
         @media (prefers-reduced-motion: reduce) {
           .primary-btn,
-          .secondary-btn {
+          .primary-btn::after {
             transition: none;
+          }
+
+          .hero-particle {
+            animation: none;
           }
         }
       `}</style>

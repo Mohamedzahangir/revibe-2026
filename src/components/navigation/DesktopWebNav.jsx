@@ -1,5 +1,4 @@
-import { Fragment } from "react";
-import WebNode from "./WebNode";
+import { NavLink } from "react-router-dom";
 
 const navItems = [
   { label: "Home", to: "/" },
@@ -12,110 +11,138 @@ const navItems = [
 export default function DesktopWebNav() {
   return (
     <>
-      <nav className="desktop-web-nav" aria-label="Primary navigation">
-        <div className="desktop-nav-row">
+      <nav className="pill-nav" aria-label="Primary navigation">
+        <div className="pill-nav-inner">
           {navItems.map((item, index) => (
-            <Fragment key={item.to}>
-              <WebNode
-                label={item.label}
+            <div className="pill-nav-item" key={item.to}>
+              <NavLink
                 to={item.to}
-                className="desktop-web-node"
-              />
+                end={item.to === "/"}
+                className={({ isActive }) =>
+                  ["pill-nav-link", isActive ? "is-active" : ""]
+                    .filter(Boolean)
+                    .join(" ")
+                }
+              >
+                <span className="pill-nav-label">{item.label}</span>
+              </NavLink>
 
               {index < navItems.length - 1 && (
-                <span className="nav-web-connector" aria-hidden="true">
-                  <svg viewBox="0 0 40 20" preserveAspectRatio="none" focusable="false">
-                    <path d="M2 10 H38" />
-                    <circle cx="20" cy="10" r="3" />
-                  </svg>
-                </span>
+                <span className="pill-nav-divider" aria-hidden="true" />
               )}
-            </Fragment>
+            </div>
           ))}
         </div>
       </nav>
 
       <style>{`
-        .desktop-web-nav {
-          display: block;
+        .pill-nav {
+          display: flex;
+          justify-content: center;
           width: 100%;
           min-width: 0;
           overflow-x: auto;
           overflow-y: hidden;
           -webkit-overflow-scrolling: touch;
-          scrollbar-width: thin;
+          scrollbar-width: none;
         }
 
-        .desktop-web-nav::-webkit-scrollbar {
-          height: 4px;
+        .pill-nav::-webkit-scrollbar {
+          display: none;
         }
 
-        .desktop-web-nav::-webkit-scrollbar-thumb {
-          background: rgba(220, 0, 0, 0.4);
-        }
-
-        .desktop-nav-row {
-          display: flex;
-          align-items: center;
+        .pill-nav-inner {
+          display: inline-flex;
+          align-items: stretch;
           justify-content: center;
-          gap: 0.5rem;
+          gap: 0;
           flex-wrap: nowrap;
           width: max-content;
+          max-width: 100%;
           margin: 0 auto;
-          padding: 0 0.15rem;
+          padding: 0.25rem;
+
+          background: rgba(245, 245, 245, 0.94);
+          border: 1px solid rgba(220, 0, 0, 0.35);
+          border-radius: 999px;
+
+          box-shadow:
+            0 2px 10px rgba(0, 0, 0, 0.18),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.6);
         }
 
-        .desktop-web-node {
+        .pill-nav-item {
+          display: inline-flex;
+          align-items: stretch;
           flex-shrink: 0;
-          font-size: 0.72rem;
-          padding: 0.5rem 0.8rem;
-          white-space: nowrap;
         }
 
-        .nav-web-connector {
+        .pill-nav-link {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 26px;
-          height: 18px;
-          opacity: 0.9;
+          padding: 0.5rem 1.1rem;
+          min-height: 38px;
+
+          border-radius: 999px;
+
+          color: #1a1a1a;
+          background: transparent;
+          border: 1px solid transparent;
+
+          font-family: "Bebas Neue", sans-serif;
+          font-size: 0.95rem;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+
+          white-space: nowrap;
+          text-decoration: none;
+
+          transition:
+            color 0.2s ease,
+            background 0.2s ease,
+            box-shadow 0.2s ease;
+        }
+
+        .pill-nav-link:hover,
+        .pill-nav-link:focus-visible {
+          color: #dc0000;
+          background: rgba(220, 0, 0, 0.08);
+        }
+
+        .pill-nav-link.is-active {
+          color: #ffffff;
+          background: #dc0000;
+          box-shadow: 0 0 12px rgba(220, 0, 0, 0.45);
+        }
+
+        .pill-nav-label {
+          position: relative;
+          z-index: 1;
+        }
+
+        .pill-nav-divider {
+          align-self: center;
+          width: 1px;
+          height: 1.1rem;
+          margin: 0 0.1rem;
+          background: rgba(220, 0, 0, 0.28);
           flex-shrink: 0;
         }
 
-        .nav-web-connector svg {
-          width: 100%;
-          height: 100%;
-          overflow: visible;
-        }
-
-        .nav-web-connector path,
-        .nav-web-connector circle {
-          stroke: rgba(220, 0, 0, 0.82);
-          stroke-width: 1.4;
-          fill: rgba(220, 0, 0, 0.7);
-        }
-
         @media (min-width: 640px) {
-          .desktop-nav-row {
-            gap: 0.6rem;
-          }
-
-          .desktop-web-node {
-            font-size: 0.8rem;
-            padding: 0.6rem 1rem;
-          }
-
-          .nav-web-connector {
-            width: 40px;
+          .pill-nav-link {
+            padding: 0.55rem 1.35rem;
+            font-size: 1.02rem;
           }
         }
 
         @media (min-width: 900px) {
-          .desktop-web-nav {
+          .pill-nav {
             overflow: visible;
           }
 
-          .desktop-nav-row {
+          .pill-nav-inner {
             width: auto;
           }
         }

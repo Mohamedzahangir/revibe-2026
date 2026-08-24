@@ -2,65 +2,96 @@ import { Link } from "react-router-dom";
 
 const galleryItems = [1, 2, 3, 4];
 
-// Placeholder names — mirror the actual list in Sponsors.jsx.
-// Update both together once real sponsors are confirmed.
-const sponsorNames = [
-  "Sponsor 01",
-  "Sponsor 02",
-  "Sponsor 03",
-  "Sponsor 04",
-  "Sponsor 05",
-  "Sponsor 06",
-];
-
 export default function About() {
   return (
     <>
-      <main className="theme-page about-page">
-        <section className="content-panel">
-          <div className="page-shell about-shell">
-            <p className="eyebrow accent">About REVIBE</p>
-            <h1 className="section-title">About REVIBE</h1>
-            <p className="lead-copy">
-              REVIBE '26 is a National Level Symposium organized by the Student
-              Guidance Cell (SGC), C. Abdul Hakeem College of Engineering &amp;
-              Technology (CAHCET). The platform brings together students to
-              participate in a carefully curated mix of technical and creative
-              experiences.
+      <main className="ws-page">
+        {/* ============================================================
+            HERO — ORIGIN STORY
+            ============================================================ */}
+        <section className="ws-hero" aria-labelledby="about-title">
+          <div className="ws-container ws-container--narrow">
+            <p className="ws-label">About REVIBE</p>
+
+            <h1 id="about-title" className="ws-display">
+              Every legend has an origin story.
+            </h1>
+
+            <div className="ws-origin-trio">
+              <p>Before the lights.</p>
+              <p>Before the crowds.</p>
+              <p>Before the challenges begin…</p>
+            </div>
+
+            <p className="ws-accent-line">There was an idea.</p>
+
+            <p className="ws-body-lg">
+              An idea to connect curious minds, bold creators and fierce
+              competitors under one web.
             </p>
+
+            <p className="ws-mid">That idea became REVIBE&nbsp;'26.</p>
+
+            <p className="ws-body-lg">
+              A National Level Symposium where technology meets creativity,
+              strategy meets skill, and every participant gets a chance to step
+              into their own universe.
+            </p>
+
+            <p className="ws-strong">Different talents. Different battles. One web.</p>
+
+            <p className="ws-welcome">Welcome to REVIBE&nbsp;'26.</p>
+
+            <p className="ws-date">12.09.2026</p>
+
+            <p className="ws-battle">Your Battleground is on!</p>
           </div>
         </section>
 
-        <span className="web-divider" aria-hidden="true" />
+        <hr className="ws-rule" aria-hidden="true" />
 
-        <section className="content-panel muted-panel">
-          <div className="page-shell">
-            <p className="eyebrow accent">Previous edition</p>
-            <h2 className="section-title">Previous REVIBE Gallery</h2>
-            <p className="lead-copy">
-              Highlights and photos from REVIBE '24 will be published here
-              once finalized.
+        {/* ============================================================
+            PREVIOUS EDITION
+            ============================================================ */}
+        <section className="ws-section" aria-labelledby="prev-title">
+          <div className="ws-container">
+            <p className="ws-label">Previous edition</p>
+            <h2 id="prev-title" className="ws-headline">
+              Previous REVIBE Gallery
+            </h2>
+            <p className="ws-body">
+              Highlights and photos from REVIBE '24 will be published here once
+              finalized.
             </p>
 
-            <div className="gallery-grid" aria-label="Gallery placeholder">
+            <div className="ws-gallery" aria-label="Gallery placeholder">
               {galleryItems.map((item) => (
-                <div key={item} className="gallery-slot">
-                  Gallery images will be added.
+                <div key={item} className="ws-card ws-gallery-card">
+                  <span className="ws-card-tag">Slot {String(item).padStart(2, "0")}</span>
+                  <span className="ws-gallery-note">Gallery images will be added.</span>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <span className="web-divider" aria-hidden="true" />
+        <hr className="ws-rule" aria-hidden="true" />
 
-        <section className="content-panel">
-          <div className="page-shell">
-            <p className="eyebrow accent">Recognition</p>
-            <h2 className="section-title">Prizes &amp; Certificates</h2>
+        {/* ============================================================
+            RECOGNITION
+            ============================================================ */}
+        <section className="ws-section" aria-labelledby="prizes-title">
+          <div className="ws-container">
+            <p className="ws-label">Recognition</p>
+            <h2 id="prizes-title" className="ws-headline">
+              Prizes &amp; Certificates
+            </h2>
 
-            <div className="info-card">
-              <ul className="simple-list">
+            <div className="ws-card ws-data-card">
+              <div className="ws-card-head">
+                <span>Awards</span>
+              </div>
+              <ul className="ws-list">
                 <li>1st and 2nd place prizes will be issued for every event.</li>
                 <li>Certificates of participation will be provided to all participants.</li>
               </ul>
@@ -68,35 +99,37 @@ export default function About() {
           </div>
         </section>
 
-        <span className="web-divider" aria-hidden="true" />
+        <hr className="ws-rule" aria-hidden="true" />
 
-        <section className="content-panel muted-panel">
-          <div className="page-shell">
-            <p className="eyebrow accent">Backed by</p>
-            <h2 className="section-title">Sponsors</h2>
+        {/* ============================================================
+            ORGANIZED BY — ABOUT SGC
+            ============================================================ */}
+        <section className="ws-section" aria-labelledby="sgc-title">
+          <div className="ws-container ws-container--narrow">
+            <p className="ws-label">Organized by</p>
+            <h2 id="sgc-title" className="ws-headline">About Student Guidance Cell</h2>
+            <p className="ws-tagline">Zeal and Zest to be</p>
 
-            <div className="info-card">
-              <ul className="name-list">
-                {sponsorNames.map((name) => (
-                  <li key={name}>
-                    <span>{name}</span>
-                    <Link to="/sponsors">View Details</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
+            <p className="ws-body-lg">
+              The Student Guidance Cell (SGC) is a student-driven platform created
+              to help students move beyond the classroom and discover what they're
+              capable of.
+            </p>
 
-        <span className="web-divider" aria-hidden="true" />
+            <p className="ws-body-lg">
+              From technical exposure and workshops to competitions, events and
+              opportunities, SGC creates spaces where students can learn, connect,
+              experiment and lead.
+            </p>
 
-        <section className="content-panel">
-          <div className="page-shell">
-            <p className="eyebrow accent">Organized by</p>
-            <h2 className="section-title">About SGC</h2>
-            <p className="lead-copy">
-              REVIBE '26 is organized by the Student Guidance Cell (SGC),
-              C. Abdul Hakeem College of Engineering &amp; Technology (CAHCET).
+            <p className="ws-accent-line">Because talent isn't just about what you know.</p>
+            <p className="ws-strong">It's about what you do with it.</p>
+
+            <p className="ws-mantra">Connect. Guide. Empower.</p>
+
+            <p className="ws-body-lg">
+              And REVIBE&nbsp;'26 is one of the webs we built to bring those
+              possibilities together.
             </p>
           </div>
         </section>
@@ -104,266 +137,402 @@ export default function About() {
 
       <style>{`
         /* =========================================================
-           PAGE / PANEL SHELL (self-contained for About.jsx)
+           WEB-SLINGER MODERN — About page
+           Flat-Brutalist / Neo-Comic design system
+           Off-white surface · 2px black borders · sharp corners ·
+           hard offset shadows · Anton / Hanken Grotesk / JetBrains Mono
+           8px grid · 12-col desktop (64px margin) · 4-col mobile (16px)
         ========================================================= */
 
-        .theme-page {
+        .ws-page {
           width: 100%;
-          background: var(--bg);
+          background: #f5f5f5;
+          color: #1a1a1a;
           overflow-x: hidden;
+          font-family: 'Hanken Grotesk', sans-serif;
         }
 
-        .content-panel {
+        .ws-container {
           width: 100%;
-          padding: 3.25rem 1.5rem;
-        }
-
-        .muted-panel {
-          background: var(--bg-soft);
-        }
-
-        .page-shell {
-          width: 100%;
-          max-width: 1100px;
+          max-width: 1280px;
           margin: 0 auto;
+          padding-inline: 16px;
+          box-sizing: border-box;
         }
 
-        .about-shell {
+        .ws-container--narrow {
           max-width: 900px;
         }
 
-        .web-divider {
-          display: block;
-          width: 100%;
-          height: 1px;
-          background: linear-gradient(
-            90deg,
-            transparent,
-            var(--red) 20%,
-            var(--gold) 50%,
-            var(--red) 80%,
-            transparent
-          );
-          opacity: 0.5;
+        /* ---------- sections ---------- */
+
+        .ws-hero {
+          position: relative;
+          padding: 96px 0 72px;
+          background: #f9f9f9;
+          overflow: hidden;
         }
 
-        /* =========================================================
-           TEXT / LABELS
-        ========================================================= */
+        .ws-section {
+          padding: 72px 0;
+          background: #f5f5f5;
+        }
 
-        .eyebrow {
-          margin: 0 0 0.6rem;
-          font-family: 'Orbitron', sans-serif;
-          font-size: 0.75rem;
+        /* subtle webbing overlay on the hero */
+        .ws-hero::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background-image:
+            repeating-linear-gradient(45deg, rgba(26,26,26,0.05) 0 1px, transparent 1px 28px),
+            repeating-linear-gradient(-45deg, rgba(26,26,26,0.05) 0 1px, transparent 1px 28px);
+          pointer-events: none;
+        }
+
+        .ws-hero .ws-container {
+          position: relative;
+          z-index: 1;
+        }
+
+        /* ---------- heavy 2px black panel dividers ---------- */
+
+        .ws-rule {
+          display: block;
+          width: 100%;
+          height: 0;
+          border: 0;
+          border-top: 2px solid #1a1a1a;
+          margin: 0;
+        }
+
+        /* ---------- typography ---------- */
+
+        .ws-label {
+          margin: 0 0 16px;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 12px;
           font-weight: 700;
-          letter-spacing: 0.28em;
+          line-height: 16px;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: #dc0000;
+        }
+
+        .ws-display {
+          margin: 0 0 32px;
+          font-family: 'Anton', sans-serif;
+          font-weight: 400;
+          font-size: clamp(40px, 9vw, 84px);
+          line-height: 0.98;
+          letter-spacing: 0.01em;
+          color: #1a1a1a;
           text-transform: uppercase;
         }
 
-        .eyebrow.accent {
-          color: var(--gold);
+        .ws-origin-trio {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          margin: 0 0 28px;
+          font-family: 'Anton', sans-serif;
+          font-size: clamp(20px, 4vw, 32px);
+          line-height: 1.1;
+          letter-spacing: 0.02em;
+          color: #1a1a1a;
         }
 
-        .section-title {
-          margin: 0 0 1.25rem;
-          font-family: 'Bangers', cursive;
-          font-size: clamp(1.9rem, 4vw, 2.75rem);
-          letter-spacing: 0.03em;
-          color: var(--white);
-          text-shadow: 0 0 18px var(--shadow);
-        }
-
-        .lead-copy {
+        .ws-origin-trio p {
           margin: 0;
+        }
+
+        .ws-accent-line {
+          margin: 0 0 20px;
+          font-family: 'Anton', sans-serif;
+          font-size: clamp(22px, 4.5vw, 34px);
+          line-height: 1.1;
+          letter-spacing: 0.02em;
+          color: #dc0000;
+        }
+
+        .ws-body-lg {
+          margin: 0 0 20px;
           max-width: 760px;
-          color: var(--soft-white);
-          line-height: 1.8;
-          font-size: 1.05rem;
+          font-family: 'Hanken Grotesk', sans-serif;
+          font-size: 18px;
+          line-height: 28px;
+          color: #1a1a1a;
         }
 
-        /* =========================================================
-           GENERIC CARD
-        ========================================================= */
-
-        .info-card {
-          position: relative;
-          border: 1px solid rgba(220, 0, 0, 0.35);
-          background: rgba(255, 255, 255, 0.01);
-          padding: 1.4rem 1.2rem;
-          margin-top: 1.5rem;
-          transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        .ws-mid {
+          margin: 0 0 24px;
+          font-family: 'Anton', sans-serif;
+          font-size: clamp(26px, 5vw, 44px);
+          line-height: 1;
+          letter-spacing: 0.02em;
+          color: #1a1a1a;
+          text-transform: uppercase;
         }
 
-        .info-card:hover,
-        .info-card:focus-within {
-          border-color: rgba(220, 0, 0, 0.75);
-          box-shadow: 0 0 24px var(--shadow);
+        .ws-strong {
+          margin: 0 0 24px;
+          font-family: 'Anton', sans-serif;
+          font-size: clamp(20px, 4vw, 30px);
+          line-height: 1.15;
+          letter-spacing: 0.03em;
+          color: #1a1a1a;
+          text-transform: uppercase;
         }
 
-        .simple-list {
+        .ws-welcome {
+          margin: 0 0 16px;
+          font-family: 'Anton', sans-serif;
+          font-size: clamp(30px, 6vw, 52px);
+          line-height: 1;
+          letter-spacing: 0.02em;
+          color: #1a1a1a;
+          text-transform: uppercase;
+        }
+
+        .ws-date {
+          display: inline-block;
+          margin: 0 0 24px;
+          padding: 8px 14px;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 14px;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          color: #ffffff;
+          background: #1a1a1a;
+          border-radius: 0;
+        }
+
+        .ws-battle {
           margin: 0;
-          padding-left: 1.1rem;
+          font-family: 'Anton', sans-serif;
+          font-size: clamp(24px, 5vw, 40px);
+          line-height: 1.1;
+          letter-spacing: 0.02em;
+          color: #dc0000;
+          text-transform: uppercase;
+        }
+
+        .ws-tagline {
+          margin: 0 0 24px;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 13px;
+          font-weight: 700;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: #dc0000;
+        }
+
+        .ws-mantra {
+          margin: 24px 0;
+          font-family: 'Anton', sans-serif;
+          font-size: clamp(24px, 5vw, 40px);
+          line-height: 1;
+          letter-spacing: 0.04em;
+          color: #ffffff;
+          background: #dc0000;
+          padding: 14px 18px;
+          display: inline-block;
+          text-transform: uppercase;
+        }
+
+        .ws-headline {
+          margin: 0 0 20px;
+          font-family: 'Anton', sans-serif;
+          font-weight: 400;
+          font-size: clamp(32px, 6vw, 48px);
+          line-height: 1;
+          letter-spacing: 0.02em;
+          color: #1a1a1a;
+          text-transform: uppercase;
+        }
+
+        .ws-body {
+          margin: 0 0 8px;
+          max-width: 760px;
+          font-family: 'Hanken Grotesk', sans-serif;
+          font-size: 16px;
+          line-height: 24px;
+          color: #3a3a3a;
+        }
+
+        /* ---------- cards (2px black border, sharp, hard offset) ---------- */
+
+        .ws-card {
+          position: relative;
+          background: #ffffff;
+          border: 2px solid #1a1a1a;
+          border-radius: 0;
+          box-shadow: 6px 6px 0 #1a1a1a;
+          transition: box-shadow 0.18s ease, transform 0.18s ease;
+        }
+
+        .ws-card:hover,
+        .ws-card:focus-within {
+          box-shadow: 6px 6px 0 #dc0000;
+          transform: translate(-1px, -1px);
+        }
+
+        .ws-data-card {
+          margin-top: 32px;
+        }
+
+        .ws-card-head {
+          background: #1a1a1a;
+          color: #ffffff;
+          padding: 10px 16px;
+          font-family: 'Anton', sans-serif;
+          font-size: 18px;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+        }
+
+        /* ---------- gallery ---------- */
+
+        .ws-gallery {
           display: grid;
-          gap: 0.6rem;
-          color: var(--soft-white);
-          line-height: 1.7;
-          font-size: 0.98rem;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 16px;
+          margin-top: 32px;
         }
 
-        .simple-list li::marker {
-          color: var(--red);
+        .ws-gallery-card {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 12px;
+          min-height: 160px;
+          padding: 16px;
+          background: #f3f3f3;
         }
 
-        /* =========================================================
-           NAME LIST (sponsors)
-        ========================================================= */
+        .ws-card-tag {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: #ffffff;
+          background: #1a1a1a;
+          padding: 4px 8px;
+          border-radius: 0;
+        }
 
-        .name-list {
+        .ws-gallery-note {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 12px;
+          color: #5b403f;
+        }
+
+        /* ---------- list (1px black separators, red square bullets) ---------- */
+
+        .ws-list {
           list-style: none;
           margin: 0;
           padding: 0;
-          display: grid;
-          gap: 0.75rem;
         }
 
-        .name-list li {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 0.75rem;
-          padding-top: 0.75rem;
-          border-top: 1px solid rgba(220, 0, 0, 0.2);
+        .ws-list li {
+          position: relative;
+          padding: 14px 16px 14px 36px;
+          font-family: 'Hanken Grotesk', sans-serif;
+          font-size: 16px;
+          line-height: 24px;
+          color: #1a1a1a;
+          border-top: 1px solid #1a1a1a;
         }
 
-        .name-list li:first-child {
+        .ws-list li:first-child {
           border-top: 0;
-          padding-top: 0;
         }
 
-        .name-list li span {
-          color: var(--white);
-          font-size: 1rem;
-        }
-
-        .name-list li a {
-          flex-shrink: 0;
-          color: var(--gold);
-          text-decoration: none;
-          font-family: 'Orbitron', sans-serif;
-          font-size: 0.66rem;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          white-space: nowrap;
-        }
-
-        .name-list li a:hover,
-        .name-list li a:focus-visible {
-          color: var(--white);
+        .ws-list li::before {
+          content: "";
+          position: absolute;
+          left: 16px;
+          top: 22px;
+          width: 8px;
+          height: 8px;
+          background: #dc0000;
         }
 
         /* =========================================================
-           GALLERY
+           RESPONSIVE — tablet (600px+)
         ========================================================= */
 
-        .gallery-grid {
-          display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 1rem;
-          margin-top: 1.5rem;
-        }
-
-        .gallery-slot {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          min-height: 180px;
-          border: 1px dashed rgba(220, 0, 0, 0.5);
-          background: rgba(220, 0, 0, 0.03);
-          color: var(--muted);
-          text-align: center;
-          padding: 1rem;
-          font-size: 0.9rem;
-        }
-
-        /* =========================================================
-           RESPONSIVE — 1024px and below
-        ========================================================= */
-
-        @media (max-width: 1024px) {
-          .content-panel {
-            padding: 2.75rem 1.25rem;
+        @media (min-width: 600px) {
+          .ws-container {
+            padding-inline: 32px;
           }
 
-          .gallery-grid {
+          .ws-gallery {
             grid-template-columns: repeat(3, minmax(0, 1fr));
           }
-        }
 
-        /* =========================================================
-           RESPONSIVE — 768px and below (tablet)
-        ========================================================= */
-
-        @media (max-width: 768px) {
-          .content-panel {
-            padding: 2.25rem 1.1rem;
+          .ws-list li {
+            padding-inline: 20px 20px 20px 40px;
           }
 
-          .section-title {
-            font-size: clamp(1.6rem, 5vw, 2.1rem);
-          }
-
-          .gallery-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+          .ws-list li::before {
+            left: 20px;
           }
         }
 
         /* =========================================================
-           RESPONSIVE — 430px and below (phones)
+           RESPONSIVE — desktop (1024px+)
         ========================================================= */
 
-        @media (max-width: 430px) {
-          .content-panel {
-            padding: 1.9rem 0.9rem;
+        @media (min-width: 1024px) {
+          .ws-container {
+            padding-inline: 64px;
           }
 
-          .eyebrow {
-            font-size: 0.68rem;
-            letter-spacing: 0.22em;
+          .ws-hero {
+            padding: 128px 0 96px;
           }
 
-          .lead-copy {
-            font-size: 0.95rem;
-            line-height: 1.7;
+          .ws-section {
+            padding: 96px 0;
           }
 
-          .info-card {
-            padding: 1.1rem 1rem;
+          .ws-gallery {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 24px;
           }
 
-          .gallery-slot {
-            min-height: 140px;
-            font-size: 0.82rem;
+          .ws-gallery-card {
+            min-height: 200px;
+            padding: 24px;
           }
 
-          .name-list li {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.3rem;
+          .ws-data-card {
+            margin-top: 40px;
+          }
+
+          .ws-list li {
+            padding-inline: 24px 24px 24px 44px;
+          }
+
+          .ws-list li::before {
+            left: 24px;
+          }
+
+          .ws-card-head {
+            padding: 12px 24px;
+            font-size: 20px;
           }
         }
 
         /* =========================================================
-           RESPONSIVE — 320px (smallest supported)
+           REDUCED MOTION
         ========================================================= */
-
-        @media (max-width: 320px) {
-          .gallery-grid {
-            grid-template-columns: 1fr;
-          }
-        }
 
         @media (prefers-reduced-motion: reduce) {
-          .info-card {
+          .ws-card {
             transition: none;
           }
         }
