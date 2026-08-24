@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 import logoWhite from "../../assets/logos/logo-white.png";
+import spideyWebm from "../../assets/videos/hanging-spidey-Picsart-BackgroundRemover.webm";
 import DesktopWebNav from "./DesktopWebNav";
 import MobileWebNav from "./MobileWebNav";
 import WebNode from "./WebNode";
@@ -18,10 +19,12 @@ export default function Header() {
           <div className="header-row-one">
 
             {/* SGC BRAND */}
-            <Link
-              to="/"
+            <a
+              href="https://teamsgc.in"
+              target="_blank"
+              rel="noopener noreferrer"
               className="brand-link sgc-brand-link"
-              aria-label="REVIBE '26 Home"
+              aria-label="Visit the official Student Guidance Cell website (teamsgc.in)"
             >
               <img
                 src={logoWhite}
@@ -41,14 +44,14 @@ export default function Header() {
                   Student Guidance Cell
                 </span>
               </span>
-            </Link>
+            </a>
 
             {/* REVIBE IDENTITY */}
             <span className="sgc-brand-event">
               REVIBE '26
             </span>
 
-            {/* LOGIN / REGISTER */}
+            {/* REGISTER + HANGING SPIDEY */}
             <div
               className="header-actions-slot"
               aria-label="Account actions"
@@ -60,12 +63,27 @@ export default function Header() {
                 variant="action"
               />
 
-              <WebNode
-                label="Login"
-                to="/login"
-                className="header-action-secondary"
-                variant="action"
-              />
+              <Link
+                to="/register"
+                className="spidey-hang"
+                aria-label="Register now to become a spidey"
+              >
+                <video
+                  className="spidey-hang-video"
+                  src={spideyWebm}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                />
+
+                <span className="spidey-hang-dialog" role="tooltip">
+                  <span className="spidey-hang-dialog-text">
+                    Register now to become a spidey
+                  </span>
+                  <span className="spidey-hang-dialog-arrow" aria-hidden="true" />
+                </span>
+              </Link>
             </div>
 
           </div>
@@ -104,19 +122,19 @@ export default function Header() {
 
           background:
             linear-gradient(
-              90deg,
-              rgba(18, 5, 0, 0.98),
-              rgba(5, 5, 5, 0.98),
-              rgba(18, 0, 0, 0.98)
+              180deg,
+              rgba(247, 244, 239, 0.96) 0%,
+              rgba(236, 231, 223, 0.94) 100%
             );
 
           border-bottom:
-            1px solid rgba(220, 0, 0, 0.45);
+            1px solid rgba(220, 0, 0, 0.22);
 
-          backdrop-filter: blur(10px);
+          backdrop-filter: blur(14px) saturate(140%);
 
           box-shadow:
-            0 8px 24px rgba(0, 0, 0, 0.3);
+            0 8px 28px rgba(0, 0, 0, 0.22),
+            0 2px 6px rgba(0, 0, 0, 0.14);
 
           overflow: visible;
         }
@@ -135,23 +153,18 @@ export default function Header() {
           background:
             radial-gradient(
               circle at 12% 50%,
-              rgba(245, 197, 66, 0.12),
+              rgba(220, 0, 0, 0.08),
               transparent 22%
             ),
 
             radial-gradient(
               circle at 88% 50%,
-              rgba(220, 0, 0, 0.12),
+              rgba(220, 0, 0, 0.10),
               transparent 24%
             );
 
           pointer-events: none;
         }
-
-
-        /* =====================================================
-           HEADER INNER
-           ===================================================== */
 
         .header-inner {
           position: relative;
@@ -175,14 +188,11 @@ export default function Header() {
            ===================================================== */
 
         .header-row-one {
-          display: grid;
-
-          grid-template-columns:
-            minmax(0, 1fr)
-            auto
-            minmax(0, 1fr);
+          position: relative;
+          display: flex;
 
           align-items: center;
+          justify-content: space-between;
 
           width: 100%;
 
@@ -205,7 +215,7 @@ export default function Header() {
 
           justify-self: start;
 
-          color: #ffffff;
+          color: #0d0d0d;
 
           text-decoration: none;
         }
@@ -238,26 +248,26 @@ export default function Header() {
 
 
         .sgc-brand-name {
-          font-family: "Orbitron", sans-serif;
+          font-family: "Bebas Neue", sans-serif;
 
           font-size: 0.95rem;
 
-          font-weight: 800;
+          font-weight: 400;
 
           letter-spacing: 0.1em;
 
-          color: #ffffff;
+          color: #0d0d0d;
         }
 
 
         .sgc-brand-subtitle {
           margin-top: 0.18rem;
 
-          font-family: "Rajdhani", sans-serif;
+          font-family: "Inter", sans-serif;
 
           font-size: 0.62rem;
 
-          color: #a1a1aa;
+          color: #6a6a6a;
 
           letter-spacing: 0.055em;
 
@@ -279,19 +289,23 @@ export default function Header() {
            ===================================================== */
 
         .sgc-brand-event {
-          justify-self: center;
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
 
-          font-family: "Bangers", cursive;
+          font-family: "Brusher", cursive;
           font-size: clamp(1.3rem, 2.6vw, 2.2rem);
           line-height: 1;
-          letter-spacing: 0.05em;
-          color: #ffffff;
+          letter-spacing: 0.02em;
+          color: #0d0d0d;
           white-space: nowrap;
           text-align: center;
           text-decoration: none;
+          pointer-events: none;
 
           text-shadow:
-            0 0 10px rgba(220, 0, 0, 0.35);
+            0 0 10px rgba(220, 0, 0, 0.18);
         }
 
 
@@ -340,30 +354,30 @@ export default function Header() {
         /* REGISTER */
 
         .header-action-primary {
-          background: #f5c542;
+          background: #dc0000;
 
-          border-color: #f5c542;
+          border-color: #dc0000;
 
-          color: #1a1000;
+          color: #ffffff;
 
           font-weight: 800;
 
           box-shadow:
-            0 0 12px rgba(245, 197, 66, 0.28);
+            0 0 12px rgba(220, 0, 0, 0.28);
         }
 
 
         .header-action-primary:hover {
-          background: #ffd45c;
+          background: #ff1a1a;
 
-          border-color: #ffd45c;
+          border-color: #ff1a1a;
 
           box-shadow:
-            0 0 16px rgba(245, 197, 66, 0.42);
+            0 0 16px rgba(220, 0, 0, 0.42);
         }
 
 
-        /* LOGIN */
+        /* LOGIN (legacy, unused) */
 
         .header-action-secondary {
           background:
@@ -385,6 +399,119 @@ export default function Header() {
 
 
         /* =====================================================
+           HANGING SPIDEY (beside Register button)
+           ===================================================== */
+
+        .spidey-hang {
+          position: relative;
+          display: inline-flex;
+          align-items: flex-start;
+          justify-content: center;
+
+          width: 44px;
+          height: 70px;
+
+          flex-shrink: 0;
+
+          text-decoration: none;
+          cursor: pointer;
+        }
+
+        .spidey-hang::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 50%;
+          width: 1px;
+          height: 22px;
+          background: rgba(220, 0, 0, 0.5);
+          transform: translateX(-50%);
+          z-index: 0;
+        }
+
+        .spidey-hang-video {
+          position: relative;
+          z-index: 1;
+          width: 44px;
+          height: 44px;
+          object-fit: contain;
+          display: block;
+          pointer-events: none;
+          margin-top: 22px;
+          filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.22));
+          animation: spidey-sway 4s ease-in-out infinite;
+          transform-origin: top center;
+        }
+
+        @keyframes spidey-sway {
+          0%, 100% { transform: rotate(-3deg); }
+          50% { transform: rotate(3deg); }
+        }
+
+        .spidey-hang-dialog {
+          position: absolute;
+          top: calc(100% + 10px);
+          right: -6px;
+          z-index: 40;
+
+          display: block;
+          width: max-content;
+          max-width: 220px;
+          padding: 0.55rem 0.85rem;
+
+          background: #0d0d0d;
+          border: 1px solid rgba(220, 0, 0, 0.6);
+          border-radius: 10px;
+          box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3);
+
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(-6px);
+          pointer-events: none;
+
+          transition:
+            opacity 0.25s ease,
+            visibility 0.25s ease,
+            transform 0.25s ease;
+        }
+
+        .spidey-hang-dialog-text {
+          display: block;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 0.78rem;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: #ffffff;
+          text-align: center;
+          line-height: 1.3;
+        }
+
+        .spidey-hang-dialog-arrow {
+          position: absolute;
+          top: -6px;
+          right: 16px;
+          width: 10px;
+          height: 10px;
+          background: #0d0d0d;
+          border-left: 1px solid rgba(220, 0, 0, 0.6);
+          border-top: 1px solid rgba(220, 0, 0, 0.6);
+          transform: rotate(45deg);
+        }
+
+        .spidey-hang:hover .spidey-hang-dialog,
+        .spidey-hang:focus-visible .spidey-hang-dialog {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
+        }
+
+        .spidey-hang:hover .spidey-hang-video,
+        .spidey-hang:focus-visible .spidey-hang-video {
+          filter: drop-shadow(0 0 10px rgba(220, 0, 0, 0.4));
+        }
+
+
+        /* =====================================================
            DESKTOP NAVIGATION
            ===================================================== */
 
@@ -400,7 +527,7 @@ export default function Header() {
           padding-top: 0.55rem;
 
           border-top:
-            1px solid rgba(255, 255, 255, 0.07);
+            1px solid rgba(220, 0, 0, 0.22);
 
           box-sizing: border-box;
         }
@@ -478,22 +605,6 @@ export default function Header() {
           }
 
 
-          /*
-             ROW 1
-
-             SGC       REVIBE       REGISTER LOGIN
-          */
-
-          .header-row-one {
-            grid-template-columns:
-              minmax(0, 1fr)
-              auto
-              minmax(0, 1fr);
-
-            gap: 0.3rem;
-          }
-
-
           /* SGC */
 
           .sgc-logo {
@@ -529,13 +640,10 @@ export default function Header() {
           }
 
 
-          /* REVIBE */
+          /* REVIBE — hidden on mobile */
 
           .sgc-brand-event {
-            font-size: clamp(1rem, 5.5vw, 1.4rem);
-
-            padding:
-              0 0.15rem;
+            display: none;
           }
 
 
@@ -559,6 +667,30 @@ export default function Header() {
             letter-spacing: 0.02em;
           }
 
+          .spidey-hang {
+            width: 30px;
+            height: 50px;
+          }
+
+          .spidey-hang-video {
+            width: 30px;
+            height: 30px;
+            margin-top: 14px;
+          }
+
+          .spidey-hang::before {
+            height: 14px;
+          }
+
+          .spidey-hang-dialog {
+            max-width: 160px;
+            padding: 0.4rem 0.6rem;
+          }
+
+          .spidey-hang-dialog-text {
+            font-size: 0.6rem;
+          }
+
 
           /*
              Hide desktop nav
@@ -570,15 +702,18 @@ export default function Header() {
 
 
           /*
-             Show mobile nav
+             Show mobile nav — centered, transparent background
           */
 
           .mobile-header-navigation {
-            display: block;
+            display: flex;
+            justify-content: center;
 
             width: 100%;
 
             margin-top: 0.45rem;
+            padding-top: 0.55rem;
+            border-top: 1px solid rgba(220, 0, 0, 0.22);
           }
         }
 
@@ -636,6 +771,21 @@ export default function Header() {
 
             font-size: 0.42rem;
           }
+
+          .spidey-hang {
+            width: 26px;
+            height: 44px;
+          }
+
+          .spidey-hang-video {
+            width: 26px;
+            height: 26px;
+            margin-top: 12px;
+          }
+
+          .spidey-hang::before {
+            height: 12px;
+          }
         }
 
 
@@ -665,6 +815,21 @@ export default function Header() {
               0.28rem;
 
             font-size: 0.38rem;
+          }
+
+          .spidey-hang {
+            width: 24px;
+            height: 40px;
+          }
+
+          .spidey-hang-video {
+            width: 24px;
+            height: 24px;
+            margin-top: 10px;
+          }
+
+          .spidey-hang::before {
+            height: 10px;
           }
         }
 

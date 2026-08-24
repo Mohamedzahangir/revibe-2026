@@ -1,4 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+@font-face {
+  font-family: 'Brusher';
+  src: url('./assets/fonts/Brusher.ttf') format('truetype');
+  font-display: swap;
+}
 
 :root {
   --bg: #050505;

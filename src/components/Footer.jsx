@@ -287,9 +287,10 @@ export default function Footer() {
 
         .sgc-footer-event {
           margin: 0 0 0.6rem;
-          font-family: 'Bangers', cursive;
-          font-size: clamp(1.6rem, 2vw, 2.2rem);
-          letter-spacing: 0.08em;
+          font-family: 'Brusher', cursive;
+          font-size: clamp(1.8rem, 2.4vw, 2.4rem);
+          line-height: 1;
+          letter-spacing: 0.06em;
           color: var(--white);
         }
 

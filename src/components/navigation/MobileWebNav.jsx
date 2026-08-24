@@ -1,4 +1,4 @@
-import WebNode from "./WebNode";
+import { NavLink } from "react-router-dom";
 
 const navItems = [
   { label: "Home", to: "/" },
@@ -8,370 +8,163 @@ const navItems = [
   { label: "Location", to: "/location" },
 ];
 
-function NavSeparator() {
-  return (
-    <span className="mobile-nav-separator" aria-hidden="true">
-      <svg viewBox="0 0 32 16" preserveAspectRatio="none" focusable="false">
-        <path className="web-strand" d="M1 2.5 L16 8 L31 2.5" />
-        <path className="web-strand" d="M1 13.5 L16 8 L31 13.5" />
-        <circle className="web-node-dot" cx="16" cy="8" r="2.3" />
-      </svg>
-    </span>
-  );
-}
-
 export default function MobileWebNav() {
   return (
     <>
-      <nav className="mobile-web-nav" aria-label="Mobile navigation">
-        <div className="mobile-navigation-row">
+      <nav className="mobile-pill-nav" aria-label="Mobile navigation">
+        <div className="mobile-pill-inner">
           {navItems.map((item, index) => (
-            <div
-              className="mobile-navigation-item"
-              key={item.to}
-            >
-              <WebNode
-                label={item.label}
+            <div className="mobile-pill-item" key={item.to}>
+              <NavLink
                 to={item.to}
-                className="mobile-nav-link"
-                variant="mobile"
-              />
+                end={item.to === "/"}
+                className={({ isActive }) =>
+                  ["mobile-pill-link", isActive ? "is-active" : ""]
+                    .filter(Boolean)
+                    .join(" ")
+                }
+              >
+                <span>{item.label}</span>
+              </NavLink>
 
-              {index < navItems.length - 1 && <NavSeparator />}
+              {index < navItems.length - 1 && (
+                <span className="mobile-pill-divider" aria-hidden="true" />
+              )}
             </div>
           ))}
         </div>
       </nav>
 
       <style>{`
-        /* =====================================================
-           MOBILE NAVIGATION
-           REVIBE '26
-           ===================================================== */
-
-        .mobile-web-nav {
-          display: block;
-
+        .mobile-pill-nav {
+          display: flex;
+          justify-content: center;
           width: 100%;
           max-width: 100%;
-
           margin: 0;
-
-          padding:
-            0.38rem
-            0.15rem;
-
-          background:
-            linear-gradient(
-              180deg,
-              rgba(12, 0, 0, 0.98),
-              rgba(5, 5, 5, 0.98)
-            );
-
-          border-top:
-            1px solid rgba(220, 0, 0, 0.32);
-
-          border-bottom:
-            1px solid rgba(220, 0, 0, 0.32);
-
+          padding: 0;
+          background: transparent;
           box-sizing: border-box;
-
           overflow: hidden;
         }
 
-
-        /* =====================================================
-           SINGLE ROW
-           ===================================================== */
-
-        .mobile-navigation-row {
-          width: 100%;
-
-          display: flex;
-
-          align-items: center;
-
-          justify-content: center;
-
-          flex-wrap: nowrap;
-
-          min-width: 0;
-
-          margin: 0;
-          padding: 0;
-
-          white-space: nowrap;
-
-          box-sizing: border-box;
-        }
-
-
-        /* =====================================================
-           NAV ITEM
-           ===================================================== */
-
-        .mobile-navigation-item {
-          display: flex;
-
-          align-items: center;
-
-          justify-content: center;
-
-          min-width: 0;
-
-          flex: 1 1 auto;
-        }
-
-
-        /* =====================================================
-           NAV LINK
-           ===================================================== */
-
-        .mobile-nav-link {
+        .mobile-pill-inner {
           display: inline-flex;
-
-          align-items: center;
-
+          align-items: stretch;
           justify-content: center;
+          gap: 0;
+          flex-wrap: nowrap;
+          width: max-content;
+          max-width: 100%;
+          margin: 0 auto;
+          padding: 0.2rem;
 
-          width: auto;
+          background: rgba(245, 245, 245, 0.94);
+          border: 1px solid rgba(220, 0, 0, 0.35);
+          border-radius: 999px;
 
-          min-width: 0;
+          box-shadow:
+            0 2px 10px rgba(0, 0, 0, 0.12),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+        }
 
-          min-height: 2rem;
+        .mobile-pill-item {
+          display: inline-flex;
+          align-items: stretch;
+          flex: 0 0 auto;
+        }
 
-          padding:
-            0.3rem
-            0.42rem;
+        .mobile-pill-link {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0.3rem 0.5rem;
+          min-height: 1.9rem;
 
-          color: #f4f4f5;
+          border-radius: 999px;
 
-          background:
-            rgba(15, 15, 15, 0.78);
+          color: #1a1a1a;
+          background: transparent;
+          border: 1px solid transparent;
 
-          border:
-            1px solid transparent;
-
-          text-decoration: none;
-
-          white-space: nowrap;
-
-          font-family:
-            "Orbitron",
-            sans-serif;
-
-          font-size: 0.56rem;
-
-          font-weight: 700;
-
-          letter-spacing: 0.035em;
-
+          font-family: "Bebas Neue", sans-serif;
+          font-size: 0.62rem;
+          letter-spacing: 0.05em;
           text-transform: uppercase;
 
-          box-sizing: border-box;
+          white-space: nowrap;
+          text-decoration: none;
 
           transition:
             color 0.2s ease,
             background 0.2s ease,
-            border-color 0.2s ease,
             box-shadow 0.2s ease;
         }
 
-
-        /* =====================================================
-           HOVER
-           ===================================================== */
-
-        .mobile-nav-link:hover {
-          color: #ffffff;
-
-          background:
-            rgba(80, 0, 0, 0.42);
-
-          border-color:
-            rgba(220, 0, 0, 0.6);
-
-          box-shadow:
-            0 0 8px rgba(220, 0, 0, 0.16);
+        .mobile-pill-link:hover,
+        .mobile-pill-link:focus-visible {
+          color: #dc0000;
+          background: rgba(220, 0, 0, 0.08);
         }
 
-
-        /* =====================================================
-           ACTIVE
-           ===================================================== */
-
-        .mobile-nav-link.active,
-        .mobile-nav-link[aria-current="page"] {
+        .mobile-pill-link.is-active {
           color: #ffffff;
-
-          background:
-            linear-gradient(
-              135deg,
-              rgba(105, 0, 0, 0.5),
-              rgba(45, 0, 0, 0.35)
-            );
-
-          border-color:
-            #dc0000;
-
-          box-shadow:
-            0 0 10px rgba(220, 0, 0, 0.22),
-            inset 0 0 8px rgba(220, 0, 0, 0.08);
+          background: #dc0000;
+          box-shadow: 0 0 10px rgba(220, 0, 0, 0.45);
         }
 
-
-        /* =====================================================
-           WEB SEPARATOR (spider-web thread connector)
-           Two strands converge into a glowing node, mirroring
-           the desktop nav's web-line-and-node visual language.
-           ===================================================== */
-
-        .mobile-nav-separator {
-          display: inline-flex;
-
-          align-items: center;
-
-          justify-content: center;
-
-          width: 1.15rem;
-          height: 1rem;
-
-          margin: 0 0.02rem;
-
+        .mobile-pill-divider {
+          align-self: center;
+          width: 1px;
+          height: 0.95rem;
+          margin: 0 0.05rem;
+          background: rgba(220, 0, 0, 0.28);
           flex-shrink: 0;
         }
 
-        .mobile-nav-separator svg {
-          width: 100%;
-          height: 100%;
-
-          overflow: visible;
-        }
-
-        .mobile-nav-separator .web-strand {
-          fill: none;
-
-          stroke: rgba(220, 0, 0, 0.75);
-
-          stroke-width: 1;
-
-          stroke-linecap: round;
-        }
-
-        .mobile-nav-separator .web-node-dot {
-          fill: #ef1b1b;
-
-          filter:
-            drop-shadow(0 0 4px rgba(239, 27, 27, 0.85));
-        }
-
-
-        /* =====================================================
-           500px+
-           ===================================================== */
-
         @media (min-width: 500px) and (max-width: 899px) {
-
-          .mobile-web-nav {
-            padding:
-              0.45rem
-              0.35rem;
+          .mobile-pill-link {
+            min-height: 2.1rem;
+            padding: 0.34rem 0.7rem;
+            font-size: 0.72rem;
+            letter-spacing: 0.055em;
           }
 
-          .mobile-nav-link {
-            min-height: 2.15rem;
-
-            padding:
-              0.34rem
-              0.58rem;
-
-            font-size: 0.62rem;
-
-            letter-spacing: 0.045em;
-          }
-
-          .mobile-nav-separator {
-            width: 1.5rem;
-            height: 1.15rem;
+          .mobile-pill-divider {
+            height: 1.1rem;
           }
         }
-
-
-        /* =====================================================
-           SMALL PHONES
-           ===================================================== */
 
         @media (max-width: 390px) {
-
-          .mobile-web-nav {
-            padding:
-              0.35rem
-              0.08rem;
+          .mobile-pill-link {
+            min-height: 1.8rem;
+            padding: 0.26rem 0.4rem;
+            font-size: 0.56rem;
+            letter-spacing: 0.03em;
           }
 
-          .mobile-nav-link {
-            min-height: 1.9rem;
-
-            padding:
-              0.27rem
-              0.3rem;
-
-            font-size: 0.49rem;
-
-            letter-spacing: 0.018em;
-          }
-
-          .mobile-nav-separator {
-            width: 0.9rem;
+          .mobile-pill-divider {
             height: 0.85rem;
-
-            margin: 0 0.01rem;
           }
         }
 
-
-        /* =====================================================
-           VERY SMALL PHONES
-           ===================================================== */
-
         @media (max-width: 340px) {
-
-          .mobile-web-nav {
-            padding:
-              0.3rem
-              0;
+          .mobile-pill-link {
+            min-height: 1.7rem;
+            padding: 0.24rem 0.32rem;
+            font-size: 0.52rem;
           }
 
-          .mobile-nav-link {
-            min-height: 1.8rem;
-
-            padding:
-              0.24rem
-              0.22rem;
-
-            font-size: 0.44rem;
-
-            letter-spacing: 0.005em;
-          }
-
-          .mobile-nav-separator {
-            width: 0.7rem;
+          .mobile-pill-divider {
             height: 0.75rem;
           }
         }
 
-
-        /* =====================================================
-           DESKTOP
-           ===================================================== */
-
         @media (min-width: 900px) {
-
-          .mobile-web-nav {
+          .mobile-pill-nav {
             display: none !important;
           }
         }
-
       `}</style>
     </>
   );

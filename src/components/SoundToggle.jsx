@@ -1,34 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import spideyIcon from "../assets/logos/song-spidey.svg";
 
-const AUDIO_SRC = "/audio/avengers_endgame.mp3";
-
-function SpeakerOnIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M4 9v6h4l5 4V5L8 9H4Z" fill="currentColor" />
-      <path
-        d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function SpeakerOffIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M4 9v6h4l5 4V5L8 9H4Z" fill="currentColor" />
-      <path
-        d="M16 9.5 20.5 14M20.5 9.5 16 14"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
+const AUDIO_SRC = "/audio/the-amazing-spider-man-2---theme.mp3";
 
 export default function SoundToggle() {
   const audioRef = useRef(null);
@@ -120,7 +93,12 @@ export default function SoundToggle() {
         aria-label={isPlaying ? "Mute background music" : "Play background music"}
         aria-pressed={isPlaying}
       >
-        {isPlaying ? <SpeakerOnIcon /> : <SpeakerOffIcon />}
+        <img
+          src={spideyIcon}
+          alt=""
+          className={"sound-toggle-icon" + (isPlaying ? " is-playing" : " is-muted")}
+          aria-hidden="true"
+        />
       </button>
 
       <style>{`
@@ -138,14 +116,14 @@ export default function SoundToggle() {
           height: 46px;
           border-radius: 50%;
 
-          border: 1px solid rgba(245, 197, 66, 0.9);
-          background: var(--gold);
+          border: 1px solid rgba(220, 0, 0, 0.9);
+          background: var(--red);
 
           color: var(--bg);
           cursor: pointer;
 
           box-shadow:
-            0 0 16px rgba(245, 197, 66, 0.35);
+            0 0 16px rgba(220, 0, 0, 0.35);
 
           transition:
             background 0.2s ease,
@@ -158,18 +136,45 @@ export default function SoundToggle() {
           height: 20px;
         }
 
+        .sound-toggle-icon {
+          width: 30px;
+          height: 30px;
+          object-fit: contain;
+          border-radius: 50%;
+          transition:
+            opacity 0.2s ease,
+            filter 0.2s ease;
+        }
+
+        .sound-toggle-icon.is-muted {
+          opacity: 0.45;
+          filter: grayscale(0.8);
+          animation: none;
+        }
+
+        .sound-toggle-icon.is-playing {
+          opacity: 1;
+          filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6));
+          animation: sound-spin 3s linear infinite;
+        }
+
+        @keyframes sound-spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
         .sound-toggle:hover,
         .sound-toggle:focus-visible {
-          background: #ffd76a;
+          background: #ff1a1a;
 
           box-shadow:
-            0 0 22px rgba(245, 197, 66, 0.55);
+            0 0 22px rgba(220, 0, 0, 0.55);
 
           transform: translateY(-1px);
         }
 
         .sound-toggle[aria-pressed="false"] {
-          background: rgba(245, 197, 66, 0.75);
+          background: rgba(220, 0, 0, 0.75);
         }
 
         @media (max-width: 899px) {
@@ -192,11 +197,20 @@ export default function SoundToggle() {
             width: 18px;
             height: 18px;
           }
+
+          .sound-toggle-icon {
+            width: 26px;
+            height: 26px;
+          }
         }
 
         @media (prefers-reduced-motion: reduce) {
           .sound-toggle {
             transition: none;
+          }
+
+          .sound-toggle-icon.is-playing {
+            animation: none;
           }
         }
       `}</style>
