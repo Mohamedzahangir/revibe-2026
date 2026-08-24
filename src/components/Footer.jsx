@@ -12,19 +12,17 @@ const quickLinks = [
   { label: "Register", to: "/register" },
 ];
 
-// TODO: replace with confirmed real values before launch.
 const contactDetails = [
-  { key: "email", label: "To be announced", href: null },
-  { key: "phone", label: "To be announced", href: null },
-  { key: "venue", label: "CAHCET", href: "/location" },
+  { key: "email", label: "contact@teamsgc.in", href: "mailto:contact@teamsgc.in" },
+  { key: "phone", label: "+91 99439 46886", href: "tel:+919943946886" },
+  { key: "venue", label: "CAHCET Auditorium", href: "/location" },
 ];
 
-// TODO: replace href="#" with confirmed social URLs before launch.
 const connectLinks = [
-  { key: "website", label: "Website", href: "#" },
-  { key: "instagram", label: "Instagram", href: "#" },
-  { key: "linkedin", label: "LinkedIn", href: "#" },
-  { key: "github", label: "GitHub", href: "#" },
+  { key: "website", label: "Website", href: "https://teamsgc.in/" },
+  { key: "instagram", label: "Instagram", href: "https://www.instagram.com/studentsguidancecell" },
+  { key: "linkedin", label: "LinkedIn", href: "https://www.linkedin.com/in/studentguidancecell-cahcet/" },
+  { key: "github", label: "GitHub", href: "https://github.com/sgc-cahcet/" },
 ];
 
 function IconMail() {
@@ -164,10 +162,10 @@ export default function Footer() {
                         {item.key === "phone" && <IconPhone />}
                         {item.key === "venue" && <IconPin />}
                       </span>
-                      {item.href ? (
+                      {item.key === "venue" ? (
                         <Link to={item.href}>{item.label}</Link>
                       ) : (
-                        <span>{item.label}</span>
+                        <a href={item.href}>{item.label}</a>
                       )}
                     </li>
                   ))}
@@ -183,6 +181,8 @@ export default function Footer() {
                       <a
                         key={item.key}
                         href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="sgc-footer-social-link"
                         aria-label={item.label}
                       >

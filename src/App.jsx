@@ -13,6 +13,8 @@ import Location from "./pages/Location";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Confirmation from "./pages/Confirmation";
+import CoordinatorDashboard from "./pages/CoordinatorDashboard";
+
 
 function App() {
   return (
@@ -36,6 +38,7 @@ function App() {
               path="/confirmation/:registrationNumber"
               element={<Confirmation />}
             />
+            <Route path="/coordinator" element={<CoordinatorDashboard />} />
           </Routes>
         </main>
 
