@@ -204,7 +204,7 @@ export default function CampusMap({ onReload }) {
   return (
     <div className="trk">
       {/* ═══ CHARACTER (overlaps bottom-left) ═══ */}
-      <img src="public/spider-man-4-logo-transparent-white-eyes.svg" alt="" className="trk__character" />
+      <img src="/spider-man-4-logo-transparent-white-eyes.svg" alt="" className="trk__character" />
 
       {/* ═══ MAIN FRAME ═══ */}
       <div className="trk__frame">
@@ -215,11 +215,11 @@ export default function CampusMap({ onReload }) {
           </button>
 
           <div>
-            <img src="public/clg tracker.png" alt="" className="trk__title-box" />
+            <img src="/clg tracker.png" alt="" className="trk__title-box" />
           </div>
 
           <div className="trk__logo-btn">
-            <img src="public/spider-svgrepo-com.svg" alt="" className="trk__logo-icon" />
+            <img src="/spider-svgrepo-com.svg" alt="" className="trk__logo-icon" />
           </div>
         </div>
 
@@ -264,7 +264,6 @@ export default function CampusMap({ onReload }) {
           <div className="trk__bracket trk__bracket--bl" />
           <div className="trk__bracket trk__bracket--br" />
 
-          <img src="/spider-web-corner.svg" alt="" className="trk__web-corner" />
           <div className="trk__zoom-lbl">{Math.round(zoom * 100)}%</div>
 
           <MapInfoCard location={activeMarker} onClose={() => setActiveMarker(null)} />
@@ -399,17 +398,17 @@ export default function CampusMap({ onReload }) {
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 52px;
-          height: 52px;
+          width: 28px;
+          height: 28px;
           background: #0a1628;
-          border: 3px solid #2a8fb5;
-          border-radius: 8px;
+          border: 2px solid #2a8fb5;
+          border-radius: 50%;
           flex-shrink: 0;
         }
 
         .trk__logo-icon {
-          width: 30px;
-          height: 30px;
+          width: 20px;
+          height: 20px;
           object-fit: contain;
         }
 
@@ -478,18 +477,6 @@ export default function CampusMap({ onReload }) {
         .trk__bracket--br { bottom: 8px; right: 8px; }
         .trk__bracket--br::before { bottom: 0; right: 0; width: 18px; height: 2px; }
         .trk__bracket--br::after { bottom: 0; right: 0; width: 2px; height: 18px; }
-
-        .trk__web-corner {
-          position: absolute;
-          bottom: 8px;
-          right: 8px;
-          width: 90px;
-          height: 90px;
-          object-fit: contain;
-          opacity: 0.45;
-          pointer-events: none;
-          z-index: 8;
-        }
 
         .trk__zoom-lbl {
           position: absolute;
@@ -573,7 +560,7 @@ export default function CampusMap({ onReload }) {
 
         .trk__character {
           position: absolute;
-          bottom: 0;
+          bottom: 20px;
           left: 0;
           width: 50px;
           height: 68px;
@@ -625,14 +612,14 @@ export default function CampusMap({ onReload }) {
 
           .trk__topbar { padding: 6px 8px; }
 
-          .trk__menu-btn,
-          .trk__logo-btn {
+          .trk__menu-btn {
             width: 40px;
             height: 40px;
           }
 
           .trk__menu-icon { width: 22px; height: 22px; }
-          .trk__logo-icon { width: 24px; height: 24px; }
+          .trk__logo-btn { width: 24px; height: 24px; }
+          .trk__logo-icon { width: 18px; height: 18px; }
 
           .trk__title-box {
             padding: 5px 14px;
@@ -643,14 +630,6 @@ export default function CampusMap({ onReload }) {
           .trk__title-text { font-size: 12px; }
 
           .trk__bracket { display: none; }
-
-          .trk__web-corner {
-            width: 55px;
-            height: 55px;
-            bottom: 6px;
-            right: 6px;
-            opacity: 0.3;
-          }
 
           .trk__zoom-lbl {
             font-size: 8px;
@@ -665,18 +644,18 @@ export default function CampusMap({ onReload }) {
           .trk__reload-btn { width: 34px; height: 34px; }
           .trk__reload-btn svg { width: 18px; height: 18px; }
 
-          .trk__character { width: 36px; height: 50px; }
+          .trk__character { width: 36px; height: 50px; bottom: 16px; }
           .trk__action-btn { font-size: 10px; padding: 6px 8px; }
         }
 
         @media (max-width: 430px) {
-          .trk__menu-btn,
-          .trk__logo-btn { width: 34px; height: 34px; border-width: 2px; }
+          .trk__menu-btn { width: 34px; height: 34px; border-width: 2px; }
+          .trk__logo-btn { width: 22px; height: 22px; border-width: 2px; }
           .trk__menu-icon { width: 18px; height: 18px; }
           .trk__title-box { padding: 4px 10px; gap: 4px; border-width: 2px; }
           .trk__title-spider { width: 20px; height: 20px; }
           .trk__title-text { font-size: 10px; }
-          .trk__character { width: 30px; height: 42px; }
+          .trk__character { width: 30px; height: 42px; bottom: 14px; }
         }
 
         @media (prefers-reduced-motion: reduce) {
