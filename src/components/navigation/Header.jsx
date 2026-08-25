@@ -262,7 +262,7 @@ export default function Header() {
           .header-inner {
             padding:
               0.4rem
-              0;
+              0.25rem;
           }
 
           /* Hide SGC brand entirely on mobile */
@@ -284,9 +284,10 @@ export default function Header() {
 
           .mobile-header-navigation {
             display: flex;
-            justify-content: center;
+            justify-content: stretch;
 
             flex: 1 1 auto;
+            width: 100%;
             min-width: 0;
 
             padding-bottom: 0.4rem;

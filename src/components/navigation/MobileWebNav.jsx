@@ -38,7 +38,7 @@ export default function MobileWebNav() {
       <style>{`
         .mobile-pill-nav {
           display: flex;
-          justify-content: center;
+          justify-content: stretch;
           width: 100%;
           max-width: 100%;
           margin: 0;
@@ -49,15 +49,15 @@ export default function MobileWebNav() {
         }
 
         .mobile-pill-inner {
-          display: inline-flex;
+          display: flex;
           align-items: stretch;
-          justify-content: center;
+          justify-content: space-between;
           gap: 0;
           flex-wrap: nowrap;
-          width: max-content;
+          width: 100%;
           max-width: 100%;
-          margin: 0 auto;
-          padding: 0.2rem;
+          margin: 0;
+          padding: 0.2rem 0.25rem;
 
           background: rgba(245, 245, 245, 0.94);
           border: 1px solid rgba(220, 0, 0, 0.35);
@@ -71,14 +71,16 @@ export default function MobileWebNav() {
         .mobile-pill-item {
           display: inline-flex;
           align-items: stretch;
-          flex: 0 0 auto;
+          flex: 1 1 0;
+          min-width: 0;
         }
 
         .mobile-pill-link {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          padding: 0.3rem 0.5rem;
+          width: 100%;
+          padding: 0.3rem 0.4rem;
           min-height: 1.9rem;
 
           border-radius: 999px;

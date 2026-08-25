@@ -5,7 +5,7 @@ const AUDIO_SRC = "/audio/the-amazing-spider-man-2---theme.mp3";
 
 export default function SoundToggle() {
   const audioRef = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
 
   useEffect(() => {
     const audio = audioRef.current;

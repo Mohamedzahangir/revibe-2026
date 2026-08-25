@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import SpiderWeb from "../components/navigation/SpiderWeb";
 
 const galleryItems = [1, 2, 3, 4];
 
@@ -64,13 +65,18 @@ export default function About() {
               finalized.
             </p>
 
-            <div className="ws-gallery" aria-label="Gallery placeholder">
-              {galleryItems.map((item) => (
-                <div key={item} className="ws-card ws-gallery-card">
-                  <span className="ws-card-tag">Slot {String(item).padStart(2, "0")}</span>
-                  <span className="ws-gallery-note">Gallery images will be added.</span>
-                </div>
-              ))}
+            <div className="ws-gallery-wrap" aria-label="Gallery placeholder">
+              <SpiderWeb className="ws-gallery-web ws-gallery-web--center" />
+              <SpiderWeb className="ws-gallery-web ws-gallery-web--tl" />
+              <SpiderWeb className="ws-gallery-web ws-gallery-web--br" />
+              <div className="ws-gallery">
+                {galleryItems.map((item) => (
+                  <div key={item} className="ws-card ws-gallery-card">
+                    <span className="ws-card-tag">Slot {String(item).padStart(2, "0")}</span>
+                    <span className="ws-gallery-note">Gallery images will be added.</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -392,14 +398,52 @@ export default function About() {
 
         /* ---------- gallery ---------- */
 
-        .ws-gallery {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 16px;
+        .ws-gallery-wrap {
+          position: relative;
           margin-top: 32px;
         }
 
+        .ws-gallery-web {
+          position: absolute;
+          z-index: 3;
+          pointer-events: none;
+          opacity: 0.5;
+        }
+
+        .ws-gallery-web--center {
+          top: 50%;
+          left: 50%;
+          width: 260px;
+          height: 260px;
+          transform: translate(-50%, -50%);
+          opacity: 0.3;
+        }
+
+        .ws-gallery-web--tl {
+          top: -40px;
+          left: -40px;
+          width: 120px;
+          height: 120px;
+        }
+
+        .ws-gallery-web--br {
+          bottom: -40px;
+          right: -40px;
+          width: 120px;
+          height: 120px;
+          transform: rotate(180deg);
+        }
+
+        .ws-gallery {
+          position: relative;
+          z-index: 2;
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 16px;
+        }
+
         .ws-gallery-card {
+          position: relative;
           display: flex;
           flex-direction: column;
           align-items: flex-start;
@@ -407,25 +451,57 @@ export default function About() {
           gap: 12px;
           min-height: 160px;
           padding: 16px;
-          background: #f3f3f3;
+          border: 1px solid rgba(220, 0, 0, 0.35);
+          border-radius: 16px;
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
+          box-shadow:
+            0 10px 30px rgba(0, 0, 0, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+          overflow: hidden;
+          transition: box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .ws-gallery-card::after {
+          content: "";
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 3px;
+          background: linear-gradient(90deg, transparent, rgba(220, 0, 0, 0.5), transparent);
+        }
+
+        .ws-gallery-card:hover,
+        .ws-gallery-card:focus-within {
+          transform: translateY(-3px);
+          box-shadow:
+            0 14px 34px rgba(0, 0, 0, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
         }
 
         .ws-card-tag {
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 0.14em;
+          position: relative;
+          z-index: 1;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 0.8rem;
+          font-weight: 400;
+          letter-spacing: 0.1em;
           text-transform: uppercase;
-          color: #ffffff;
-          background: #1a1a1a;
-          padding: 4px 8px;
-          border-radius: 0;
+          color: #0d0d0d;
+          background: linear-gradient(135deg, rgba(255,255,255,0.7), rgba(220, 0, 0, 0.06));
+          border: 1px solid rgba(220, 0, 0, 0.45);
+          border-radius: 8px;
+          padding: 0.45rem 0.8rem;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .ws-gallery-note {
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 12px;
+          position: relative;
+          z-index: 1;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 0.78rem;
+          letter-spacing: 0.08em;
           color: #5b403f;
+          text-transform: uppercase;
         }
 
         /* ---------- list (1px black separators, red square bullets) ---------- */
@@ -473,6 +549,17 @@ export default function About() {
             grid-template-columns: repeat(3, minmax(0, 1fr));
           }
 
+          .ws-gallery-web--center {
+            width: 320px;
+            height: 320px;
+          }
+
+          .ws-gallery-web--tl,
+          .ws-gallery-web--br {
+            width: 150px;
+            height: 150px;
+          }
+
           .ws-list li {
             padding-inline: 20px 20px 20px 40px;
           }
@@ -502,6 +589,17 @@ export default function About() {
           .ws-gallery {
             grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 24px;
+          }
+
+          .ws-gallery-web--center {
+            width: 380px;
+            height: 380px;
+          }
+
+          .ws-gallery-web--tl,
+          .ws-gallery-web--br {
+            width: 180px;
+            height: 180px;
           }
 
           .ws-gallery-card {
