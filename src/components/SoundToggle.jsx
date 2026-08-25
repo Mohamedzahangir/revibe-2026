@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import spideyIcon from "../assets/logos/song-spidey.svg";
+import spidermanVideo from "../assets/videos/spiderman.webp";
 
 const AUDIO_SRC = "/audio/the-amazing-spider-man-2---theme.mp3";
 
@@ -86,27 +87,42 @@ export default function SoundToggle() {
     <>
       <audio ref={audioRef} src={AUDIO_SRC} loop preload="auto" />
 
-      <button
-        type="button"
-        className="sound-toggle"
-        onClick={toggleSound}
-        aria-label={isPlaying ? "Mute background music" : "Play background music"}
-        aria-pressed={isPlaying}
-      >
+      <div className="sound-toggle-wrap">
+        <button
+          type="button"
+          className="sound-toggle"
+          onClick={toggleSound}
+          aria-label={isPlaying ? "Mute background music" : "Play background music"}
+          aria-pressed={isPlaying}
+        >
+          <img
+            src={spideyIcon}
+            alt=""
+            className={"sound-toggle-icon" + (isPlaying ? " is-playing" : " is-muted")}
+            aria-hidden="true"
+          />
+        </button>
+
         <img
-          src={spideyIcon}
+          src={spidermanVideo}
           alt=""
-          className={"sound-toggle-icon" + (isPlaying ? " is-playing" : " is-muted")}
+          className="sound-spiderman-video"
           aria-hidden="true"
         />
-      </button>
+      </div>
 
       <style>{`
-        .sound-toggle {
+        .sound-toggle-wrap {
           position: fixed;
           top: 13px;
           right: 1.25rem;
           z-index: 30;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .sound-toggle {
 
           display: flex;
           align-items: center;
@@ -178,17 +194,19 @@ export default function SoundToggle() {
         }
 
         @media (max-width: 899px) {
-          .sound-toggle {
+          .sound-toggle-wrap {
             top: 54px;
             right: 0.8rem;
           }
         }
 
         @media (max-width: 430px) {
-          .sound-toggle {
+          .sound-toggle-wrap {
             top: 52px;
             right: 0.7rem;
+          }
 
+          .sound-toggle {
             width: 42px;
             height: 42px;
           }
@@ -205,9 +223,31 @@ export default function SoundToggle() {
         }
 
         @media (max-width: 340px) {
-          .sound-toggle {
+          .sound-toggle-wrap {
             top: 48px;
             right: 0.6rem;
+          }
+        }
+
+        .sound-spiderman-video {
+          width: 100px;
+          height: 100px;
+          object-fit: contain;
+          margin-top: 4px;
+          pointer-events: none;
+        }
+
+        @media (max-width: 899px) {
+          .sound-spiderman-video {
+            width: 56px;
+            height: 56px;
+          }
+        }
+
+        @media (max-width: 430px) {
+          .sound-spiderman-video {
+            width: 50px;
+            height: 50px;
           }
         }
 
