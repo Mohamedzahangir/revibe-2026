@@ -89,7 +89,7 @@ export default function Location() {
           flex: 1;
           display: flex;
           align-items: stretch;
-          padding: 12px 0 20px;
+          padding: 0;
           min-height: 0;
           background: #f5f5f5;
           position: relative;
@@ -117,8 +117,6 @@ export default function Location() {
           position: relative;
           flex: 1;
           min-height: 0;
-          padding-left: 50px;
-          padding-bottom: 56px;
         }
 
         .ws-label {
@@ -191,8 +189,8 @@ export default function Location() {
         @media (max-width: 430px) {
           .ws-hero { padding: 24px 0 12px; }
           .ws-section { padding: 14px 0; }
-          .ws-section--map { padding: 8px 0 14px; }
-          .loc-map-wrap { padding-left: 38px; padding-bottom: 50px; }
+          .ws-section--map { padding: 0; }
+          .loc-map-wrap { padding: 0; }
           .loc-web--tl { width: 90px; height: 90px; }
           .loc-web--br { width: 80px; height: 80px; }
         }
