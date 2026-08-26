@@ -9,7 +9,13 @@ export default function MapInfoCard({ location, onClose }) {
         <button type="button" className="cminfo__close" onClick={onClose} aria-label="Close">&#10005;</button>
       </div>
       <p className="cminfo__desc">{location.desc}</p>
-      {location.tag && <span className="cminfo__tag">{location.tag}</span>}
+      {location.tag && (
+        <div className="cminfo__tags">
+          {location.tag.split(",").map((t, i) => (
+            <span key={i} className="cminfo__tag">{t.trim()}</span>
+          ))}
+        </div>
+      )}
 
       <style>{`
         .cminfo {
@@ -82,6 +88,12 @@ export default function MapInfoCard({ location, onClose }) {
           font-size: 12px;
           line-height: 17px;
           color: rgba(255,255,255,0.55);
+        }
+
+        .cminfo__tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
         }
 
         .cminfo__tag {
