@@ -1,10 +1,21 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import SpiderWeb from "../components/navigation/SpiderWeb";
 import CampusMap from "../components/location/CampusMap";
+
+const INSTRUCTIONS = [
+  "Scroll on the corners for page scroll",
+  "Zoom the map to access",
+];
 
 export default function Location() {
   const [mapKey, setMapKey] = useState(0);
   const handleReload = useCallback(() => setMapKey((k) => k + 1), []);
+  const [instrIdx, setInstrIdx] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setInstrIdx((i) => (i + 1) % INSTRUCTIONS.length), 3000);
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <>
@@ -19,6 +30,9 @@ export default function Location() {
             </h1>
             <p className="ws-accent-line">
               Your battleground is on!
+            </p>
+            <p className="ws-instruction" key={instrIdx}>
+              {INSTRUCTIONS[instrIdx]}
             </p>
           </div>
         </section>
@@ -151,6 +165,10 @@ export default function Location() {
           color: #dc0000;
         }
 
+        .ws-instruction {
+          display: none;
+        }
+
         .loc-web {
           position: absolute;
           pointer-events: none;
@@ -194,6 +212,38 @@ export default function Location() {
           .loc-map-wrap { padding: 0; }
           .loc-web--tl { width: 90px; height: 90px; }
           .loc-web--br { width: 80px; height: 80px; }
+
+          .ws-instruction {
+            display: block;
+            text-aligment:center;
+            margin: 10px 0 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(6, 7, 7, 1);
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid rgba(26, 26, 26, 0.4);
+            width: 0;
+            animation:
+              type-in 1s steps(10) forwards,
+              blink 0.8s step-end infinite,
+              type-out 2.5s 2.5s steps(30) forwards;
+          }
+
+          @keyframes type-in {
+            to { width: 100%; }
+          }
+
+          @keyframes type-out {
+            from { width: 100%; }
+            to { width: 0; }
+          }
+
+          @keyframes blink {
+            50% { border-color: transparent; }
+          }
         }
       `}</style>
     </>
