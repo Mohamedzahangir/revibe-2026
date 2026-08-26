@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router-dom";
+import SpiderWeb from "../components/navigation/SpiderWeb";
 
 const eventCatalog = [
   {
@@ -146,292 +147,381 @@ export default function EventDetails() {
     coordinator: "To be announced.",
   };
 
+  const isTech = event.category === "Technical";
+
   return (
     <>
-      <main className="theme-page event-details-page">
-        <section className="content-panel">
-          <div className="page-shell detail-shell">
-            <div className="detail-header">
-              <p className="eyebrow accent">Event details</p>
-              <h1 className="section-title">{event.name}</h1>
-              <span className="detail-badge">{event.category}</span>
+      <main className="ed-page">
+        <section className="ed-hero">
+          <SpiderWeb className="ed-web ed-web--tl" />
+          <SpiderWeb className="ed-web ed-web--br" />
+          <div className="ed-shell">
+            <Link to="/events" className="ed-back">
+              <span className="ed-back-arrow">←</span> All Events
+            </Link>
+            <div className="ed-hero-copy">
+              <span className={`ed-cat${isTech ? " ed-cat--tech" : " ed-cat--non"}`}>
+                {event.category}
+              </span>
+              <h1 className="ed-title">{event.name}</h1>
             </div>
+          </div>
+        </section>
 
-            <div className="detail-grid">
-              <article className="detail-card">
-                <h2>Description</h2>
-                <p>{event.description}</p>
+        <section className="ed-body">
+          <div className="ed-shell">
+            <div className="ed-grid">
+              <article className="ed-card">
+                <h2 className="ed-card-heading">About this event</h2>
+                <p className="ed-card-text">{event.description}</p>
               </article>
 
-              <article className="detail-card">
-                <h2>Information</h2>
-                <ul className="meta-list">
-                  <li><span>Rules</span><strong>{event.rules}</strong></li>
-                  <li><span>Team size</span><strong>{event.teamSize}</strong></li>
-                  <li><span>Registration fee</span><strong>{event.registrationFee}</strong></li>
-                  <li><span>Coordinator</span><strong>{event.coordinator}</strong></li>
+              <article className="ed-card">
+                <h2 className="ed-card-heading">Details</h2>
+                <ul className="ed-meta">
+                  <li className="ed-meta-item">
+                    <span className="ed-meta-label">Rules</span>
+                    <span className="ed-meta-value">{event.rules}</span>
+                  </li>
+                  <li className="ed-meta-item">
+                    <span className="ed-meta-label">Team size</span>
+                    <span className="ed-meta-value">{event.teamSize}</span>
+                  </li>
+                  <li className="ed-meta-item">
+                    <span className="ed-meta-label">Registration fee</span>
+                    <span className="ed-meta-value">{event.registrationFee}</span>
+                  </li>
+                  <li className="ed-meta-item">
+                    <span className="ed-meta-label">Coordinator</span>
+                    <span className="ed-meta-value">{event.coordinator}</span>
+                  </li>
                 </ul>
               </article>
             </div>
 
-            <div className="detail-actions">
-              <Link to="/register" className="primary-btn">Register now</Link>
-              <Link to="/events" className="secondary-btn">Back to events</Link>
+            <div className="ed-actions">
+              <Link to="/register" className="ed-btn ed-btn--primary">
+                Register Now <span className="ed-btn-arrow">→</span>
+              </Link>
+              <Link to="/events" className="ed-btn ed-btn--secondary">
+                Back to Events
+              </Link>
             </div>
           </div>
         </section>
       </main>
 
       <style>{`
-        /* =========================================================
-           PAGE / PANEL SHELL (self-contained for EventDetails.jsx)
-        ========================================================= */
-
-        .theme-page {
+        .ed-page {
           width: 100%;
-          background: var(--bg);
-          color: var(--white);
+          background: #f5f5f5;
+          color: #1a1a1a;
           overflow-x: hidden;
         }
 
-        .content-panel {
-          width: 100%;
-          padding: 4rem 1.5rem;
-        }
-
-        .page-shell {
+        .ed-shell {
           width: 100%;
           max-width: 1100px;
           margin: 0 auto;
+          padding-inline: 16px;
+          box-sizing: border-box;
         }
 
-        .detail-shell {
-          max-width: 980px;
+        @media (min-width: 1024px) {
+          .ed-shell { padding-inline: 64px; }
         }
 
-        /* =========================================================
-           TEXT / LABELS
-        ========================================================= */
+        /* ═══ HERO ═══ */
 
-        .eyebrow {
-          margin: 0 0 0.6rem;
-          font-family: 'Orbitron', sans-serif;
-          font-size: 0.75rem;
-          font-weight: 700;
-          letter-spacing: 0.28em;
-          text-transform: uppercase;
+        .ed-hero {
+          position: relative;
+          padding: 4rem 0 2.5rem;
+          background: #f9f9f9;
+          overflow: hidden;
+          border-bottom: 2px solid #1a1a1a;
         }
 
-        .eyebrow.accent {
-          color: var(--gold);
+        .ed-hero-copy {
+          text-align: center;
+          position: relative;
+          z-index: 1;
         }
 
-        .section-title {
-          margin: 0 0 0.75rem;
-          font-family: 'Bangers', cursive;
-          font-size: clamp(1.9rem, 4vw, 2.75rem);
-          letter-spacing: 0.03em;
-          color: var(--white);
-          text-shadow: 0 0 18px var(--shadow);
-        }
-
-        .detail-header {
-          margin-bottom: 1.5rem;
-        }
-
-        .detail-badge {
+        .ed-back {
           display: inline-flex;
-          padding: 0.45rem 0.7rem;
-          border: 1px solid rgba(220, 0, 0, 0.5);
-          background: rgba(220, 0, 0, 0.05);
-          color: var(--gold);
-          font-family: 'Orbitron', sans-serif;
-          font-size: 0.68rem;
+          align-items: center;
+          gap: 0.4rem;
+          margin-bottom: 1.5rem;
+          font-family: 'Anton', sans-serif;
+          font-size: 0.95rem;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: #dc0000;
+          text-decoration: none;
+          position: relative;
+          z-index: 1;
+          transition: color 0.2s;
+        }
+
+        .ed-back:hover {
+          color: #0d0d0d;
+        }
+
+        .ed-back-arrow {
+          display: inline-block;
+          transition: transform 0.2s;
+        }
+
+        .ed-back:hover .ed-back-arrow {
+          transform: translateX(-4px);
+        }
+
+        .ed-cat {
+          display: inline-flex;
+          padding: 4px 12px;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10px;
+          font-weight: 700;
           letter-spacing: 0.12em;
           text-transform: uppercase;
+          margin-bottom: 0.8rem;
+          border-radius: 6px;
         }
 
-        /* =========================================================
-           DETAIL GRID / CARDS
-        ========================================================= */
+        .ed-cat--tech {
+          background: rgba(220, 0, 0, 0.08);
+          border: 1px solid rgba(220, 0, 0, 0.4);
+          color: #dc0000;
+        }
 
-        .detail-grid {
+        .ed-cat--non {
+          background: rgba(26, 26, 26, 0.06);
+          border: 1px solid rgba(26, 26, 26, 0.3);
+          color: #1a1a1a;
+        }
+
+        .ed-title {
+          margin: 0;
+          font-family: 'Anton', sans-serif;
+          font-weight: 400;
+          font-size: clamp(2rem, 6vw, 3.2rem);
+          line-height: 1;
+          letter-spacing: 0.04em;
+          color: #0d0d0d;
+          text-transform: uppercase;
+        }
+
+        .ed-web {
+          position: absolute;
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        .ed-web--tl {
+          top: -50px;
+          left: 16px;
+          width: 220px;
+          height: 220px;
+          opacity: 0.45;
+        }
+
+        .ed-web--br {
+          bottom: 0;
+          right: 0;
+          width: 160px;
+          height: 160px;
+          transform: rotate(180deg);
+          opacity: 0.3;
+        }
+
+        /* ═══ BODY / GRID ═══ */
+
+        .ed-body {
+          padding: 2.5rem 0 4rem;
+          background: #f5f5f5;
+        }
+
+        .ed-grid {
           display: grid;
           grid-template-columns: 1.1fr 0.9fr;
-          gap: 1.25rem;
+          gap: 24px;
         }
 
-        .detail-card {
+        /* ═══ GLASS CARD ═══ */
+
+        .ed-card {
+          position: relative;
+          padding: 24px;
           border: 1px solid rgba(220, 0, 0, 0.35);
-          background: rgba(255, 255, 255, 0.01);
-          padding: 1.2rem;
+          border-radius: 16px;
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
+          box-shadow:
+            0 10px 30px rgba(0, 0, 0, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+          overflow: hidden;
         }
 
-        .detail-card h2 {
-          margin: 0 0 0.75rem;
-          font-family: 'Orbitron', sans-serif;
-          font-size: 0.8rem;
-          letter-spacing: 0.12em;
+        .ed-card::after {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background: linear-gradient(90deg, transparent, rgba(220, 0, 0, 0.5), transparent);
+          pointer-events: none;
+        }
+
+        .ed-card-heading {
+          margin: 0 0 1rem;
+          font-family: 'Anton', sans-serif;
+          font-size: 1.15rem;
+          font-weight: 400;
+          letter-spacing: 0.08em;
           text-transform: uppercase;
-          color: var(--red);
+          color: #dc0000;
         }
 
-        .detail-card p {
+        .ed-card-text {
           margin: 0;
-          color: var(--soft-white);
+          font-family: 'Hanken Grotesk', sans-serif;
+          font-size: 1rem;
           line-height: 1.7;
+          color: #3a3a3a;
         }
 
-        .meta-list {
+        /* ═══ META LIST ═══ */
+
+        .ed-meta {
           list-style: none;
           margin: 0;
           padding: 0;
           display: grid;
-          gap: 0.9rem;
+          gap: 0;
         }
 
-        .meta-list li {
+        .ed-meta-item {
           display: grid;
           gap: 0.2rem;
-          padding-top: 0.75rem;
-          border-top: 1px solid rgba(220, 0, 0, 0.2);
+          padding: 0.85rem 0;
+          border-bottom: 1px solid rgba(26, 26, 26, 0.1);
         }
 
-        .meta-list li:first-child {
-          border-top: 0;
+        .ed-meta-item:first-child {
           padding-top: 0;
         }
 
-        .meta-list span {
-          color: var(--muted);
-          font-size: 0.7rem;
+        .ed-meta-item:last-child {
+          border-bottom: 0;
+          padding-bottom: 0;
+        }
+
+        .ed-meta-label {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10px;
+          font-weight: 700;
           letter-spacing: 0.12em;
           text-transform: uppercase;
-          font-family: 'Orbitron', sans-serif;
+          color: #6a6a6a;
         }
 
-        .meta-list strong {
-          color: var(--white);
+        .ed-meta-value {
+          font-family: 'Hanken Grotesk', sans-serif;
+          font-size: 1rem;
           font-weight: 600;
+          color: #1a1a1a;
         }
 
-        /* =========================================================
-           ACTIONS / BUTTONS
-        ========================================================= */
+        /* ═══ ACTIONS ═══ */
 
-        .detail-actions {
+        .ed-actions {
           display: flex;
           flex-wrap: wrap;
           gap: 1rem;
           margin-top: 2rem;
         }
 
-        .primary-btn,
-        .secondary-btn {
+        .ed-btn {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          min-height: 46px;
-          padding: 0.8rem 1.25rem;
-          border: 1px solid transparent;
-          font-family: 'Orbitron', sans-serif;
-          font-size: 0.72rem;
-          letter-spacing: 0.14em;
+          gap: 0.5rem;
+          min-height: 50px;
+          padding: 0.9rem 1.8rem;
+          border: 2px solid #1a1a1a;
+          border-radius: 999px;
+          font-family: 'Anton', sans-serif;
+          font-size: 1rem;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           text-decoration: none;
-          transition: transform 0.2s ease;
+          transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
         }
 
-        .primary-btn {
-          background: var(--red);
-          color: var(--white);
-          box-shadow: 0 0 18px rgba(220, 0, 0, 0.25);
+        .ed-btn--primary {
+          background: #dc0000;
+          color: #ffffff;
+          box-shadow: 0 8px 22px rgba(220, 0, 0, 0.3);
         }
 
-        .secondary-btn {
-          border-color: rgba(220, 0, 0, 0.7);
-          background: rgba(255, 255, 255, 0.01);
-          color: var(--white);
+        .ed-btn--primary:hover {
+          transform: translateY(-3px);
+          background: #0d0d0d;
+          color: #ffffff;
+          box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3);
         }
 
-        .primary-btn:hover,
-        .primary-btn:focus-visible,
-        .secondary-btn:hover,
-        .secondary-btn:focus-visible {
-          transform: translateY(-1px);
+        .ed-btn-arrow {
+          display: inline-block;
+          transition: transform 0.2s;
         }
 
-        /* =========================================================
-           RESPONSIVE — 1024px and below
-        ========================================================= */
+        .ed-btn--primary:hover .ed-btn-arrow {
+          transform: translateX(4px);
+        }
+
+        .ed-btn--secondary {
+          background: transparent;
+          color: #0d0d0d;
+        }
+
+        .ed-btn--secondary:hover {
+          transform: translateY(-3px);
+          background: #0d0d0d;
+          color: #ffffff;
+          box-shadow: 0 14px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        /* ═══ RESPONSIVE ═══ */
 
         @media (max-width: 1024px) {
-          .content-panel {
-            padding: 3.25rem 1.25rem;
-          }
+          .ed-hero { padding: 3.5rem 0 2rem; }
         }
-
-        /* =========================================================
-           RESPONSIVE — 768px and below (tablet)
-        ========================================================= */
 
         @media (max-width: 768px) {
-          .content-panel {
-            padding: 2.75rem 1.1rem;
-          }
-
-          .section-title {
-            font-size: clamp(1.6rem, 5vw, 2.1rem);
-          }
-
-          .detail-grid {
-            grid-template-columns: 1fr;
-          }
+          .ed-hero { padding: 3rem 0 1.5rem; }
+          .ed-title { font-size: clamp(1.8rem, 7vw, 2.5rem); }
+          .ed-grid { grid-template-columns: 1fr; }
+          .ed-body { padding: 2rem 0 3rem; }
         }
-
-        /* =========================================================
-           RESPONSIVE — 430px and below (phones)
-        ========================================================= */
 
         @media (max-width: 430px) {
-          .content-panel {
-            padding: 2.25rem 0.9rem;
-          }
-
-          .eyebrow {
-            font-size: 0.68rem;
-            letter-spacing: 0.22em;
-          }
-
-          .detail-card {
-            padding: 1rem;
-          }
-
-          .detail-actions {
-            flex-direction: column;
-          }
-
-          .primary-btn,
-          .secondary-btn {
-            width: 100%;
-          }
-        }
-
-        /* =========================================================
-           RESPONSIVE — 320px (smallest supported)
-        ========================================================= */
-
-        @media (max-width: 320px) {
-          .detail-badge {
-            font-size: 0.6rem;
-          }
+          .ed-hero { padding: 2.5rem 0 1.25rem; }
+          .ed-title { font-size: clamp(1.5rem, 8vw, 2rem); }
+          .ed-web--tl { width: 130px; height: 130px; }
+          .ed-web--br { width: 100px; height: 100px; }
+          .ed-body { padding: 1.5rem 0 2.5rem; }
+          .ed-card { padding: 20px; }
+          .ed-actions { flex-direction: column; }
+          .ed-btn { width: 100%; }
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .primary-btn,
-          .secondary-btn {
-            transition: none;
-          }
+          .ed-btn { transition: none; }
+          .ed-btn-arrow { transition: none; }
+          .ed-back { transition: none; }
+          .ed-back-arrow { transition: none; }
         }
       `}</style>
     </>
