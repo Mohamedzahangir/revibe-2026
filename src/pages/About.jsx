@@ -11,6 +11,10 @@ export default function About() {
             HERO — ORIGIN STORY
             ============================================================ */}
         <section className="ws-hero" aria-labelledby="about-title">
+          <SpiderWeb className="ws-hero-web ws-hero-web--tl" />
+          <SpiderWeb className="ws-hero-web ws-hero-web--tr" />
+          <SpiderWeb className="ws-hero-web ws-hero-web--bl" />
+          <SpiderWeb className="ws-hero-web ws-hero-web--br" />
           <div className="ws-container ws-container--narrow">
             <p className="ws-label">About REVIBE</p>
 
@@ -184,15 +188,42 @@ export default function About() {
           background: #f5f5f5;
         }
 
-        /* subtle webbing overlay on the hero */
-        .ws-hero::before {
-          content: "";
+        .ws-hero-web {
           position: absolute;
-          inset: 0;
-          background-image:
-            repeating-linear-gradient(45deg, rgba(26,26,26,0.05) 0 1px, transparent 1px 28px),
-            repeating-linear-gradient(-45deg, rgba(26,26,26,0.05) 0 1px, transparent 1px 28px);
           pointer-events: none;
+          z-index: 0;
+          opacity: 0.35;
+        }
+
+        .ws-hero-web--tl {
+          top: 0;
+          left: 0;
+          width: 180px;
+          height: 180px;
+        }
+
+        .ws-hero-web--tr {
+          top: 0;
+          right: 0;
+          width: 140px;
+          height: 140px;
+          transform: scaleX(-1);
+        }
+
+        .ws-hero-web--bl {
+          bottom: 0;
+          left: 0;
+          width: 140px;
+          height: 140px;
+          transform: scaleY(-1);
+        }
+
+        .ws-hero-web--br {
+          bottom: 0;
+          right: 0;
+          width: 180px;
+          height: 180px;
+          transform: rotate(180deg);
         }
 
         .ws-hero .ws-container {

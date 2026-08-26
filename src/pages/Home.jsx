@@ -55,14 +55,6 @@ export default function Home() {
         <section className="page-hero home-hero" aria-labelledby="hero-title">
           <SpiderWeb className="corner-web hero-web-tl" />
           <SpiderWeb className="corner-web hero-web-br" />
-          <div className="hero-particles" aria-hidden="true">
-            <span className="hero-particle" />
-            <span className="hero-particle" />
-            <span className="hero-particle" />
-            <span className="hero-particle" />
-            <span className="hero-particle" />
-          </div>
-
           <div className="page-shell">
             <div className="hero-copy">
               <h1 id="hero-title" className="display-title">
@@ -391,10 +383,10 @@ export default function Home() {
         }
 
         .hero-web-tl {
-          top: 0;
-          left: 0;
-          width: 240px;
-          height: 240px;
+          top: -60px;
+          left: 16px;
+          width: 300px;
+          height: 300px;
           opacity: 0.6;
         }
 
@@ -419,33 +411,6 @@ export default function Home() {
         .countdown-block > *:not(.corner-web) {
           position: relative;
           z-index: 1;
-        }
-
-        .hero-particles {
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          z-index: 0;
-        }
-
-        .hero-particle {
-          position: absolute;
-          width: 6px;
-          height: 6px;
-          background: ${COLOR.red};
-          box-shadow: 0 0 0 2px rgba(230, 57, 70, 0.25);
-          animation: hero-float 9s ease-in-out infinite;
-        }
-
-        .hero-particle:nth-child(1) { top: 18%; left: 12%; animation-delay: 0s; }
-        .hero-particle:nth-child(2) { top: 32%; left: 82%; animation-delay: 1.4s; }
-        .hero-particle:nth-child(3) { top: 58%; left: 22%; animation-delay: 2.8s; }
-        .hero-particle:nth-child(4) { top: 72%; left: 68%; animation-delay: 4.2s; }
-        .hero-particle:nth-child(5) { top: 44%; left: 50%; animation-delay: 5.6s; }
-
-        @keyframes hero-float {
-          0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
-          50% { transform: translateY(-16px) scale(1.4); opacity: 0.6; }
         }
 
         /* =====================================================
@@ -642,10 +607,6 @@ export default function Home() {
           .primary-btn::after,
           .secondary-btn {
             transition: none;
-          }
-
-          .hero-particle {
-            animation: none;
           }
         }
       `}</style>
