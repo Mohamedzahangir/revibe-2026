@@ -8,7 +8,6 @@ const quickLinks = [
   { label: "Events", to: "/events" },
   { label: "Sponsors", to: "/sponsors" },
   { label: "Location", to: "/location" },
-  { label: "Login", to: "/login" },
   { label: "Register", to: "/register" },
 ];
 
