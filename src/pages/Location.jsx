@@ -94,6 +94,7 @@ export default function Location() {
           background: #f5f5f5;
           position: relative;
           overflow: hidden;
+          z-index: 1;
         }
 
         .ws-section--map::before {
@@ -189,7 +190,7 @@ export default function Location() {
         @media (max-width: 430px) {
           .ws-hero { padding: 24px 0 12px; }
           .ws-section { padding: 14px 0; }
-          .ws-section--map { padding: 0; }
+          .ws-section--map { padding: 0 12px; }
           .loc-map-wrap { padding: 0; }
           .loc-web--tl { width: 90px; height: 90px; }
           .loc-web--br { width: 80px; height: 80px; }

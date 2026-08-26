@@ -420,6 +420,7 @@ export default function CampusMap({ onReload }) {
           overflow: hidden;
           position: relative;
           touch-action: none;
+          overscroll-behavior: none;
           user-select: none;
           -webkit-user-select: none;
           background: #0a1628;
