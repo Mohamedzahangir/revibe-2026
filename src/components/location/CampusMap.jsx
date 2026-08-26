@@ -7,13 +7,14 @@ const DESKTOP_MAP = "/clg map.png";
 const MOBILE_MAP = "/clg map ( mobile ).png";
 
 const LOCATIONS = [
-  { id: "main", name: "Main Block", x: 30, y: 10, desc: "Administrative hub and primary classrooms of CAHCET.", tag: "Event Venue", color: "cyan" },
-  { id: "aids", name: "AIDS Block", x: 80, y: 20, desc: "Department of AI & Data Science.", tag: "Academic", color: "red" },
-  { id: "tech-tower", name: "Tech Tower", x: 50, y: 32, desc: "Technology and innovation center.", tag: "Academic", color: "cyan" },
-  { id: "mech", name: "Mech Block", x: 62, y: 44, desc: "Department of Mechanical Engineering.", tag: "Academic", color: "red" },
-  { id: "eee-mba", name: "EEE / MBA Block", x: 63, y: 57, desc: "Departments of EEE and MBA.", tag: "Academic", color: "red" },
-  { id: "electronics", name: "Electronic Block", x: 44, y: 68, desc: "Department of Electronics & Communication.", tag: "Academic", color: "green" },
-  { id: "auditorium", name: "Auditorium", x: 50, y: 82, desc: "Main auditorium for symposium events.", tag: "Event Venue", color: "cyan" },
+  { id: "main", name: "Main Block", x: 30, y: 10, desc: "Administrative hub and primary classrooms of CAHCET.", tag: "PPT:-CSE & AIDS smart room,Minni hack:-it smart room", color: "cyan" },
+  { id: "aids", name: "AIDS Block", x: 80, y: 20, desc: "Department of AI & Data Science.", tag: "Mehandi", color: "red" },
+  { id: "tech-tower", name: "Tech Tower", x: 50, y: 32, desc: "Technology and innovation center.", tag: "Coding & Debugging:-Lab3&4 , Prompt wars:-Lab1&2", color: "cyan" },
+  { id: "mech", name: "Mech Block", x: 62, y: 44, desc: "Department of Mechanical Engineering.", tag: "Art&Painting , IPL auction", color: "red" },
+  { id: "eee-mba", name: "EEE Block", x: 63, y: 57, desc: "Departments of EEE and MBA.", tag: "Connections , Games", color: "red" },
+  { id: "electronics", name: "ECE Block", x: 44, y: 68, desc: "Department of Electronics & Communication.", tag: "Academic", color: "green" },
+  { id: "auditorium", name: "Auditorium", x: 50, y: 82, desc: "Main auditorium for symposium events.", tag: "Innauguration Ceremony , Closing Ceremony", color: "cyan" },
+  { id: "lab", name: "MBA / PHY Lab", x: 63, y: 70, desc: "MBA seminar hall and Physics lab", tag: "Tech quiz :- MBA smeinar hall , Cooking :- Phy lab", color: "cyan" },
 ];
 
 const MIN_ZOOM = 0.6;
@@ -169,7 +170,7 @@ export default function CampusMap({ onReload }) {
     const jingle = jingleRef.current;
     if (jingle) {
       jingle.currentTime = 0;
-      jingle.play().catch(() => {});
+      jingle.play().catch(() => { });
     }
   }, []);
 
@@ -283,7 +284,7 @@ export default function CampusMap({ onReload }) {
             onClick={handleReload}
             aria-label="Reload map"
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
           </button>
         </div>
       </div>

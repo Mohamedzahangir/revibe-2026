@@ -13,7 +13,7 @@ export default function Location() {
           <SpiderWeb className="loc-web loc-web--tl" />
           <SpiderWeb className="loc-web loc-web--br" />
           <div className="ws-container ws-container--narrow">
-            <p className="ws-label">Venue</p>
+            <p className="ws-label">CAHCET</p>
             <h1 id="loc-title" className="ws-display">
               REVIBE '26 Venue
             </h1>
