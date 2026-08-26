@@ -509,8 +509,11 @@ export default function Home() {
           }
 
           .hero-web-tl {
+            top: 0;
+            left: 0;
             width: 150px;
             height: 150px;
+            opacity: 0.6;
           }
 
           .hero-web-br {

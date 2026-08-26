@@ -28,7 +28,12 @@ export default function SoundToggle() {
         setIsPlaying(true);
       })
       .catch(() => {
-        setIsPlaying(false);
+        /*
+         * Audible autoplay is blocked until the first user
+         * interaction. Keep the toggle visually "on" (default)
+         * and start the track as soon as the visitor interacts.
+         */
+        setIsPlaying(true);
       });
 
     /*
