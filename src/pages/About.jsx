@@ -3,6 +3,66 @@ import SpiderWeb from "../components/navigation/SpiderWeb";
 
 const galleryItems = [1, 2, 3, 4];
 
+const eliteSponsors = [
+  {
+    name: "Sponsor 01",
+    blurb: "Powering the headline stage of REVIBE '26 and the spotlight on every champion.",
+    logo: null,
+  },
+  {
+    name: "Sponsor 02",
+    blurb: "The engine behind the web — fuelling the experience, end to end.",
+    logo: null,
+  },
+  {
+    name: "Sponsor 03",
+    blurb: "Standing shoulder-to-shoulder with us across all thirteen battles.",
+    logo: null,
+  },
+];
+
+const premiumSponsors = [
+  {
+    name: "Sponsor 04",
+    blurb: "Architecting the infrastructure that keeps the web alive.",
+    logo: null,
+  },
+  {
+    name: "Sponsor 05",
+    blurb: "Helping curious minds from every corner find their way to the web.",
+    logo: null,
+  },
+  {
+    name: "Sponsor 06",
+    blurb: "Carrying the story of REVIBE '26 far beyond the auditorium walls.",
+    logo: null,
+  },
+];
+
+function SponsorTier({ tier, sponsors }) {
+  return (
+    <div className="ws-sponsors-grid">
+      {sponsors.map((sponsor) => (
+        <article className="ws-card ws-gallery-card ws-sponsor-card" key={sponsor.name}>
+          <span className="ws-card-tag">{tier}</span>
+          <div
+            className="ws-sponsor-logo"
+            aria-label={`${sponsor.name} logo placeholder`}
+          >
+            {sponsor.logo ? (
+              <img src={sponsor.logo} alt={`${sponsor.name} logo`} />
+            ) : (
+              <span>LOGO</span>
+            )}
+          </div>
+          <h3 className="ws-sponsor-name">{sponsor.name}</h3>
+          <p className="ws-sponsor-blurb">{sponsor.blurb}</p>
+        </article>
+      ))}
+    </div>
+  );
+}
+
 export default function About() {
   return (
     <>
@@ -10,11 +70,7 @@ export default function About() {
         {/* ============================================================
             HERO — ORIGIN STORY
             ============================================================ */}
-        <section className="ws-hero" aria-labelledby="about-title">
-          <SpiderWeb className="ws-hero-web ws-hero-web--tl" />
-          <SpiderWeb className="ws-hero-web ws-hero-web--tr" />
-          <SpiderWeb className="ws-hero-web ws-hero-web--bl" />
-          <SpiderWeb className="ws-hero-web ws-hero-web--br" />
+        <section className="ws-hero ws-grid-bg" aria-labelledby="about-title">
           <div className="ws-container ws-container--narrow">
             <p className="ws-label">About REVIBE</p>
 
@@ -56,6 +112,44 @@ export default function About() {
         <hr className="ws-rule" aria-hidden="true" />
 
         {/* ============================================================
+            SPONSORS — ELITE WEB ALLIES
+            ============================================================ */}
+        <section className="ws-section" aria-labelledby="elite-title">
+          <div className="ws-container">
+            <p className="ws-label">Our Partners</p>
+            <h2 id="elite-title" className="ws-headline">
+              Elite Web Allies
+            </h2>
+            <p className="ws-body">
+              The flagship forces powering the web — the names holding the
+              strongest strands of REVIBE '26 together.
+            </p>
+            <SponsorTier tier="Elite" sponsors={eliteSponsors} />
+          </div>
+        </section>
+
+        <hr className="ws-rule" aria-hidden="true" />
+
+        {/* ============================================================
+            SPONSORS — PREMIUM WEB ALLIES
+            ============================================================ */}
+        <section className="ws-section" aria-labelledby="premium-title">
+          <div className="ws-container">
+            <p className="ws-label">Our Partners</p>
+            <h2 id="premium-title" className="ws-headline">
+              Premium Web Allies
+            </h2>
+            <p className="ws-body">
+              The specialists and storytellers weaving the finer threads of
+              the REVIBE '26 web.
+            </p>
+            <SponsorTier tier="Premium" sponsors={premiumSponsors} />
+          </div>
+        </section>
+
+        <hr className="ws-rule" aria-hidden="true" />
+
+        {/* ============================================================
             PREVIOUS EDITION
             ============================================================ */}
         <section className="ws-section" aria-labelledby="prev-title">
@@ -88,33 +182,9 @@ export default function About() {
         <hr className="ws-rule" aria-hidden="true" />
 
         {/* ============================================================
-            RECOGNITION
-            ============================================================ */}
-        <section className="ws-section" aria-labelledby="prizes-title">
-          <div className="ws-container">
-            <p className="ws-label">Recognition</p>
-            <h2 id="prizes-title" className="ws-headline">
-              Prizes &amp; Certificates
-            </h2>
-
-            <div className="ws-card ws-data-card">
-              <div className="ws-card-head">
-                <span>Awards</span>
-              </div>
-              <ul className="ws-list">
-                <li>1st and 2nd place prizes will be issued for every event.</li>
-                <li>Certificates of participation will be provided to all participants.</li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        <hr className="ws-rule" aria-hidden="true" />
-
-        {/* ============================================================
             ORGANIZED BY — ABOUT SGC
             ============================================================ */}
-        <section className="ws-section" aria-labelledby="sgc-title">
+        <section className="ws-section ws-grid-bg" aria-labelledby="sgc-title">
           <div className="ws-container ws-container--narrow">
             <p className="ws-label">Organized by</p>
             <h2 id="sgc-title" className="ws-headline">About Student Guidance Cell</h2>
@@ -183,9 +253,26 @@ export default function About() {
           overflow: hidden;
         }
 
+        /*
+           Cross-pattern diagonal grid overlay — reads like a spider web.
+           Applied to the About REVIBE hero and the About SGC section.
+        */
+        .ws-grid-bg::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          background-image:
+            repeating-linear-gradient(45deg, rgba(26,26,26,0.05) 0 1px, transparent 1px 28px),
+            repeating-linear-gradient(-45deg, rgba(26,26,26,0.05) 0 1px, transparent 1px 28px);
+        }
+
         .ws-section {
+          position: relative;
           padding: 72px 0;
           background: #f5f5f5;
+          overflow: hidden;
         }
 
         .ws-hero-web {
@@ -226,7 +313,8 @@ export default function About() {
           transform: rotate(180deg);
         }
 
-        .ws-hero .ws-container {
+        .ws-hero .ws-container,
+        .ws-section .ws-container {
           position: relative;
           z-index: 1;
         }
@@ -535,36 +623,65 @@ export default function About() {
           text-transform: uppercase;
         }
 
-        /* ---------- list (1px black separators, red square bullets) ---------- */
+        /* ---------- sponsors (same boxes as gallery) ---------- */
 
-        .ws-list {
-          list-style: none;
-          margin: 0;
-          padding: 0;
-        }
-
-        .ws-list li {
+        .ws-sponsors-grid {
           position: relative;
-          padding: 14px 16px 14px 36px;
-          font-family: 'Hanken Grotesk', sans-serif;
-          font-size: 16px;
-          line-height: 24px;
+          z-index: 2;
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 16px;
+          margin-top: 32px;
+        }
+
+        .ws-sponsor-card {
+          gap: 14px;
+          min-height: 200px;
+          padding: 16px;
+        }
+
+        .ws-sponsor-logo {
+          display: grid;
+          place-items: center;
+          width: 100%;
+          min-height: 110px;
+          border: 1px dashed rgba(220, 0, 0, 0.5);
+          border-radius: 12px;
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(220, 0, 0, 0.04));
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.72rem;
+          font-weight: 700;
+          letter-spacing: 0.2em;
+          color: #6a6a6a;
+        }
+
+        .ws-sponsor-logo img {
+          max-width: 80%;
+          max-height: 90px;
+          object-fit: contain;
+        }
+
+        .ws-sponsor-name {
+          position: relative;
+          z-index: 1;
+          margin: 0;
+          font-family: 'Anton', sans-serif;
+          font-weight: 400;
+          font-size: 1.35rem;
+          line-height: 1.05;
+          letter-spacing: 0.02em;
           color: #1a1a1a;
-          border-top: 1px solid #1a1a1a;
+          text-transform: uppercase;
         }
 
-        .ws-list li:first-child {
-          border-top: 0;
-        }
-
-        .ws-list li::before {
-          content: "";
-          position: absolute;
-          left: 16px;
-          top: 22px;
-          width: 8px;
-          height: 8px;
-          background: #dc0000;
+        .ws-sponsor-blurb {
+          position: relative;
+          z-index: 1;
+          margin: 0;
+          font-family: 'Hanken Grotesk', sans-serif;
+          font-size: 0.92rem;
+          line-height: 1.5;
+          color: #3a3a3a;
         }
 
         /* =========================================================
@@ -577,6 +694,10 @@ export default function About() {
           }
 
           .ws-gallery {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
+
+          .ws-sponsors-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
           }
 
@@ -622,6 +743,11 @@ export default function About() {
             gap: 24px;
           }
 
+          .ws-sponsors-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 24px;
+          }
+
           .ws-gallery-web--center {
             width: 380px;
             height: 380px;
@@ -635,6 +761,10 @@ export default function About() {
 
           .ws-gallery-card {
             min-height: 200px;
+            padding: 24px;
+          }
+
+          .ws-sponsor-card {
             padding: 24px;
           }
 
@@ -653,6 +783,20 @@ export default function About() {
           .ws-card-head {
             padding: 12px 24px;
             font-size: 20px;
+          }
+        }
+
+        /* =========================================================
+           RESPONSIVE — mobile
+        ========================================================= */
+
+        @media (max-width: 560px) {
+          .ws-sponsors-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .ws-sponsor-card {
+            padding: 14px;
           }
         }
 
