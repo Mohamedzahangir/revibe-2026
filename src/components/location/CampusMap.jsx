@@ -7,12 +7,10 @@ const DESKTOP_MAP = "/clg map.png";
 const MOBILE_MAP = "/clg map ( mobile ).png";
 
 const LOCATIONS = [
-  { id: "main", name: "Main Block", x: 30, y: 10, desc: "Administrative hub and primary classrooms of CAHCET.", tag: "PPT:-CSE & AIDS smart room,Minni hack:-it smart room", color: "cyan" },
-  { id: "aids", name: "AIDS Block", x: 80, y: 20, desc: "Department of AI & Data Science.", tag: "Mehandi", color: "red" },
+  { id: "main", name: "Main Block", x: 30, y: 10, desc: "Administrative hub and primary classrooms of CAHCET.", tag: "PPT:-CSE & AIDS smart room,Minni hack:-it smart room , Mehandi:-old aids classroom", color: "cyan" },
   { id: "tech-tower", name: "Tech Tower", x: 50, y: 32, desc: "Technology and innovation center.", tag: "Coding & Debugging:-Lab3&4 , Prompt wars:-Lab1&2", color: "cyan" },
   { id: "mech", name: "Mech Block", x: 62, y: 44, desc: "Department of Mechanical Engineering.", tag: "Art&Painting , IPL auction", color: "red" },
   { id: "eee-mba", name: "EEE Block", x: 63, y: 57, desc: "Departments of EEE and MBA.", tag: "Connections , Games", color: "red" },
-  { id: "electronics", name: "ECE Block", x: 44, y: 68, desc: "Department of Electronics & Communication.", tag: "Academic", color: "green" },
   { id: "auditorium", name: "Auditorium", x: 50, y: 82, desc: "Main auditorium for symposium events.", tag: "Innauguration Ceremony , Closing Ceremony", color: "cyan" },
   { id: "lab", name: "MBA / PHY Lab", x: 63, y: 70, desc: "MBA seminar hall and Physics lab", tag: "Tech quiz :- MBA smeinar hall , Cooking :- Phy lab", color: "cyan" },
 ];
