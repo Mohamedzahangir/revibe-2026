@@ -4,6 +4,7 @@ import Header from "./components/navigation/Header";
 import Footer from "./components/Footer";
 import SoundToggle from "./components/SoundToggle";
 import ScrollToTop from "./components/ScrollToTop";
+
 import Home from "./pages/Home";
 import Events from "./pages/Events";
 import EventDetails from "./pages/EventDetails";
@@ -11,10 +12,9 @@ import About from "./pages/About";
 import Sponsors from "./pages/Sponsors";
 import Location from "./pages/Location";
 import Login from "./pages/Login";
+import CoordinatorDashboard from "./pages/CoordinatorDashboard";
 import Register from "./pages/Register";
 import Confirmation from "./pages/Confirmation";
-import CoordinatorDashboard from "./pages/CoordinatorDashboard";
-
 
 function App() {
   return (
@@ -33,12 +33,12 @@ function App() {
             <Route path="/sponsors" element={<Sponsors />} />
             <Route path="/location" element={<Location />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/coordinator" element={<CoordinatorDashboard />} />
             <Route path="/register" element={<Register />} />
             <Route
               path="/confirmation/:registrationNumber"
               element={<Confirmation />}
             />
-            <Route path="/coordinator" element={<CoordinatorDashboard />} />
           </Routes>
         </main>
 
@@ -48,5 +48,4 @@ function App() {
     </BrowserRouter>
   );
 }
-
 export default App;

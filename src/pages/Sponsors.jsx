@@ -5,37 +5,64 @@ const sponsors = [
     name: "Sponsor 01",
     category: "Title Sponsor",
     logo: null,
-    blurb: "Powering the headline stage of REVIBE '26 and the spotlight on every champion.",
+    blurb:
+      "Powering the headline stage of REVIBE '26 and the spotlight on every champion.",
   },
   {
     name: "Sponsor 02",
     category: "Powered By",
     logo: null,
-    blurb: "The engine behind the web — fuelling the experience, end to end.",
+    blurb:
+      "The engine behind the web — fuelling the experience, end to end.",
   },
   {
     name: "Sponsor 03",
     category: "Event Partner",
     logo: null,
-    blurb: "Standing shoulder-to-shoulder with us across all thirteen battles.",
+    blurb:
+      "Standing shoulder-to-shoulder with us across all thirteen battles.",
   },
   {
     name: "Sponsor 04",
     category: "Tech Partner",
     logo: null,
-    blurb: "Architecting the infrastructure that keeps the web alive.",
+    blurb:
+      "Architecting the infrastructure that keeps the web alive.",
   },
   {
     name: "Sponsor 05",
     category: "Community Partner",
     logo: null,
-    blurb: "Helping curious minds from every corner find their way to the web.",
+    blurb:
+      "Helping curious minds from every corner find their way to the web.",
   },
   {
     name: "Sponsor 06",
     category: "Media Partner",
     logo: null,
-    blurb: "Carrying the story of REVIBE '26 far beyond the auditorium walls.",
+    blurb:
+      "Carrying the story of REVIBE '26 far beyond the auditorium walls.",
+  },
+];
+
+/* ============================================================
+   SPECIAL ITEMS / FOOD STALLS
+
+   Update only this array when the final stall menu is confirmed.
+============================================================ */
+
+const specialItems = [
+  {
+    name: "FUSK IT",
+    items: ["Ice Cream", "Waffles", "More special items coming soon"],
+  },
+  {
+    name: "TIBET MOMO",
+    items: ["Chicken Momo", "More momo varieties coming soon"],
+  },
+  {
+    name: "WAFFLE HUT",
+    items: ["Chocolate Waffles", "More waffle varieties coming soon"],
   },
 ];
 
@@ -45,7 +72,7 @@ export default function Sponsors() {
       <main className="sp-page">
         {/* ============================================================
             HERO
-            ============================================================ */}
+        ============================================================ */}
         <section className="sp-hero" aria-labelledby="sponsors-title">
           <SpiderWeb className="sp-hero-web sp-hero-web--tl" />
           <SpiderWeb className="sp-hero-web sp-hero-web--tr" />
@@ -56,7 +83,7 @@ export default function Sponsors() {
             <p className="sp-label">REVIBE '26 Presents</p>
 
             <h1 id="sponsors-title" className="sp-display">
-              The Web is held together by its partners.
+              Meet Our Sponsors.
             </h1>
 
             <p className="sp-body-lg">
@@ -71,13 +98,15 @@ export default function Sponsors() {
 
         {/* ============================================================
             SPONSOR GRID
-            ============================================================ */}
+        ============================================================ */}
         <section className="sp-section" aria-labelledby="grid-title">
           <div className="sp-container">
             <p className="sp-label">The Roster</p>
+
             <h2 id="grid-title" className="sp-headline">
               Six threads. One web.
             </h2>
+
             <p className="sp-body">
               From the title stage to the community that carries the story
               forward — each partner holds a strand of the REVIBE '26 web.
@@ -99,16 +128,27 @@ export default function Sponsors() {
                       aria-label={`${sponsor.name} logo placeholder`}
                     >
                       {sponsor.logo ? (
-                        <img src={sponsor.logo} alt={`${sponsor.name} logo`} />
+                        <img
+                          src={sponsor.logo}
+                          alt={`${sponsor.name} logo`}
+                        />
                       ) : (
                         <span className="sp-card-logo-mark">LOGO</span>
                       )}
                     </div>
 
                     <div className="sp-card-copy">
-                      <p className="sp-card-category">{sponsor.category}</p>
-                      <h3 className="sp-card-name">{sponsor.name}</h3>
-                      <p className="sp-card-blurb">{sponsor.blurb}</p>
+                      <p className="sp-card-category">
+                        {sponsor.category}
+                      </p>
+
+                      <h3 className="sp-card-name">
+                        {sponsor.name}
+                      </h3>
+
+                      <p className="sp-card-blurb">
+                        {sponsor.blurb}
+                      </p>
                     </div>
                   </li>
                 ))}
@@ -116,15 +156,75 @@ export default function Sponsors() {
             </div>
           </div>
         </section>
+
+        {/* ============================================================
+            SPECIAL ITEMS / FOOD STALLS
+        ============================================================ */}
+        <section
+          className="sp-special-section"
+          aria-labelledby="special-items-title"
+        >
+          <div className="sp-container">
+            <div className="sp-special-heading">
+              <p className="sp-label">At REVIBE '26</p>
+
+              <h2 id="special-items-title" className="sp-headline">
+                Special Items Present
+              </h2>
+
+              <p className="sp-body">
+                Take a break between events and check out the special food
+                stalls waiting for you at REVIBE '26.
+              </p>
+            </div>
+
+            <div className="sp-special-grid">
+              {specialItems.map((stall, index) => (
+                <article className="sp-special-card" key={stall.name}>
+                  {/* Card number */}
+                  <div className="sp-special-number">
+                    {String(index + 1).padStart(2, "0")}
+                  </div>
+
+                  {/* Stall heading */}
+                  <div className="sp-special-top">
+                    <span className="sp-special-kicker">
+                      FOOD STALL
+                    </span>
+
+                    <h3 className="sp-special-name">
+                      {stall.name}
+                    </h3>
+                  </div>
+
+                  {/* Menu */}
+                  <div className="sp-special-menu">
+                    <p className="sp-special-menu-title">
+                      MENU
+                    </p>
+
+                    <ul>
+                      {stall.items.map((item) => (
+                        <li key={item}>
+                          <span className="sp-menu-dot" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Decorative line */}
+                  <div className="sp-special-line" />
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
       </main>
 
       <style>{`
         /* =========================================================
-           WEB-SLINGER MODERN — Sponsors page
-           Mirrors the neo-comic system used by Home + About.
-           Off-white surface · 2px black borders · sharp corners ·
-           hard offset shadows · Anton / Hanken Grotesk / JetBrains Mono
-           8px grid · 12-col desktop (64px margin) · 4-col mobile (16px)
+           SPONSORS PAGE
         ========================================================= */
 
         .sp-page {
@@ -147,7 +247,9 @@ export default function Sponsors() {
           max-width: 900px;
         }
 
-        /* ---------- sections ---------- */
+        /* =========================================================
+           HERO
+        ========================================================= */
 
         .sp-hero {
           position: relative;
@@ -155,11 +257,6 @@ export default function Sponsors() {
           background: #f9f9f9;
           overflow: hidden;
           border-bottom: 2px solid #1a1a1a;
-        }
-
-        .sp-section {
-          padding: 72px 0;
-          background: #f5f5f5;
         }
 
         .sp-hero-web {
@@ -206,7 +303,9 @@ export default function Sponsors() {
           text-align: center;
         }
 
-        /* ---------- 2px black panel dividers ---------- */
+        /* =========================================================
+           COMMON
+        ========================================================= */
 
         .sp-rule {
           display: block;
@@ -216,8 +315,6 @@ export default function Sponsors() {
           border-top: 2px solid #1a1a1a;
           margin: 0;
         }
-
-        /* ---------- typography ---------- */
 
         .sp-label {
           margin: 0 0 16px;
@@ -255,7 +352,6 @@ export default function Sponsors() {
         .sp-body-lg {
           margin: 0 auto 24px;
           max-width: 760px;
-          font-family: 'Hanken Grotesk', sans-serif;
           font-size: 18px;
           line-height: 28px;
           color: #1a1a1a;
@@ -264,15 +360,19 @@ export default function Sponsors() {
         .sp-body {
           margin: 0 auto 8px;
           max-width: 760px;
-          font-family: 'Hanken Grotesk', sans-serif;
           font-size: 16px;
           line-height: 24px;
           color: #3a3a3a;
         }
 
         /* =========================================================
-           SPONSOR GRID
-           ========================================================= */
+           SPONSOR SECTION
+        ========================================================= */
+
+        .sp-section {
+          padding: 72px 0;
+          background: #f5f5f5;
+        }
 
         .sp-grid-wrap {
           position: relative;
@@ -321,20 +421,34 @@ export default function Sponsors() {
           border: 1px solid rgba(220, 0, 0, 0.35);
           border-radius: 16px;
           background:
-            linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
+            linear-gradient(
+              135deg,
+              rgba(255, 255, 255, 0.75),
+              rgba(255, 255, 255, 0.55)
+            );
           box-shadow:
             0 10px 30px rgba(0, 0, 0, 0.08),
             inset 0 1px 0 rgba(255, 255, 255, 0.8);
           overflow: hidden;
-          transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+          transition:
+            box-shadow 0.2s ease,
+            transform 0.2s ease,
+            border-color 0.2s ease;
         }
 
         .sp-card::after {
           content: "";
           position: absolute;
-          top: 0; left: 0; right: 0;
+          top: 0;
+          left: 0;
+          right: 0;
           height: 3px;
-          background: linear-gradient(90deg, transparent, rgba(220, 0, 0, 0.5), transparent);
+          background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(220, 0, 0, 0.5),
+            transparent
+          );
           pointer-events: none;
         }
 
@@ -361,9 +475,6 @@ export default function Sponsors() {
           font-size: 11px;
           font-weight: 700;
           letter-spacing: 0.12em;
-          box-shadow:
-            0 4px 12px rgba(0, 0, 0, 0.2),
-            inset 0 1px 0 rgba(220, 0, 0, 0.15);
         }
 
         .sp-card-logo {
@@ -377,7 +488,11 @@ export default function Sponsors() {
           border: 1px dashed rgba(220, 0, 0, 0.45);
           border-radius: 12px;
           background:
-            linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(220, 0, 0, 0.04));
+            linear-gradient(
+              135deg,
+              rgba(255, 255, 255, 0.7),
+              rgba(220, 0, 0, 0.04)
+            );
         }
 
         .sp-card-logo img {
@@ -397,13 +512,10 @@ export default function Sponsors() {
         .sp-card-copy {
           position: relative;
           z-index: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
         }
 
         .sp-card-category {
-          margin: 0;
+          margin: 0 0 4px;
           font-family: 'JetBrains Mono', monospace;
           font-size: 11px;
           font-weight: 700;
@@ -425,15 +537,141 @@ export default function Sponsors() {
 
         .sp-card-blurb {
           margin: 0;
-          font-family: 'Hanken Grotesk', sans-serif;
           font-size: 0.95rem;
           line-height: 1.5;
           color: #3a3a3a;
         }
 
         /* =========================================================
-           RESPONSIVE — tablet
-           ========================================================= */
+           SPECIAL ITEMS SECTION
+        ========================================================= */
+
+        .sp-special-section {
+          position: relative;
+          padding: 80px 0 96px;
+          background: #eeeeee;
+          border-top: 2px solid #1a1a1a;
+          overflow: hidden;
+        }
+
+        .sp-special-heading {
+          text-align: center;
+          max-width: 800px;
+          margin: 0 auto;
+        }
+
+        .sp-special-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 24px;
+          margin-top: 44px;
+        }
+
+        .sp-special-card {
+          position: relative;
+          min-width: 0;
+          padding: 28px;
+          border: 2px solid #1a1a1a;
+          background: #ffffff;
+          box-shadow: 8px 8px 0 #1a1a1a;
+          overflow: hidden;
+          transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+        }
+
+        .sp-special-card:hover {
+          transform: translate(-3px, -3px);
+          box-shadow: 11px 11px 0 #1a1a1a;
+        }
+
+        .sp-special-number {
+          position: absolute;
+          top: 14px;
+          right: 16px;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+          color: #dc0000;
+        }
+
+        .sp-special-top {
+          padding-right: 40px;
+          margin-bottom: 26px;
+        }
+
+        .sp-special-kicker {
+          display: inline-block;
+          margin-bottom: 8px;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.18em;
+          color: #dc0000;
+        }
+
+        .sp-special-name {
+          margin: 0;
+          font-family: 'Anton', sans-serif;
+          font-size: clamp(28px, 4vw, 40px);
+          line-height: 1;
+          letter-spacing: 0.02em;
+          text-transform: uppercase;
+          color: #1a1a1a;
+        }
+
+        .sp-special-menu {
+          border-top: 2px solid #1a1a1a;
+          padding-top: 18px;
+        }
+
+        .sp-special-menu-title {
+          margin: 0 0 12px;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.18em;
+          color: #dc0000;
+        }
+
+        .sp-special-menu ul {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .sp-special-menu li {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          font-size: 16px;
+          line-height: 1.45;
+          color: #303030;
+        }
+
+        .sp-menu-dot {
+          width: 7px;
+          height: 7px;
+          margin-top: 8px;
+          flex: 0 0 7px;
+          background: #dc0000;
+          transform: rotate(45deg);
+        }
+
+        .sp-special-line {
+          width: 70px;
+          height: 4px;
+          margin-top: 24px;
+          background: #dc0000;
+        }
+
+        /* =========================================================
+           TABLET
+        ========================================================= */
 
         @media (min-width: 600px) {
           .sp-container {
@@ -441,9 +679,26 @@ export default function Sponsors() {
           }
         }
 
+        @media (max-width: 1023px) {
+          .sp-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .sp-special-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .sp-special-card:last-child {
+            grid-column: 1 / -1;
+            max-width: calc(50% - 12px);
+            width: 100%;
+            justify-self: center;
+          }
+        }
+
         /* =========================================================
-           RESPONSIVE — desktop
-           ========================================================= */
+           DESKTOP
+        ========================================================= */
 
         @media (min-width: 1024px) {
           .sp-container {
@@ -468,22 +723,10 @@ export default function Sponsors() {
         }
 
         /* =========================================================
-           RESPONSIVE — mobile
-           ========================================================= */
+           MOBILE
+        ========================================================= */
 
-        @media (max-width: 899px) {
-          .sp-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 16px;
-          }
-
-          .sp-hero-web--tr,
-          .sp-hero-web--bl {
-            display: none;
-          }
-        }
-
-        @media (max-width: 560px) {
+        @media (max-width: 599px) {
           .sp-hero {
             padding: 80px 0 56px;
           }
@@ -495,9 +738,47 @@ export default function Sponsors() {
             opacity: 0.25;
           }
 
+          .sp-hero-web--tr,
+          .sp-hero-web--bl {
+            display: none;
+          }
+
           .sp-grid {
             grid-template-columns: 1fr;
             gap: 16px;
+          }
+
+          .sp-special-section {
+            padding: 64px 0 72px;
+          }
+
+          .sp-special-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-top: 32px;
+          }
+
+          .sp-special-card {
+            padding: 22px;
+            box-shadow: 6px 6px 0 #1a1a1a;
+          }
+
+          .sp-special-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 8px 8px 0 #1a1a1a;
+          }
+
+          .sp-special-card:last-child {
+            grid-column: auto;
+            max-width: none;
+          }
+
+          .sp-special-name {
+            font-size: clamp(30px, 10vw, 38px);
+          }
+
+          .sp-special-menu li {
+            font-size: 15px;
           }
 
           .sp-grid-web--tl,
@@ -512,14 +793,19 @@ export default function Sponsors() {
             font-size: 10px;
             padding: 4px 8px;
           }
+
+          .sp-special-card {
+            padding: 18px;
+          }
         }
 
         /* =========================================================
            REDUCED MOTION
-           ========================================================= */
+        ========================================================= */
 
         @media (prefers-reduced-motion: reduce) {
-          .sp-card {
+          .sp-card,
+          .sp-special-card {
             transition: none;
           }
         }
