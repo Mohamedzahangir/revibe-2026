@@ -1,171 +1,184 @@
 const eventData = [
   {
     slug: "paper-presentation",
-    name: "PPT Presentation",
+    name: "Daily bugle dispatch",
     category: "Technical",
     description:
-      "Present your ideas and technical work to a panel of judges.",
+      "Paper presentation",
     teamSize: "2 Members",
     registrationFee: "₹100 / person",
     venue: "CSE & AI/DS Smart Room",
     time: "10:30 AM – 12:40 PM",
     maxCapacity: "30 Teams",
+    chibi: "/Chibi/spidey.png",
   },
 
   {
     slug: "mini-hackathon",
-    name: "Mini Hackathon",
+    name: "web slinger sprint",
     category: "Technical",
     description:
-      "A short-format hackathon where teams build and present innovative solutions.",
+      "Mini Hackathon",
     teamSize: "2 Members",
     registrationFee: "₹50 / person",
     venue: "IT Smart Room",
     time: "10:30 AM – 12:40 PM",
     maxCapacity: "30 Teams",
+    chibi: "/Chibi/rdj.png",
   },
 
   {
     slug: "technical-quiz",
-    name: "Tech Quiz",
+    name: "SPIDEY-SENSE SHOWDOWN",
     category: "Technical",
     description:
-      "Compete in a fast-paced technical quiz that tests knowledge and quick thinking.",
+      "Technical Quiz",
     teamSize: "2 Members",
     registrationFee: "₹50 / person",
     venue: "MBA Seminar Hall",
     time: "10:30 AM – 12:40 PM",
     maxCapacity: "60 Teams",
+    chibi: "/Chibi/turnsuit.png",
   },
 
   {
     slug: "coding-debugging",
-    name: "Coding & Debugging",
+    name: "WEB & DEBUG",
     category: "Technical",
     description:
-      "Solve coding challenges and debug faulty programs under time pressure.",
+      "Coding & debugging",
     teamSize: "2 Members",
     registrationFee: "₹50 / person",
     venue: "Lab 3 & 4",
     time: "10:30 AM – 12:40 PM",
     maxCapacity: "40 Teams",
-  },
-
-  {
-    slug: "prompt-wars",
-    name: "Prompt Wars",
-    category: "Technical",
-    description:
-      "A creative challenge focused on prompt formulation, problem-solving, and AI skills.",
-    teamSize: "2 Members",
-    registrationFee: "₹50 / person",
-    venue: "Lab 1 & 2",
-    time: "10:30 AM – 12:40 PM",
-    maxCapacity: "40 Teams",
+    chibi: "/Chibi/octo.png",
   },
 
   {
     slug: "shark-tank",
-    name: "Shark Tank",
+    name: "OSCORP PITCH VAULT",
     category: "Technical",
     description:
-      "Pitch an innovative idea and defend your concept before a judging panel.",
+      "Shark Tank",
     teamSize: "2 Members",
     registrationFee: "₹50 / person",
     venue: "Tech Tower Seminar Hall",
     time: "10:30 AM – 12:40 PM",
     maxCapacity: "25 Teams",
+    chibi: "/Chibi/goblin.png",
+  },
+
+  {
+    slug: "prompt-wars",
+    name: "MULTIVERSE PROMPT CLASH",
+    category: "Technical",
+    description:
+      "Prompt wars",
+    teamSize: "2 Members",
+    registrationFee: "₹50 / person",
+    venue: "Lab 1 & 2",
+    time: "10:30 AM – 12:40 PM",
+    maxCapacity: "40 Teams",
+    chibi: "/Chibi/ironspider.png",
   },
 
   {
     slug: "mehandi",
-    name: "Mehandi",
+    name: "WEB INK ART",
     category: "Non-Technical",
     description:
-      "Showcase creativity and artistic skill through an expressive Mehandi competition.",
+      "Mehandi",
     teamSize: "1 Member",
     registrationFee: "₹50 / person",
     venue: "AI/DS Old Class",
     time: "10:30 AM – 12:40 PM",
     maxCapacity: "50 Participants",
+    chibi: "/Chibi/gwen.png",
   },
 
   {
     slug: "cooking-without-fire",
-    name: "Cooking Without Fire",
+    name: "AUNT MAY'S NO-FLAME KITCHEN",
     category: "Non-Technical",
     description:
-      "Create innovative and delicious dishes without using fire.",
+      "Cooking without fire",
     teamSize: "3 Members",
     registrationFee: "₹150 / team",
     venue: "Physics Lab",
     time: "10:30 AM – 12:40 PM",
     maxCapacity: "10 Teams",
+    chibi: "/Chibi/mayday.png",
   },
 
   {
     slug: "ipl-auction",
-    name: "IPL Auction",
+    name: "OSCORP AUCTION HOUSE",
     category: "Non-Technical",
     description:
-      "Experience a strategic auction challenge inspired by the IPL.",
+      "IPL Auction",
     teamSize: "5–6 Members",
     registrationFee: "₹200 / team",
     venue: "AI/DS Seminar Hall",
     time: "10:30 AM – 12:40 PM",
     maxCapacity: "10 Teams",
+    chibi: "/Chibi/nova.png",
   },
 
   {
     slug: "art-painting",
-    name: "Art & Painting",
+    name: "GRAFFITI OF THE SPIDER-VERSE",
     category: "Non-Technical",
     description:
-      "Express your creativity through an on-the-spot art and painting competition.",
+      "Art & painting",
     teamSize: "1 Member",
     registrationFee: "₹50 / person",
     venue: "Mechanical Seminar Hall",
     time: "10:30 AM – 12:40 PM",
     maxCapacity: "50 Participants",
+    chibi: "/Chibi/miles.png",
   },
 
   {
     slug: "connection",
-    name: "Connection",
+    name: "SPIDER-VERSE CONNECT",
     category: "Non-Technical",
     description:
-      "A word-association challenge that rewards quick thinking and teamwork.",
+      "Connection",
     teamSize: "2 Members",
     registrationFee: "₹50 / person",
     venue: "MBA Seminar Hall",
     time: "1:30 PM – 3:00 PM",
     maxCapacity: "60 Teams",
+    chibi: "/Chibi/venom.png",
   },
 
   {
     slug: "chess",
-    name: "Chess",
+    name: "SINISTER SIX STRATEGY",
     category: "Non-Technical",
     description:
-      "A strategic chess competition for participants to test their skills and tactics.",
+      "Chess",
     teamSize: "1 Member",
     registrationFee: "₹50 / person",
     venue: "AI/DS Old Class",
     time: "1:30 PM – 3:00 PM",
     maxCapacity: "40 Participants",
+    chibi: "/Chibi/mysterio.png",
   },
 
   {
     slug: "free-fire",
-    name: "Free Fire",
+    name: "SYMBIOTE SHOWDOWN",
     category: "Non-Technical",
     description:
-      "A competitive gaming event where teams battle it out for victory.",
+      "Free Fire",
     teamSize: "4 Members",
     registrationFee: "₹50 / person",
     venue: "EEE Class",
     time: "1:30 PM – 3:00 PM",
     maxCapacity: "20 Teams",
+    chibi: "/Chibi/hulk.png",
   },
 ];
 

@@ -16,10 +16,6 @@ export default function Events() {
   return (
     <>
       <main className="ev-page">
-        {/* ═══════════════════════════════════════════════════════════
-            HERO
-        ═══════════════════════════════════════════════════════════ */}
-
         <section className="ev-hero">
           <div className="ev-shell">
             <div className="ev-hero-copy">
@@ -27,9 +23,7 @@ export default function Events() {
                 <span className="ev-kicker-dot" />
                 Event list
               </p>
-
               <h1 className="ev-title">REVIBE '26 Events</h1>
-
               <p className="ev-subtitle">
                 {eventData.length} events across technical and non-technical
                 domains.
@@ -38,10 +32,6 @@ export default function Events() {
           </div>
         </section>
 
-        {/* ═══════════════════════════════════════════════════════════
-            FILTERS
-        ═══════════════════════════════════════════════════════════ */}
-
         <section className="ev-filters">
           <div className="ev-shell">
             <div className="ev-filter-pill">
@@ -49,16 +39,11 @@ export default function Events() {
                 <span key={filter} className="ev-filter-inner">
                   <button
                     type="button"
-                    className={`ev-filter-btn${
-                      activeFilter === filter
-                        ? " ev-filter-btn--active"
-                        : ""
-                    }`}
+                    className={`ev-filter-btn${activeFilter === filter ? " ev-filter-btn--active" : ""}`}
                     onClick={() => setActiveFilter(filter)}
                   >
                     {filter}
                   </button>
-
                   {index < FILTERS.length - 1 && (
                     <span className="ev-filter-divider" />
                   )}
@@ -68,14 +53,9 @@ export default function Events() {
           </div>
         </section>
 
-        {/* ═══════════════════════════════════════════════════════════
-            EVENT GRID
-        ═══════════════════════════════════════════════════════════ */}
-
         <section className="ev-grid-section">
           <SpiderWeb className="ev-web ev-web--tl" />
           <SpiderWeb className="ev-web ev-web--br" />
-
           <div className="ev-shell">
             {filtered.length > 0 ? (
               <div className="ev-grid">
@@ -85,27 +65,22 @@ export default function Events() {
                     to={`/events/${event.slug}`}
                     className="ev-card"
                   >
+                    <SpiderWeb className="ev-card-web" />
+                    <img
+                      src={event.chibi}
+                      alt=""
+                      className="ev-card-chibi"
+                    />
                     <span className="ev-card-num">
                       {String(index + 1).padStart(2, "0")}
                     </span>
-
-                    <span
-                      className={`ev-card-cat${
-                        event.category === "Technical"
-                          ? " ev-card-cat--tech"
-                          : " ev-card-cat--non"
-                      }`}
-                    >
+                    <span className={`ev-card-cat${event.category === "Technical" ? " ev-card-cat--tech" : " ev-card-cat--non"}`}>
                       {event.category}
                     </span>
-
                     <h3 className="ev-card-name">{event.name}</h3>
-
                     <p className="ev-card-desc">{event.description}</p>
-
                     <span className="ev-card-link">
-                      View details{" "}
-                      <span className="ev-card-arrow">→</span>
+                      View details <span className="ev-card-arrow">→</span>
                     </span>
                   </Link>
                 ))}
@@ -113,9 +88,7 @@ export default function Events() {
             ) : (
               <div className="ev-empty">
                 <h2>No events found</h2>
-                <p>
-                  There are currently no events available in this category.
-                </p>
+                <p>There are currently no events available in this category.</p>
               </div>
             )}
           </div>
@@ -139,14 +112,10 @@ export default function Events() {
         }
 
         @media (min-width: 1024px) {
-          .ev-shell {
-            padding-inline: 64px;
-          }
+          .ev-shell { padding-inline: 64px; }
         }
 
-        /* ═══════════════════════════════════════════════════════════
-           HERO
-        ═══════════════════════════════════════════════════════════ */
+        /* ═══ HERO ═══ */
 
         .ev-hero {
           position: relative;
@@ -161,16 +130,8 @@ export default function Events() {
           position: absolute;
           inset: 0;
           background-image:
-            repeating-linear-gradient(
-              45deg,
-              rgba(26, 26, 26, 0.05) 0 1px,
-              transparent 1px 28px
-            ),
-            repeating-linear-gradient(
-              -45deg,
-              rgba(26, 26, 26, 0.05) 0 1px,
-              transparent 1px 28px
-            );
+            repeating-linear-gradient(45deg, rgba(26,26,26,0.05) 0 1px, transparent 1px 28px),
+            repeating-linear-gradient(-45deg, rgba(26,26,26,0.05) 0 1px, transparent 1px 28px);
           pointer-events: none;
         }
 
@@ -220,9 +181,7 @@ export default function Events() {
           color: #3a3a3a;
         }
 
-        /* ═══════════════════════════════════════════════════════════
-           SPIDER WEBS
-        ═══════════════════════════════════════════════════════════ */
+        /* ═══ SPIDER WEBS ═══ */
 
         .ev-web {
           position: absolute;
@@ -247,9 +206,7 @@ export default function Events() {
           opacity: 0.35;
         }
 
-        /* ═══════════════════════════════════════════════════════════
-           FILTER PILLS
-        ═══════════════════════════════════════════════════════════ */
+        /* ═══ FILTER PILLS ═══ */
 
         .ev-filters {
           padding: 1.5rem 0;
@@ -291,10 +248,7 @@ export default function Events() {
           text-transform: uppercase;
           cursor: pointer;
           white-space: nowrap;
-          transition:
-            color 0.2s ease,
-            background 0.2s ease,
-            box-shadow 0.2s ease;
+          transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
         }
 
         .ev-filter-btn:hover {
@@ -322,9 +276,7 @@ export default function Events() {
           flex-shrink: 0;
         }
 
-        /* ═══════════════════════════════════════════════════════════
-           GRID
-        ═══════════════════════════════════════════════════════════ */
+        /* ═══ GRID ═══ */
 
         .ev-grid-section {
           position: relative;
@@ -341,9 +293,7 @@ export default function Events() {
           z-index: 1;
         }
 
-        /* ═══════════════════════════════════════════════════════════
-           EVENT CARD
-        ═══════════════════════════════════════════════════════════ */
+        /* ═══ EVENT CARD ═══ */
 
         .ev-card {
           position: relative;
@@ -351,24 +301,18 @@ export default function Events() {
           flex-direction: column;
           gap: 12px;
           padding: 24px;
+          padding-bottom: 60px;
           border: 1px solid rgba(220, 0, 0, 0.35);
           border-radius: 16px;
           background:
-            linear-gradient(
-              135deg,
-              rgba(255, 255, 255, 0.75),
-              rgba(255, 255, 255, 0.55)
-            );
+            linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
           box-shadow:
             0 10px 30px rgba(0, 0, 0, 0.08),
             inset 0 1px 0 rgba(255, 255, 255, 0.8);
           overflow: hidden;
           text-decoration: none;
           color: inherit;
-          transition:
-            box-shadow 0.2s ease,
-            transform 0.2s ease,
-            border-color 0.2s ease;
+          transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
         }
 
         .ev-card::after {
@@ -378,13 +322,9 @@ export default function Events() {
           left: 0;
           right: 0;
           height: 3px;
-          background: linear-gradient(
-            90deg,
-            transparent,
-            rgba(220, 0, 0, 0.5),
-            transparent
-          );
+          background: linear-gradient(90deg, transparent, rgba(220, 0, 0, 0.5), transparent);
           pointer-events: none;
+          z-index: 3;
         }
 
         .ev-card:hover,
@@ -399,6 +339,29 @@ export default function Events() {
         .ev-card:hover .ev-card-arrow,
         .ev-card:focus-visible .ev-card-arrow {
           transform: translateX(4px);
+        }
+
+        .ev-card-web {
+          position: absolute;
+          bottom: 50px;
+          right: 18px;
+          width: 140px;
+          height: 140px;
+          opacity: 0.4;
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        .ev-card-chibi {
+          position: absolute;
+          bottom: 10px;
+          right: -20px;
+          margin-left: 20px;
+          width: 200px;
+          height: auto;
+          object-fit: contain;
+          pointer-events: none;
+          z-index: 1;
         }
 
         .ev-card-num {
@@ -431,6 +394,7 @@ export default function Events() {
           letter-spacing: 0.12em;
           text-transform: uppercase;
           border-radius: 6px;
+          
         }
 
         .ev-card-cat--tech {
@@ -454,6 +418,9 @@ export default function Events() {
           letter-spacing: 0.02em;
           color: #1a1a1a;
           text-transform: uppercase;
+          padding-right: 100px;
+          
+        
         }
 
         .ev-card-desc {
@@ -463,6 +430,10 @@ export default function Events() {
           line-height: 1.5;
           color: #3a3a3a;
           flex: 1;
+        
+          
+        
+          
         }
 
         .ev-card-link {
@@ -476,6 +447,7 @@ export default function Events() {
           letter-spacing: 0.1em;
           text-transform: uppercase;
           color: #dc0000;
+          
         }
 
         .ev-card-arrow {
@@ -483,9 +455,7 @@ export default function Events() {
           transition: transform 0.2s ease;
         }
 
-        /* ═══════════════════════════════════════════════════════════
-           EMPTY STATE
-        ═══════════════════════════════════════════════════════════ */
+        /* ═══ EMPTY STATE ═══ */
 
         .ev-empty {
           position: relative;
@@ -513,102 +483,46 @@ export default function Events() {
           color: #555555;
         }
 
-        /* ═══════════════════════════════════════════════════════════
-           RESPONSIVE
-        ═══════════════════════════════════════════════════════════ */
+        /* ═══ RESPONSIVE ═══ */
 
         @media (max-width: 1024px) {
-          .ev-hero {
-            padding: 4rem 0 2.5rem;
-          }
+          .ev-hero { padding: 4rem 0 2.5rem; }
         }
 
         @media (max-width: 900px) {
-          .ev-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
+          .ev-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
         @media (max-width: 768px) {
-          .ev-hero {
-            padding: 3.5rem 0 2rem;
-          }
-
-          .ev-title {
-            font-size: clamp(1.8rem, 7vw, 2.8rem);
-          }
-
-          .ev-grid-section {
-            padding: 2rem 0 3rem;
-          }
+          .ev-hero { padding: 3.5rem 0 2rem; }
+          .ev-title { font-size: clamp(1.8rem, 7vw, 2.8rem); }
+          .ev-grid-section { padding: 2rem 0 3rem; }
         }
 
         @media (max-width: 620px) {
-          .ev-grid {
-            grid-template-columns: 1fr;
-          }
+          .ev-grid { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 430px) {
-          .ev-shell {
-            padding-inline: 12px;
-          }
+          .ev-shell { padding-inline: 12px; }
+          .ev-hero { padding: 2.75rem 0 1.5rem; }
+          .ev-title { font-size: clamp(1.6rem, 8vw, 2.2rem); }
+          .ev-subtitle { font-size: 0.95rem; }
 
-          .ev-hero {
-            padding: 2.75rem 0 1.5rem;
-          }
+          .ev-web--tl { display: none; }
+          .ev-web--br { display: none; }
 
-          .ev-title {
-            font-size: clamp(1.6rem, 8vw, 2.2rem);
-          }
+          .ev-filters { padding: 1rem 0; }
+          .ev-filter-pill { max-width: calc(100vw - 24px); }
+          .ev-filter-btn { padding: 0.35rem 0.7rem; min-height: 32px; font-size: 0.82rem; }
 
-          .ev-subtitle {
-            font-size: 0.95rem;
-          }
-
-          .ev-web--tl {
-            width: 140px;
-            height: 140px;
-          }
-
-          .ev-web--br {
-            width: 110px;
-            height: 110px;
-          }
-
-          .ev-filters {
-            padding: 1rem 0;
-          }
-
-          .ev-filter-pill {
-            max-width: calc(100vw - 24px);
-          }
-
-          .ev-filter-btn {
-            padding: 0.35rem 0.7rem;
-            min-height: 32px;
-            font-size: 0.82rem;
-          }
-
-          .ev-grid-section {
-            padding: 1.5rem 0 2.5rem;
-          }
-
-          .ev-grid {
-            gap: 16px;
-          }
-
-          .ev-card {
-            padding: 20px;
-          }
-
-          .ev-card-name {
-            font-size: 1.3rem;
-          }
-
-          .ev-card-desc {
-            font-size: 0.9rem;
-          }
+          .ev-grid-section { padding: 1.5rem 0 2.5rem; }
+          .ev-grid { gap: 16px; }
+          .ev-card { padding: 20px; padding-bottom: 50px; }
+          .ev-card-chibi { width: 150px;right: -20px; }
+          .ev-card-web { width: 110px; height: 110px; bottom:30px; right:0px; }
+          .ev-card-name { font-size: 1.3rem; padding-right: 50px; }
+          .ev-card-desc { font-size: 0.9rem; }
         }
 
         @media (max-width: 390px) {
@@ -618,24 +532,13 @@ export default function Events() {
             font-size: 0.72rem;
             letter-spacing: 0.05em;
           }
-
-          .ev-filter-divider {
-            height: 0.85rem;
-          }
+          .ev-filter-divider { height: 0.85rem; }
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .ev-card {
-            transition: none;
-          }
-
-          .ev-card-arrow {
-            transition: none;
-          }
-
-          .ev-filter-btn {
-            transition: none;
-          }
+          .ev-card { transition: none; }
+          .ev-card-arrow { transition: none; }
+          .ev-filter-btn { transition: none; }
         }
       `}</style>
     </>
