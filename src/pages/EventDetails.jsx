@@ -798,7 +798,7 @@ export default function EventDetails() {
           }
 
           .ed-chibi {
-            right: 230px;
+            right: 17rem;
             bottom: 1px;
             width: 110px;
           }
@@ -810,7 +810,7 @@ export default function EventDetails() {
           .ed-web--br {
             width: 80px;
             height: 80px;
-            right:240px;
+            right: 18rem;
             bottom:18px;
           }
 
