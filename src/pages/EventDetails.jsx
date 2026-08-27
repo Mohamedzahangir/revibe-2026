@@ -320,16 +320,18 @@ export default function EventDetails() {
 
             <div className="ed-hero-copy">
               <span
-                className={`ed-cat${
-                  isTech ? " ed-cat--tech" : " ed-cat--non"
-                }`}
+                className={`ed-cat${isTech ? " ed-cat--tech" : " ed-cat--non"
+                  }`}
               >
                 {event.category}
               </span>
 
-              <h1 className="ed-title">{event.name}</h1>
+              <h1 className="ed-title">{event.description}</h1>
             </div>
           </div>
+          {event.chibi && (
+            <img src={event.chibi} alt="" className="ed-chibi" />
+          )}
         </section>
 
         {/* ═══════════════════════════════════════════════════════════
@@ -554,6 +556,15 @@ export default function EventDetails() {
           text-transform: uppercase;
         }
 
+        .ed-chibi {
+          position: absolute;
+          right: 355px;
+          bottom: 3px;
+          width: 200px;
+          height: auto;
+          pointer-events: none;
+        }
+
         .ed-web {
           position: absolute;
           pointer-events: none;
@@ -569,10 +580,10 @@ export default function EventDetails() {
         }
 
         .ed-web--br {
-          bottom: 0;
-          right: 0;
-          width: 160px;
-          height: 160px;
+          bottom: 7px;
+          right: 375px;
+          width: 150px;
+          height: 150px;
           transform: rotate(180deg);
           opacity: 0.3;
         }
@@ -783,16 +794,24 @@ export default function EventDetails() {
 
           .ed-title {
             font-size: clamp(1.5rem, 8vw, 2rem);
+            margin-left: 30px;
+          }
+
+          .ed-chibi {
+            right: 230px;
+            bottom: 1px;
+            width: 110px;
           }
 
           .ed-web--tl {
-            width: 130px;
-            height: 130px;
+            display: none;
           }
 
           .ed-web--br {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
+            right:240px;
+            bottom:18px;
           }
 
           .ed-body {
