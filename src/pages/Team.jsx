@@ -643,19 +643,23 @@ export default function Team() {
           }
 
           .mb-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
+            grid-template-columns: 1fr;
+            gap: 16px;
           }
 
           .mb-grid--core {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: 1fr;
             gap: 16px;
-            justify-items: center;
           }
 
-          .mb-grid--core > li:first-child {
-            grid-column: 1 / -1;
-            max-width: 240px;
+          .mb-card {
+            height: auto;
+          }
+
+          .mb-photo {
+            aspect-ratio: 577 / 433;
+            max-height: 240px;
+            margin: 0 auto;
           }
         }
 
