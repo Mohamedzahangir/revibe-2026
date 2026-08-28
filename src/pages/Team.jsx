@@ -1,4 +1,3 @@
-import SpiderWeb from "../components/navigation/SpiderWeb";
 import imageTemplate from "../assets/Photos/image-template.png";
 
 const coreTeam = [
@@ -14,7 +13,7 @@ const coreTeam = [
     role: "Vice President",
     dept: "IV Year CSE",
     photo:
-      "https://res.cloudinary.com/dbqjkjl0c/image/upload/v1739469250/Kashif_Ul_haq_pgq5mb.jpg",
+      "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935202/Kashif_Ul_haq_hatop4.png",
   },
   {
     name: "Mohammed Melhan",
@@ -34,11 +33,12 @@ const teams = [
       "The builders behind the web, coding, structuring and shipping every page of the experience.",
     members: [
       { name: "Mohammed Aasif", dept: "IV Year CSE", role: "Administrator", lead: true, photo: "https://res.cloudinary.com/devn2ez7p/image/upload/v1782652275/prof_link_pic_3_2.jpg_w85kkn.jpg" },
-      { name: "Mohamed Zahangir Ali Molla", dept: "III Year AI-DS", role: "Administrator", lead: true, photo: "https://res.cloudinary.com/drgwlnf67/image/upload/f_auto,q_auto/dcb3e81a-ec96-49ea-aad0-05ad796b053e_rifahc" },
+      { name: "Mohammed Zahangir", dept: "III Year AI-DS", role: "Administrator", lead: true, photo: "https://res.cloudinary.com/drgwlnf67/image/upload/f_auto,q_auto/dcb3e81a-ec96-49ea-aad0-05ad796b053e_rifahc" },
       { name: "Abdul Gaffoor Asjad", dept: "IV Year CSE", photo: "https://res.cloudinary.com/dbqjkjl0c/image/upload/v1739474332/Abdul_Gaffoor_Asjad_d9uolc.jpg" },
       { name: "Mohammed Yasar M", dept: "III Year AI-DS", role: "Session Incharge", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/f_auto,q_auto/Screenshot_2026-03-31_163341_uwuv0c" },
-      { name: "Rila Fathima S.K", dept: "II Year CSE" },
-      { name: "A Muhammad Saad", dept: "II Year IT" },
+      { name: "Rila Fathima S.K", dept: "II Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935200/Rila_Fathima_bmcgac.png" },
+      { name: "A Muhammad Saad", dept: "II Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935198/A_Muhammad_Saad_dqvnob.jpg" },
+      { name: "Zainab Sayeeda MK", dept: "II Year AI-DS", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935200/Sayeeda_qq0vv6.png" },
     ],
   },
   {
@@ -48,12 +48,12 @@ const teams = [
     blurb:
       "The visual storytellers, shaping the look, feel and identity that makes the web come alive.",
     members: [
-      { name: "Mudassir", dept: "IV Year AI-DS", lead: true, photo: "https://res.cloudinary.com/dbqjkjl0c/image/upload/v1739469242/Mohammed_Mudassir461_dwng1y.jpg" },
+      { name: "Mudassir", dept: "IV Year AI-DS", lead: true, photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935182/Mohammed_Mudassir_y8mis1.jpg" },
       { name: "Pooja Sri M", dept: "III Year CSE", photo: "https://res.cloudinary.com/dxdieopb8/image/upload/v1775223179/pooja_pic_kt3mta.jpg" },
-      { name: "Afra Naushine S", dept: "III Year CSE", photo: "https://res.cloudinary.com/dnxvo9np0/image/upload/v1775233033/WhatsApp_Image_2026-04-03_at_9.45.33_PM_mqbcte.jpg" },
-      { name: "Juvariya Anjum", dept: "II Year AI-DS" },
-      { name: "Shanmuga Priya. J", dept: "II Year CSE" },
-      { name: "MONIKA A", dept: "II Year CSE" },
+      { name: "Afra Naushine S", dept: "III Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935181/Afra_Naushine_yiv1fl.jpg", photoPos: "center 20%" },
+      { name: "Juvariya Anjum", dept: "II Year AI-DS", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935206/Juvariya_Anjum_rwctbz.jpg" },
+      { name: "Shanmuga Priya. J", dept: "II Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935197/Shanmuga_Priya_viwfz7.png" },
+      { name: "MONIKA A", dept: "II Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935193/Monika_tb1xkl.png" },
     ],
   },
   {
@@ -65,7 +65,7 @@ const teams = [
     members: [
       { name: "Shafifa Naaz", dept: "IV Year IT", lead: true, photo: "https://res.cloudinary.com/douhcccb7/image/upload/v1739638247/WhatsApp_Image_2025-02-15_at_10.07.35_PM_zn9aaw.jpg" },
       { name: "Samiiksha C", dept: "III Year CSE", photo: "https://res.cloudinary.com/dnbifmfhl/image/upload/v1774977981/WhatsApp_Image_2026-03-31_at_10.45.05_PM_rzanjh.jpg" },
-      { name: "Sanga Illakiya. S", dept: "II Year CSE" },
+      { name: "Sanga Illakiya. S", dept: "II Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935199/Sanga_Ilakiya_mhftws.png" },
     ],
   },
   {
@@ -77,9 +77,9 @@ const teams = [
     members: [
       { name: "Mohammed Abuzar", dept: "IV Year CSE", role: "Social Media Lead", lead: true, photo: "https://res.cloudinary.com/douhcccb7/image/upload/v1739525912/WhatsApp_Image_2025-02-14_at_5.06.32_AM_nasmey.jpg" },
       { name: "Mohammed Sufyaan", dept: "II Year IT" },
-      { name: "S MOHAMMED SAAD", dept: "II Year AI-DS" },
-      { name: "Mohammed Fahad Khan FM", dept: "II Year IT" },
-      { name: "Zainab Sayeeda MK", dept: "II Year AI-DS" },
+      { name: "S MOHAMMED SAAD", dept: "II Year AI-DS", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935208/S_MOHAMMED_SAAD_h03juj.png" },
+      { name: "Mohammed Fahad Khan FM", dept: "II Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935189/Fahad_Khan_gtft9u.png" },
+      { name: "Zainab Sayeeda MK", dept: "II Year AI-DS", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935200/Sayeeda_qq0vv6.png" },
     ],
   },
   {
@@ -91,23 +91,23 @@ const teams = [
     members: [
       { name: "Abishek", dept: "IV Year IT", role: "Session Incharge", photo: "/placeholder.svg?height=200&width=200" },
       { name: "Mohammed Abbas", dept: "IV Year CSE", role: "Session Incharge", photo: "https://res.cloudinary.com/dbqjkjl0c/image/upload/v1739474337/Mohammed_Abbas_z7hbpd.jpg" },
-      { name: "Swetha", dept: "IV Year IT", photo: "https://res.cloudinary.com/douhcccb7/image/upload/v1739638258/WhatsApp_Image_2025-02-15_at_9.56.53_PM_s9oghq.jpg" },
+      { name: "Swetha", dept: "IV Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935194/Swetha_edexd4.jpg" },
       { name: "Dhurga prasad S", dept: "IV Year EEE", photo: "https://res.cloudinary.com/douhcccb7/image/upload/v1739638236/WhatsApp_Image_2025-02-15_at_9.36.39_PM_uzlpgq.jpg" },
-      { name: "Raja Rajeswari S", dept: "III Year AI-DS", role: "Advisor", photo: "https://res.cloudinary.com/drgwlnf67/image/upload/v1782659637/advisor_lz99kh.jpg" },
+      { name: "Raja Rajeswari S", dept: "III Year AI-DS", role: "Advisor", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935189/Raja_Rajeshwari_ejr7v6.jpg" },
       { name: "Zakwan Haaziq K", dept: "III Year CSE", photo: "https://res.cloudinary.com/doknhsy61/image/upload/v1776162058/mee_prof_wzcf0y.jpg" },
       { name: "Affan Basha A", dept: "III Year IT", photo: "https://res.cloudinary.com/drgwlnf67/image/upload/v1782659637/affan_jnnr58.jpg" },
       { name: "Akshaya A", dept: "III Year CSE", photo: "https://gokuls2028.neocities.org/Akshaya%20A.jpeg" },
-      { name: "Banusree R", dept: "III Year CSE", photo: "https://res.cloudinary.com/dvfzsmzbt/image/upload/f_auto,q_auto/R_BANUSREE_iexzmz" },
-      { name: "Gokul S", dept: "III Year IT", photo: "https://gokuls2028.neocities.org/sgc.jpeg" },
-      { name: "GOPIKA. P", dept: "II Year EEE" },
-      { name: "S Teekaraman", dept: "II Year CSE" },
-      { name: "MOHAMMED MAAZ C", dept: "II Year CSE" },
-      { name: "Zuha Fathima. Z", dept: "II Year IT" },
-      { name: "K Mohamed Emad UR Rahman", dept: "II Year AI-ML" },
+      { name: "Banusree R", dept: "III Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935183/R.Banusree_uisleq.jpg" },
+      { name: "Gokul S", dept: "III Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935187/gokul_s_kmjp5e.jpg" },
+      { name: "GOPIKA. P", dept: "II Year EEE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935191/Gopika_P_itslkt.png" },
+      { name: "S Teekaraman", dept: "II Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935203/S_Teekaraman_xfcata.jpg" },
+      { name: "MOHAMMED MAAZ C", dept: "II Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935180/Maaz_Mohammed_ykuaie.jpg" },
+      { name: "Zuha Fathima. Z", dept: "II Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935204/Zuha_Fathima_apwj0d.png" },
+      { name: "K Mohamed Emad UR Rahman", dept: "II Year AI-ML", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935211/MD_EMAD_K_brf3yl.png" },
       { name: "M Samyuktha", dept: "II Year AI-ML" },
-      { name: "S. Shalini", dept: "II Year AI-ML" },
-      { name: "Madiha. A", dept: "II Year IT" },
-      { name: "Mohammed Amaan. D", dept: "II Year AI-ML" },
+      { name: "S. Shalini", dept: "II Year AI-ML", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935204/Shalini_mm8tyg.jpg" },
+      { name: "Madiha. A", dept: "II Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935202/Madiha_r249s3.jpg" },
+      { name: "Mohammed Amaan. D", dept: "II Year AI-ML", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935181/Mohammed_Amaan._D_auakrw.jpg" },
       { name: "T. Vaishnavi", dept: "II Year AI-ML" },
       { name: "Monesh Raji R", dept: "II Year ECE" },
     ],
@@ -124,28 +124,33 @@ function initials(name) {
 function MemberCard({ member }) {
   return (
     <article className="mb-card" key={member.name}>
-      <div className="mb-photo" aria-label={`${member.name} photo`}>
-        <img className="mb-photo-frame" src={imageTemplate} alt="" aria-hidden="true" />
-        <div className="mb-photo-cutout">
-          {member.photo ? (
-            <img className="mb-photo-img" src={member.photo} alt={member.name} />
-          ) : (
-            <span className="mb-photo-mark">{initials(member.name)}</span>
-          )}
-        </div>
+      <div className="mb-card-header">
         {member.lead && (
           <span className="mb-lead-pill" aria-label="Lead">
             Lead
           </span>
         )}
       </div>
-      <div className="mb-copy">
-        <div className="mb-name-row">
-          <h3 className="mb-name">{member.name}</h3>
-          {member.role && (
-            <span className="mb-designation">{member.role}</span>
+      <div className="mb-photo" aria-label={`${member.name} photo`}>
+        <img className="mb-photo-frame" src={imageTemplate} alt="" aria-hidden="true" />
+        <div className="mb-photo-cutout">
+          {member.photo ? (
+            <img
+              className="mb-photo-img"
+              src={member.photo}
+              alt={member.name}
+              style={member.photoPos ? { objectPosition: member.photoPos } : undefined}
+            />
+          ) : (
+            <span className="mb-photo-mark">{initials(member.name)}</span>
           )}
         </div>
+      </div>
+      <div className="mb-copy">
+        <h3 className="mb-name">{member.name}</h3>
+        {member.role && (
+          <span className="mb-designation">{member.role}</span>
+        )}
         <p className="mb-dept">{member.dept}</p>
       </div>
     </article>
@@ -159,12 +164,7 @@ export default function Team() {
         {/* ============================================================
             HERO
             ============================================================ */}
-        <section className="mb-hero mb-grid-bg" aria-labelledby="members-title">
-          <SpiderWeb className="mb-hero-web mb-hero-web--tl" />
-          <SpiderWeb className="mb-hero-web mb-hero-web--tr" />
-          <SpiderWeb className="mb-hero-web mb-hero-web--bl" />
-          <SpiderWeb className="mb-hero-web mb-hero-web--br" />
-
+        <section className="mb-hero" aria-labelledby="members-title">
           <div className="mb-container mb-container--narrow">
             <p className="mb-label">REVIBE '26 Crew</p>
 
@@ -199,9 +199,6 @@ export default function Team() {
             </p>
 
             <div className="mb-grid-wrap">
-              <SpiderWeb className="mb-grid-web mb-grid-web--tl" />
-              <SpiderWeb className="mb-grid-web mb-grid-web--br" />
-
               <ul className="mb-grid mb-grid--core" role="list">
                 {coreTeam.map((member) => (
                   <li key={`core-${member.name}`}>
@@ -225,9 +222,6 @@ export default function Team() {
               <p className="mb-body">{team.blurb}</p>
 
               <div className="mb-grid-wrap">
-                <SpiderWeb className="mb-grid-web mb-grid-web--tl" />
-                <SpiderWeb className="mb-grid-web mb-grid-web--br" />
-
                 <ul className="mb-grid" role="list">
                   {team.members.map((member) => (
                     <li key={`${team.id}-${member.name}-${member.dept}`}>
@@ -278,60 +272,11 @@ export default function Team() {
           overflow: hidden;
         }
 
-        .mb-grid-bg::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          z-index: 0;
-          pointer-events: none;
-          background-image:
-            repeating-linear-gradient(45deg, rgba(26,26,26,0.05) 0 1px, transparent 1px 28px),
-            repeating-linear-gradient(-45deg, rgba(26,26,26,0.05) 0 1px, transparent 1px 28px);
-        }
-
         .mb-section {
           position: relative;
           padding: 72px 0;
           background: #f5f5f5;
           overflow: hidden;
-        }
-
-        .mb-hero-web {
-          position: absolute;
-          pointer-events: none;
-          z-index: 0;
-          opacity: 0.35;
-        }
-
-        .mb-hero-web--tl {
-          top: 0;
-          left: 0;
-          width: 200px;
-          height: 200px;
-        }
-
-        .mb-hero-web--tr {
-          top: 0;
-          right: 0;
-          width: 150px;
-          height: 150px;
-          transform: scaleX(-1);
-        }
-
-        .mb-hero-web--bl {
-          bottom: 0;
-          left: 0;
-          width: 150px;
-          height: 150px;
-          transform: scaleY(-1);
-        }
-
-        .mb-hero-web--br {
-          bottom: 0;
-          right: 0;
-          width: 200px;
-          height: 200px;
-          transform: rotate(180deg);
         }
 
         .mb-hero .mb-container,
@@ -437,28 +382,6 @@ export default function Team() {
           margin-top: 40px;
         }
 
-        .mb-grid-web {
-          position: absolute;
-          z-index: 3;
-          pointer-events: none;
-          opacity: 0.4;
-        }
-
-        .mb-grid-web--tl {
-          top: -50px;
-          left: -50px;
-          width: 160px;
-          height: 160px;
-        }
-
-        .mb-grid-web--br {
-          bottom: -50px;
-          right: -50px;
-          width: 160px;
-          height: 160px;
-          transform: rotate(180deg);
-        }
-
         .mb-grid {
           position: relative;
           z-index: 2;
@@ -468,14 +391,19 @@ export default function Team() {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 24px;
+          align-items: stretch;
+        }
+
+        .mb-grid > li {
+          display: flex;
         }
 
         .mb-card {
           position: relative;
           display: flex;
           flex-direction: column;
-          gap: 14px;
-          padding: 20px;
+          gap: 10px;
+          padding: 18px;
           border: 1px solid rgba(220, 0, 0, 0.35);
           border-radius: 16px;
           background:
@@ -485,6 +413,7 @@ export default function Team() {
             inset 0 1px 0 rgba(255, 255, 255, 0.8);
           overflow: hidden;
           transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+          height: 100%;
         }
 
         .mb-card::after {
@@ -516,7 +445,7 @@ export default function Team() {
           z-index: 1;
           width: 100%;
           aspect-ratio: 577 / 433;
-          margin-top: 8px;
+          margin-top: 0;
           border-radius: 12px;
           overflow: hidden;
 
@@ -572,12 +501,17 @@ export default function Team() {
           text-transform: uppercase;
         }
 
+        .mb-card-header {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 28px;
+          flex-shrink: 0;
+        }
+
         .mb-lead-pill {
-          position: absolute;
-          top: 10px;
-          right: 10px;
-          z-index: 2;
-          padding: 5px 11px;
+          z-index: 3;
+          padding: 5px 14px;
           background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
           color: #ffffff;
           border: 1px solid rgba(220, 0, 0, 0.4);
@@ -599,28 +533,31 @@ export default function Team() {
           z-index: 1;
           display: flex;
           flex-direction: column;
-          gap: 4px;
-        }
-
-        .mb-name-row {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: baseline;
-          gap: 0.3rem 0.45rem;
+          align-items: center;
+          text-align: center;
+          gap: 6px;
+          flex: 1 1 auto;
+          justify-content: flex-end;
         }
 
         .mb-name {
           margin: 0;
           font-family: 'Anton', sans-serif;
           font-weight: 400;
-          font-size: 1.25rem;
-          line-height: 1.1;
+          font-size: 1.05rem;
+          line-height: 1.15;
           letter-spacing: 0.02em;
           color: #b7102a;
           text-transform: uppercase;
+          min-height: 2.4rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
         }
 
         .mb-designation {
+          display: inline-block;
           font-family: 'JetBrains Mono', monospace;
           font-size: 0.66rem;
           font-weight: 700;
@@ -630,8 +567,11 @@ export default function Team() {
           background: rgba(220, 0, 0, 0.10);
           border: 1px solid rgba(220, 0, 0, 0.35);
           border-radius: 999px;
-          padding: 0.12rem 0.5rem;
+          padding: 0.18rem 0.6rem;
           white-space: nowrap;
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .mb-dept {
@@ -642,6 +582,7 @@ export default function Team() {
           letter-spacing: 0.14em;
           text-transform: uppercase;
           color: #3a3a3a;
+          min-height: 1.2rem;
         }
 
         .mb-grid--core {
@@ -694,11 +635,6 @@ export default function Team() {
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 16px;
           }
-
-          .mb-hero-web--tr,
-          .mb-hero-web--bl {
-            display: none;
-          }
         }
 
         @media (max-width: 560px) {
@@ -706,22 +642,20 @@ export default function Team() {
             padding: 80px 0 56px;
           }
 
-          .mb-hero-web--tl,
-          .mb-hero-web--br {
-            width: 130px;
-            height: 130px;
-            opacity: 0.25;
-          }
-
           .mb-grid {
-            grid-template-columns: 1fr;
-            gap: 16px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
           }
 
-          .mb-grid-web--tl,
-          .mb-grid-web--br {
-            width: 110px;
-            height: 110px;
+          .mb-grid--core {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            justify-items: center;
+          }
+
+          .mb-grid--core > li:first-child {
+            grid-column: 1 / -1;
+            max-width: 240px;
           }
         }
 
