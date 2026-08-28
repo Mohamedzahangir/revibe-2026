@@ -3,22 +3,6 @@ import imageTemplate from "../assets/Photos/image-template.png";
 
 const teams = [
   {
-    id: "web-artists",
-    label: "Design Team",
-    title: "Web Artists",
-    blurb:
-      "The visual storytellers, shaping the look, feel and identity that makes the web come alive.",
-    members: [
-      { name: "Mohammed Aasif", dept: "IV year CSE", role: "Administrator", lead: true },
-      { name: "Mohd. Zahangir", dept: "III year AI-DS", role: "Administrator", lead: true },
-      { name: "Abdul Asjad", dept: "IV year CSE" },
-      { name: "Mohammed Yasar M", dept: "III year AI-DS", role: "Session Incharge" },
-      { name: "Rila Fathima S.K", dept: "II year CSE" },
-      { name: "Mohammed Saad", dept: "II year IT" },
-      { name: "Zainab", dept: "II year AI-DS" },
-    ],
-  },
-  {
     id: "web-architects",
     label: "Website Team",
     title: "Web Architects",
@@ -32,6 +16,22 @@ const teams = [
       { name: "Juveriya", dept: "II year AI-DS" },
       { name: "Shamuga Priya", dept: "II year CSE" },
       { name: "Monika", dept: "II year EEE" },
+    ],
+  },
+  {
+    id: "web-artists",
+    label: "Design Team",
+    title: "Web Artists",
+    blurb:
+      "The visual storytellers, shaping the look, feel and identity that makes the web come alive.",
+    members: [
+      { name: "Mohammed Aasif", dept: "IV year CSE", role: "Administrator", lead: true },
+      { name: "Mohd. Zahangir", dept: "III year AI-DS", role: "Administrator", lead: true },
+      { name: "Abdul Asjad", dept: "IV year CSE" },
+      { name: "Mohammed Yasar M", dept: "III year AI-DS", role: "Session Incharge" },
+      { name: "Rila Fathima S.K", dept: "II year CSE" },
+      { name: "Mohammed Saad", dept: "II year IT" },
+      { name: "Zainab", dept: "II year AI-DS" },
     ],
   },
   {
