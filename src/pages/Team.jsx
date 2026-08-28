@@ -80,6 +80,7 @@ const teams = [
       { name: "S MOHAMMED SAAD", dept: "II Year AI-DS", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935208/S_MOHAMMED_SAAD_h03juj.png" },
       { name: "Mohammed Fahad Khan FM", dept: "II Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935189/Fahad_Khan_gtft9u.png" },
       { name: "Zainab Sayeeda MK", dept: "II Year AI-DS", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935200/Sayeeda_qq0vv6.png" },
+      { name: "Mohammed Yasar M", dept: "III Year AI-DS", role: "Session Incharge", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/f_auto,q_auto/Screenshot_2026-03-31_163341_uwuv0c" },
     ],
   },
   {
