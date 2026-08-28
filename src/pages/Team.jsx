@@ -1,6 +1,33 @@
 import SpiderWeb from "../components/navigation/SpiderWeb";
 import imageTemplate from "../assets/Photos/image-template.png";
 
+const coreTeam = [
+  {
+    name: "Mohammed Ayaz",
+    role: "President",
+    dept: "IV year CSE",
+    photo:
+      "https://res.cloudinary.com/drgwlnf67/image/upload/v1782542238/WhatsApp_Image_2026-06-27_at_9.12.04_AM_vv5fls.jpg",
+    linkedin: "https://www.linkedin.com/in/mohammed-ayaz-2b16062a5",
+  },
+  {
+    name: "Kashif Ulhaq",
+    role: "Vice President",
+    dept: "IV year CSE",
+    photo:
+      "https://res.cloudinary.com/dbqjkjl0c/image/upload/v1739469250/Kashif_Ul_haq_pgq5mb.jpg",
+    linkedin: "https://www.linkedin.com/in/kashif-ulhaq-k-a43956278/",
+  },
+  {
+    name: "Mohamed Melhan",
+    role: "Vice President",
+    dept: "IV year AI-DS",
+    photo:
+      "https://res.cloudinary.com/drgwlnf67/image/upload/v1782659638/melhan_sedtgb.jpg",
+    linkedin: "https://www.linkedin.com/in/mohamed-melhan-k-o-1bb3872a6",
+  },
+];
+
 const teams = [
   {
     id: "web-architects",
@@ -9,10 +36,10 @@ const teams = [
     blurb:
       "The builders behind the web, coding, structuring and shipping every page of the experience.",
     members: [
-      { name: "Mohammed Aasif", dept: "IV year CSE", role: "Administrator", lead: true },
-      { name: "Mohd. Zahangir", dept: "III year AI-DS", role: "Administrator", lead: true },
-      { name: "Abdul Asjad", dept: "IV year CSE" },
-      { name: "Mohammed Yasar M", dept: "III year AI-DS", role: "Session Incharge" },
+      { name: "Mohammed Aasif", dept: "IV year CSE", role: "Administrator", lead: true, photo: "https://res.cloudinary.com/devn2ez7p/image/upload/v1782652275/prof_link_pic_3_2.jpg_w85kkn.jpg", linkedin: "https://www.linkedin.com/in/mohammed-aasif-6a36062a5" },
+      { name: "Mohd. Zahangir", dept: "III year AI-DS", role: "Administrator", lead: true, photo: "https://res.cloudinary.com/drgwlnf67/image/upload/f_auto,q_auto/dcb3e81a-ec96-49ea-aad0-05ad796b053e_rifahc", linkedin: "https://www.linkedin.com/in/mohd-zahangir-ali-molla/" },
+      { name: "Abdul Asjad", dept: "IV year CSE", photo: "https://res.cloudinary.com/dbqjkjl0c/image/upload/v1739474332/Abdul_Gaffoor_Asjad_d9uolc.jpg", linkedin: "https://www.linkedin.com/in/abdul-gaffoor-asjad-b6b2412a6" },
+      { name: "Mohammed Yasar M", dept: "III year AI-DS", role: "Session Incharge", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/f_auto,q_auto/Screenshot_2026-03-31_163341_uwuv0c", linkedin: "https://www.linkedin.com/in/mohammed-yasar-28b821334" },
       { name: "Rila Fathima S.K", dept: "II year CSE" },
       { name: "Mohammed Saad", dept: "II year IT" },
       { name: "Zainab", dept: "II year AI-DS" },
@@ -25,10 +52,9 @@ const teams = [
     blurb:
       "The visual storytellers, shaping the look, feel and identity that makes the web come alive.",
     members: [
-      { name: "Mudassir", dept: "IV year AI-DS", lead: true },
-      { name: "Mohammed Ayaz", dept: "IV year CSE", role: "President", lead: true },
-      { name: "Pooja Sri M", dept: "III year CSE" },
-      { name: "Afra Naushine S", dept: "III year CSE" },
+      { name: "Mudassir", dept: "IV year AI-DS", lead: true, photo: "https://res.cloudinary.com/dbqjkjl0c/image/upload/v1739469242/Mohammed_Mudassir461_dwng1y.jpg", linkedin: "https://www.linkedin.com/in/mohammed-mudassir-a3b6322a5" },
+      { name: "Pooja Sri M", dept: "III year CSE", photo: "https://res.cloudinary.com/dxdieopb8/image/upload/v1775223179/pooja_pic_kt3mta.jpg", linkedin: "https://www.linkedin.com/in/pooja-sri-m-a52487379" },
+      { name: "Afra Naushine S", dept: "III year CSE", photo: "https://res.cloudinary.com/dnxvo9np0/image/upload/v1775233033/WhatsApp_Image_2026-04-03_at_9.45.33_PM_mqbcte.jpg", linkedin: "https://www.linkedin.com/in/afra-naushine" },
       { name: "Juveriya", dept: "II year AI-DS" },
       { name: "Shamuga Priya", dept: "II year CSE" },
       { name: "Monika", dept: "II year EEE" },
@@ -41,8 +67,8 @@ const teams = [
     blurb:
       "The wordsmiths of the web, spinning the narrative thread that runs through every page.",
     members: [
-      { name: "Shafifa Naaz", dept: "IV year IT", lead: true },
-      { name: "Samiiksha C", dept: "III year CSE" },
+      { name: "Shafifa Naaz", dept: "IV year IT", lead: true, photo: "https://res.cloudinary.com/douhcccb7/image/upload/v1739638247/WhatsApp_Image_2025-02-15_at_10.07.35_PM_zn9aaw.jpg", linkedin: "https://www.linkedin.com/in/shafifa-naaz-7442472a6" },
+      { name: "Samiiksha C", dept: "III year CSE", photo: "https://res.cloudinary.com/dnbifmfhl/image/upload/v1774977981/WhatsApp_Image_2026-03-31_at_10.45.05_PM_rzanjh.jpg", linkedin: "https://www.linkedin.com/in/samiiksha-c" },
       { name: "Sanga Illakiya", dept: "II year AI-ML" },
     ],
   },
@@ -53,7 +79,7 @@ const teams = [
     blurb:
       "The amplifiers of the web, carrying the signal of REVIBE '26 across every channel.",
     members: [
-      { name: "Abuzar", dept: "IV year CSE", role: "Social Media Lead", lead: true },
+      { name: "Abuzar", dept: "IV year CSE", role: "Social Media Lead", lead: true, photo: "https://res.cloudinary.com/douhcccb7/image/upload/v1739525912/WhatsApp_Image_2025-02-14_at_5.06.32_AM_nasmey.jpg", linkedin: "https://www.linkedin.com/in/md-abuzar-1892882a6/" },
       { name: "Mohammed Sufyaan A", dept: "II year IT" },
       { name: "Mohammed Saad S", dept: "II year AI-DS" },
       { name: "Fahad Khan", dept: "II year IT" },
@@ -68,18 +94,16 @@ const teams = [
     blurb:
       "The wider web of SGC, the hands holding the rest of the strands together.",
     members: [
-      { name: "Kashif Ulhaq", dept: "IV Year", role: "Vice President" },
-      { name: "Mohammed Melhan", dept: "IV Year", role: "Vice President" },
-      { name: "Abishek", dept: "IV Year", role: "Session Incharge" },
-      { name: "Mohammed Abbas", dept: "IV Year", role: "Session Incharge" },
-      { name: "Swetha", dept: "IV Year" },
-      { name: "Dhurga Prasad S", dept: "IV Year" },
-      { name: "Raja Rajeswari S", dept: "III Year", role: "Advisor" },
-      { name: "Zakwan Haaziq K", dept: "III Year" },
-      { name: "Affan Basha A", dept: "III Year" },
-      { name: "Akshaya A", dept: "III Year" },
-      { name: "Banusree R", dept: "III Year" },
-      { name: "Gokul S", dept: "III Year" },
+      { name: "Abishek", dept: "IV Year", role: "Session Incharge", photo: "/placeholder.svg?height=200&width=200", linkedin: "https://www.linkedin.com/in/ak-abishek/" },
+      { name: "Mohammed Abbas", dept: "IV Year", role: "Session Incharge", photo: "https://res.cloudinary.com/dbqjkjl0c/image/upload/v1739474337/Mohammed_Abbas_z7hbpd.jpg", linkedin: "https://www.linkedin.com/in/mohamed-abbas-46b49a2a5/" },
+      { name: "Swetha", dept: "IV Year", photo: "https://res.cloudinary.com/douhcccb7/image/upload/v1739638258/WhatsApp_Image_2025-02-15_at_9.56.53_PM_s9oghq.jpg", linkedin: "https://www.linkedin.com/in/swetha-venkatesan-7b32492a6/" },
+      { name: "Dhurga Prasad S", dept: "IV Year", photo: "https://res.cloudinary.com/douhcccb7/image/upload/v1739638236/WhatsApp_Image_2025-02-15_at_9.36.39_PM_uzlpgq.jpg" },
+      { name: "Raja Rajeswari S", dept: "III Year", role: "Advisor", photo: "https://res.cloudinary.com/drgwlnf67/image/upload/v1782659637/advisor_lz99kh.jpg", linkedin: "https://www.linkedin.com/in/raja-rajeswari-srinivasan-10711b3b0" },
+      { name: "Zakwan Haaziq K", dept: "III Year", photo: "https://res.cloudinary.com/doknhsy61/image/upload/v1776162058/mee_prof_wzcf0y.jpg", linkedin: "https://www.linkedin.com/in/zakwan-haaziq-533392322/" },
+      { name: "Affan Basha A", dept: "III Year", photo: "https://res.cloudinary.com/drgwlnf67/image/upload/v1782659637/affan_jnnr58.jpg", linkedin: "https://www.linkedin.com/in/affanbasha" },
+      { name: "Akshaya A", dept: "III Year", photo: "https://gokuls2028.neocities.org/Akshaya%20A.jpeg", linkedin: "https://www.linkedin.com/in/akshaya-a-343731340/" },
+      { name: "Banusree R", dept: "III Year", photo: "https://res.cloudinary.com/dvfzsmzbt/image/upload/f_auto,q_auto/R_BANUSREE_iexzmz", linkedin: "https://www.linkedin.com/in/r-banu-sree-5893a9379/" },
+      { name: "Gokul S", dept: "III Year", photo: "https://gokuls2028.neocities.org/sgc.jpeg", linkedin: "https://www.linkedin.com/in/gokul-s202428/" },
       { name: "Gopika P", dept: "II Year" },
       { name: "S Teekaraman", dept: "II Year" },
       { name: "Mohammed Maaz C", dept: "II Year" },
@@ -127,7 +151,23 @@ function MemberCard({ member }) {
             <span className="mb-designation">{member.role}</span>
           )}
         </div>
-        <p className="mb-dept">{member.dept}</p>
+        <div className="mb-dept-row">
+          <p className="mb-dept">{member.dept}</p>
+          {member.linkedin && (
+            <a
+              className="mb-linkedin"
+              href={member.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${member.name} on LinkedIn`}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z" />
+              </svg>
+              LinkedIn
+            </a>
+          )}
+        </div>
       </div>
     </article>
   );
@@ -161,6 +201,36 @@ export default function Team() {
             </p>
 
             <p className="mb-strong">Different talents. One web. One mission.</p>
+          </div>
+        </section>
+
+        <hr className="mb-rule" aria-hidden="true" />
+
+        {/* ============================================================
+            CORE TEAM
+            ============================================================ */}
+        <section className="mb-section" aria-labelledby="core-team">
+          <div className="mb-container">
+            <p className="mb-label">REVIBE '26 Core</p>
+            <h2 id="core-team" className="mb-headline">
+              The Core Team
+            </h2>
+            <p className="mb-body">
+              The leads of SGC, steering the vision and holding the web together.
+            </p>
+
+            <div className="mb-grid-wrap">
+              <SpiderWeb className="mb-grid-web mb-grid-web--tl" />
+              <SpiderWeb className="mb-grid-web mb-grid-web--br" />
+
+              <ul className="mb-grid mb-grid--core" role="list">
+                {coreTeam.map((member) => (
+                  <li key={`core-${member.name}`}>
+                    <MemberCard member={member} />
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </section>
 
@@ -595,6 +665,41 @@ export default function Team() {
           color: #3a3a3a;
         }
 
+        .mb-dept-row {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 0.4rem 0.6rem;
+        }
+
+        .mb-linkedin {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.25rem;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: #0a66c2;
+          text-decoration: none;
+          padding: 0.15rem 0.45rem;
+          border: 1px solid rgba(10, 102, 194, 0.35);
+          border-radius: 999px;
+          background: rgba(10, 102, 194, 0.06);
+          transition: background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .mb-linkedin:hover,
+        .mb-linkedin:focus-visible {
+          background: rgba(10, 102, 194, 0.14);
+          border-color: rgba(10, 102, 194, 0.6);
+        }
+
+        .mb-grid--core {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
         /* =========================================================
            RESPONSIVE - tablet
            ========================================================= */
@@ -634,6 +739,11 @@ export default function Team() {
         @media (max-width: 899px) {
           .mb-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+          }
+
+          .mb-grid--core {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 16px;
           }
 
