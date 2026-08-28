@@ -49,9 +49,9 @@ const teams = [
       "The visual storytellers, shaping the look, feel and identity that makes the web come alive.",
     members: [
       { name: "Mudassir", dept: "IV Year AI-DS", lead: true, photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935182/Mohammed_Mudassir_y8mis1.jpg" },
-      { name: "Pooja Sri M", dept: "III Year CSE", photo: "https://res.cloudinary.com/dxdieopb8/image/upload/v1775223179/pooja_pic_kt3mta.jpg" },
-      { name: "Afra Naushine S", dept: "III Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935181/Afra_Naushine_yiv1fl.jpg", photoPos: "center 20%" },
-      { name: "Juvariya Anjum", dept: "II Year AI-DS", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935206/Juvariya_Anjum_rwctbz.jpg" },
+      { name: "Pooja Sri M", dept: "III Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787941461/Pooja_Sri_M_jr0hls.jpg" },
+      { name: "Afra Naushine S", dept: "III Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787941446/Afra_Naushine_zpxjoc.jpg" },
+      { name: "Juvariya Anjum", dept: "II Year AI-DS", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787941461/Juvariya_Anjum_zmyciw.jpg" },
       { name: "Shanmuga Priya. J", dept: "II Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935197/Shanmuga_Priya_viwfz7.png" },
       { name: "MONIKA A", dept: "II Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935193/Monika_tb1xkl.png" },
     ],
@@ -63,7 +63,7 @@ const teams = [
     blurb:
       "The wordsmiths of the web, spinning the narrative thread that runs through every page.",
     members: [
-      { name: "Shafifa Naaz", dept: "IV Year IT", lead: true, photo: "https://res.cloudinary.com/douhcccb7/image/upload/v1739638247/WhatsApp_Image_2025-02-15_at_10.07.35_PM_zn9aaw.jpg" },
+      { name: "Shafifa Naaz", dept: "IV Year IT", lead: true, photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787941459/Shaffu_Naaz_fpygq3.jpg" },
       { name: "Samiiksha C", dept: "III Year CSE", photo: "https://res.cloudinary.com/dnbifmfhl/image/upload/v1774977981/WhatsApp_Image_2026-03-31_at_10.45.05_PM_rzanjh.jpg" },
       { name: "Sanga Illakiya. S", dept: "II Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935199/Sanga_Ilakiya_mhftws.png" },
     ],
@@ -75,7 +75,7 @@ const teams = [
     blurb:
       "The amplifiers of the web, carrying the signal of REVIBE '26 across every channel.",
     members: [
-      { name: "Mohammed Abuzar", dept: "IV Year CSE", role: "Social Media Lead", lead: true, photo: "https://res.cloudinary.com/douhcccb7/image/upload/v1739525912/WhatsApp_Image_2025-02-14_at_5.06.32_AM_nasmey.jpg" },
+      { name: "Mohammed Abuzar", dept: "IV Year CSE", role: "Social Media Lead", lead: true, photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787941459/Md_Abuzar_w1qi0d.jpg" },
       { name: "Mohammed Sufyaan", dept: "II Year IT" },
       { name: "S MOHAMMED SAAD", dept: "II Year AI-DS", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935208/S_MOHAMMED_SAAD_h03juj.png" },
       { name: "Mohammed Fahad Khan FM", dept: "II Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935189/Fahad_Khan_gtft9u.png" },
@@ -90,11 +90,11 @@ const teams = [
       "The wider web of SGC, the hands holding the rest of the strands together.",
     members: [
       { name: "Abishek", dept: "IV Year IT", role: "Session Incharge", photo: "/placeholder.svg?height=200&width=200" },
-      { name: "Mohammed Abbas", dept: "IV Year CSE", role: "Session Incharge", photo: "https://res.cloudinary.com/dbqjkjl0c/image/upload/v1739474337/Mohammed_Abbas_z7hbpd.jpg" },
+      { name: "Mohammed Abbas", dept: "IV Year CSE", role: "Session Incharge", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787941467/Mohammed_Abbas_vpydox.jpg" },
       { name: "Swetha", dept: "IV Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935194/Swetha_edexd4.jpg" },
       { name: "Dhurga prasad S", dept: "IV Year EEE", photo: "https://res.cloudinary.com/douhcccb7/image/upload/v1739638236/WhatsApp_Image_2025-02-15_at_9.36.39_PM_uzlpgq.jpg" },
       { name: "Raja Rajeswari S", dept: "III Year AI-DS", role: "Advisor", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935189/Raja_Rajeshwari_ejr7v6.jpg" },
-      { name: "Zakwan Haaziq K", dept: "III Year CSE", photo: "https://res.cloudinary.com/doknhsy61/image/upload/v1776162058/mee_prof_wzcf0y.jpg" },
+      { name: "Zakwan Haaziq K", dept: "III Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787941463/Zakwan_Haaziq_b6f5m5.jpg" },
       { name: "Affan Basha A", dept: "III Year IT", photo: "https://res.cloudinary.com/drgwlnf67/image/upload/v1782659637/affan_jnnr58.jpg" },
       { name: "Akshaya A", dept: "III Year CSE", photo: "https://gokuls2028.neocities.org/Akshaya%20A.jpeg" },
       { name: "Banusree R", dept: "III Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935183/R.Banusree_uisleq.jpg" },
@@ -124,14 +124,12 @@ function initials(name) {
 function MemberCard({ member }) {
   return (
     <article className="mb-card" key={member.name}>
-      <div className="mb-card-header">
+      <div className="mb-photo" aria-label={`${member.name} photo`}>
         {member.lead && (
           <span className="mb-lead-pill" aria-label="Lead">
             Lead
           </span>
         )}
-      </div>
-      <div className="mb-photo" aria-label={`${member.name} photo`}>
         <img className="mb-photo-frame" src={imageTemplate} alt="" aria-hidden="true" />
         <div className="mb-photo-cutout">
           {member.photo ? (
@@ -147,10 +145,12 @@ function MemberCard({ member }) {
         </div>
       </div>
       <div className="mb-copy">
-        <h3 className="mb-name">{member.name}</h3>
-        {member.role && (
-          <span className="mb-designation">{member.role}</span>
-        )}
+        <div className="mb-name-row">
+          <h3 className="mb-name">{member.name}</h3>
+          {member.role && (
+            <span className="mb-designation">{member.role}</span>
+          )}
+        </div>
         <p className="mb-dept">{member.dept}</p>
       </div>
     </article>
@@ -391,19 +391,14 @@ export default function Team() {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
           gap: 24px;
-          align-items: stretch;
-        }
-
-        .mb-grid > li {
-          display: flex;
         }
 
         .mb-card {
           position: relative;
           display: flex;
           flex-direction: column;
-          gap: 10px;
-          padding: 18px;
+          gap: 14px;
+          padding: 20px;
           border: 1px solid rgba(220, 0, 0, 0.35);
           border-radius: 16px;
           background:
@@ -413,7 +408,6 @@ export default function Team() {
             inset 0 1px 0 rgba(255, 255, 255, 0.8);
           overflow: hidden;
           transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
-          height: 100%;
         }
 
         .mb-card::after {
@@ -445,7 +439,7 @@ export default function Team() {
           z-index: 1;
           width: 100%;
           aspect-ratio: 577 / 433;
-          margin-top: 0;
+          margin-top: 8px;
           border-radius: 12px;
           overflow: hidden;
 
@@ -501,17 +495,12 @@ export default function Team() {
           text-transform: uppercase;
         }
 
-        .mb-card-header {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          min-height: 28px;
-          flex-shrink: 0;
-        }
-
         .mb-lead-pill {
-          z-index: 3;
-          padding: 5px 14px;
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          z-index: 2;
+          padding: 5px 11px;
           background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
           color: #ffffff;
           border: 1px solid rgba(220, 0, 0, 0.4);
@@ -533,31 +522,28 @@ export default function Team() {
           z-index: 1;
           display: flex;
           flex-direction: column;
-          align-items: center;
-          text-align: center;
-          gap: 6px;
-          flex: 1 1 auto;
-          justify-content: flex-end;
+          gap: 4px;
+        }
+
+        .mb-name-row {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: baseline;
+          gap: 0.3rem 0.45rem;
         }
 
         .mb-name {
           margin: 0;
           font-family: 'Anton', sans-serif;
           font-weight: 400;
-          font-size: 1.05rem;
-          line-height: 1.15;
+          font-size: 1.25rem;
+          line-height: 1.1;
           letter-spacing: 0.02em;
           color: #b7102a;
           text-transform: uppercase;
-          min-height: 2.4rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
         }
 
         .mb-designation {
-          display: inline-block;
           font-family: 'JetBrains Mono', monospace;
           font-size: 0.66rem;
           font-weight: 700;
@@ -567,11 +553,8 @@ export default function Team() {
           background: rgba(220, 0, 0, 0.10);
           border: 1px solid rgba(220, 0, 0, 0.35);
           border-radius: 999px;
-          padding: 0.18rem 0.6rem;
+          padding: 0.12rem 0.5rem;
           white-space: nowrap;
-          max-width: 100%;
-          overflow: hidden;
-          text-overflow: ellipsis;
         }
 
         .mb-dept {
@@ -582,7 +565,6 @@ export default function Team() {
           letter-spacing: 0.14em;
           text-transform: uppercase;
           color: #3a3a3a;
-          min-height: 1.2rem;
         }
 
         .mb-grid--core {
@@ -645,21 +627,23 @@ export default function Team() {
           .mb-grid {
             grid-template-columns: 1fr;
             gap: 16px;
+            justify-items: center;
+          }
+
+          .mb-grid > li {
+            width: 100%;
+            max-width: 340px;
           }
 
           .mb-grid--core {
             grid-template-columns: 1fr;
             gap: 16px;
+            justify-items: center;
           }
 
-          .mb-card {
-            height: auto;
-          }
-
-          .mb-photo {
-            aspect-ratio: 577 / 433;
-            max-height: 240px;
-            margin: 0 auto;
+          .mb-grid--core > li {
+            width: 100%;
+            max-width: 340px;
           }
         }
 

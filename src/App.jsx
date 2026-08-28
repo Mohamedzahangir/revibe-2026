@@ -15,6 +15,7 @@ import Login from "./pages/Login";
 import CoordinatorDashboard from "./pages/CoordinatorDashboard";
 import Register from "./pages/Register";
 import Confirmation from "./pages/Confirmation";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
               path="/confirmation/:registrationNumber"
               element={<Confirmation />}
             />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
 
