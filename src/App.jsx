@@ -9,7 +9,7 @@ import Home from "./pages/Home";
 import Events from "./pages/Events";
 import EventDetails from "./pages/EventDetails";
 import About from "./pages/About";
-import Sponsors from "./pages/Sponsors";
+import Team from "./pages/Team";
 import Location from "./pages/Location";
 import Login from "./pages/Login";
 import CoordinatorDashboard from "./pages/CoordinatorDashboard";
@@ -30,7 +30,7 @@ function App() {
             <Route path="/events" element={<Events />} />
             <Route path="/events/:slug" element={<EventDetails />} />
             <Route path="/about" element={<About />} />
-            <Route path="/sponsors" element={<Sponsors />} />
+            <Route path="/team" element={<Team />} />
             <Route path="/location" element={<Location />} />
             <Route path="/login" element={<Login />} />
             <Route path="/coordinator" element={<CoordinatorDashboard />} />
