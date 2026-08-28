@@ -9,13 +9,13 @@ const teams = [
     blurb:
       "The builders behind the web, coding, structuring and shipping every page of the experience.",
     members: [
-      { name: "Mudassir", dept: "IV year AI-DS", lead: true },
-      { name: "Mohammed Ayaz", dept: "IV year CSE", role: "President", lead: true },
-      { name: "Pooja Sri M", dept: "III year CSE" },
-      { name: "Afra Naushine S", dept: "III year CSE" },
-      { name: "Juveriya", dept: "II year AI-DS" },
-      { name: "Shamuga Priya", dept: "II year CSE" },
-      { name: "Monika", dept: "II year EEE" },
+      { name: "Mohammed Aasif", dept: "IV year CSE", role: "Administrator", lead: true },
+      { name: "Mohd. Zahangir", dept: "III year AI-DS", role: "Administrator", lead: true },
+      { name: "Abdul Asjad", dept: "IV year CSE" },
+      { name: "Mohammed Yasar M", dept: "III year AI-DS", role: "Session Incharge" },
+      { name: "Rila Fathima S.K", dept: "II year CSE" },
+      { name: "Mohammed Saad", dept: "II year IT" },
+      { name: "Zainab", dept: "II year AI-DS" },
     ],
   },
   {
@@ -25,13 +25,13 @@ const teams = [
     blurb:
       "The visual storytellers, shaping the look, feel and identity that makes the web come alive.",
     members: [
-      { name: "Mohammed Aasif", dept: "IV year CSE", role: "Administrator", lead: true },
-      { name: "Mohd. Zahangir", dept: "III year AI-DS", role: "Administrator", lead: true },
-      { name: "Abdul Asjad", dept: "IV year CSE" },
-      { name: "Mohammed Yasar M", dept: "III year AI-DS", role: "Session Incharge" },
-      { name: "Rila Fathima S.K", dept: "II year CSE" },
-      { name: "Mohammed Saad", dept: "II year IT" },
-      { name: "Zainab", dept: "II year AI-DS" },
+      { name: "Mudassir", dept: "IV year AI-DS", lead: true },
+      { name: "Mohammed Ayaz", dept: "IV year CSE", role: "President", lead: true },
+      { name: "Pooja Sri M", dept: "III year CSE" },
+      { name: "Afra Naushine S", dept: "III year CSE" },
+      { name: "Juveriya", dept: "II year AI-DS" },
+      { name: "Shamuga Priya", dept: "II year CSE" },
+      { name: "Monika", dept: "II year EEE" },
     ],
   },
   {
