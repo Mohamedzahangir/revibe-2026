@@ -1,3 +1,4 @@
+import { useState } from "react";
 import imageTemplate from "../assets/Photos/image-template.png";
 
 const coreTeam = [
@@ -33,7 +34,7 @@ const teams = [
       "The builders behind the web, coding, structuring and shipping every page of the experience.",
     members: [
       { name: "Mohammed Aasif", dept: "IV Year CSE", role: "Administrator", lead: true, photo: "https://res.cloudinary.com/devn2ez7p/image/upload/v1782652275/prof_link_pic_3_2.jpg_w85kkn.jpg" },
-      { name: "Mohammed Zahangir", dept: "III Year AI-DS", role: "Administrator", lead: true, photo: "https://res.cloudinary.com/drgwlnf67/image/upload/f_auto,q_auto/dcb3e81a-ec96-49ea-aad0-05ad796b053e_rifahc" },
+      { name: "Mohammed Zahangir", dept: "III Year AI-DS", role: "Administrator", lead: true, photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788023717/Zahangir_jdjb0o.jpg" },
       { name: "Abdul Gaffoor Asjad", dept: "IV Year CSE", photo: "https://res.cloudinary.com/dbqjkjl0c/image/upload/v1739474332/Abdul_Gaffoor_Asjad_d9uolc.jpg" },
       { name: "Mohammed Yasar M", dept: "III Year AI-DS", role: "Session Incharge", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/f_auto,q_auto/Screenshot_2026-03-31_163341_uwuv0c" },
       { name: "Rila Fathima S.K", dept: "II Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935200/Rila_Fathima_bmcgac.png" },
@@ -84,23 +85,51 @@ const teams = [
     ],
   },
   {
+    id: "vault-slingers",
+    label: "Finance Team",
+    title: "Vault Slingers",
+    blurb:
+      "The keepers of the cache, balancing every thread of the budget that keeps the web running.",
+    members: [
+      { name: "Mohammed Abbas", dept: "IV Year CSE", role: "Lead", lead: true, photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787941467/Mohammed_Abbas_vpydox.jpg" },
+      { name: "Affan Basha A", dept: "III Year IT", photo: "https://res.cloudinary.com/drgwlnf67/image/upload/v1782659637/affan_jnnr58.jpg" },
+    ],
+  },
+  {
+    id: "friendly-hosts",
+    label: "Hospitality Team",
+    title: "Friendly Hosts",
+    blurb:
+      "Your friendly neighborhood hosts, welcoming every visitor into the web with open arms.",
+    members: [
+      { name: "Abishek", dept: "IV Year IT", role: "Team Lead", lead: true, photo: "/placeholder.svg?height=200&width=200" },
+      { name: "Dhurga prasad S", dept: "IV Year EEE", role: "Co-Lead", photo: "https://res.cloudinary.com/douhcccb7/image/upload/v1739638236/WhatsApp_Image_2025-02-15_at_9.36.39_PM_uzlpgq.jpg" },
+      { name: "Mohammed Zahangir", dept: "III Year AI-DS",  role: "Administrator", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788023717/Zahangir_jdjb0o.jpg" },
+    ],
+  },
+  {
+    id: "scene-spinners",
+    label: "Decoration Team",
+    title: "Scene Spinners",
+    blurb:
+      "The scene spinners, dressing every corner of the web in the colors of REVIBE '26.",
+    members: [
+      { name: "Swetha", dept: "IV Year IT", role: "Lead", lead: true, photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935194/Swetha_edexd4.jpg" },
+      { name: "Akshaya A", dept: "III Year CSE", photo: "https://gokuls2028.neocities.org/Akshaya%20A.jpeg" },
+      { name: "Banusree R", dept: "III Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935183/R.Banusree_uisleq.jpg" },
+      { name: "GOPIKA. P", dept: "II Year EEE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935191/Gopika_P_itslkt.png" },
+    ],
+  },
+  {
     id: "rest-of-team",
     label: "The Wider Web",
     title: "Rest of the Team",
     blurb:
       "The wider web of SGC, the hands holding the rest of the strands together.",
     members: [
-      { name: "Abishek", dept: "IV Year IT", role: "Session Incharge", photo: "/placeholder.svg?height=200&width=200" },
-      { name: "Mohammed Abbas", dept: "IV Year CSE", role: "Session Incharge", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787941467/Mohammed_Abbas_vpydox.jpg" },
-      { name: "Swetha", dept: "IV Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935194/Swetha_edexd4.jpg" },
-      { name: "Dhurga prasad S", dept: "IV Year EEE", photo: "https://res.cloudinary.com/douhcccb7/image/upload/v1739638236/WhatsApp_Image_2025-02-15_at_9.36.39_PM_uzlpgq.jpg" },
       { name: "Raja Rajeswari S", dept: "III Year AI-DS", role: "Advisor", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935189/Raja_Rajeshwari_ejr7v6.jpg" },
       { name: "Zakwan Haaziq K", dept: "III Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787941463/Zakwan_Haaziq_b6f5m5.jpg" },
-      { name: "Affan Basha A", dept: "III Year IT", photo: "https://res.cloudinary.com/drgwlnf67/image/upload/v1782659637/affan_jnnr58.jpg" },
-      { name: "Akshaya A", dept: "III Year CSE", photo: "https://gokuls2028.neocities.org/Akshaya%20A.jpeg" },
-      { name: "Banusree R", dept: "III Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935183/R.Banusree_uisleq.jpg" },
       { name: "Gokul S", dept: "III Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935187/gokul_s_kmjp5e.jpg" },
-      { name: "GOPIKA. P", dept: "II Year EEE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935191/Gopika_P_itslkt.png" },
       { name: "S Teekaraman", dept: "II Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935203/S_Teekaraman_xfcata.jpg" },
       { name: "MOHAMMED MAAZ C", dept: "II Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935180/Maaz_Mohammed_ykuaie.jpg" },
       { name: "Zuha Fathima. Z", dept: "II Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935204/Zuha_Fathima_apwj0d.png" },
@@ -159,6 +188,12 @@ function MemberCard({ member }) {
 }
 
 export default function Team() {
+  const [openTeams, setOpenTeams] = useState({});
+
+  const toggleTeam = (id) => {
+    setOpenTeams((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
   return (
     <>
       <main className="mb-page">
@@ -213,16 +248,36 @@ export default function Team() {
 
         <hr className="mb-rule" aria-hidden="true" />
 
-        {teams.map((team) => (
+        {teams.map((team) => {
+          const isOpen = !!openTeams[team.id];
+          return (
           <section key={team.id} className="mb-section" aria-labelledby={team.id}>
             <div className="mb-container">
-              <p className="mb-label">{team.label}</p>
-              <h2 id={team.id} className="mb-headline">
-                {team.title}
-              </h2>
-              <p className="mb-body">{team.blurb}</p>
+              <button
+                type="button"
+                className="mb-team-toggle"
+                aria-expanded={isOpen}
+                aria-controls={`${team.id}-members`}
+                onClick={() => toggleTeam(team.id)}
+              >
+                <span className="mb-team-toggle-head">
+                  <p className="mb-label">{team.label}</p>
+                  <h2 id={team.id} className="mb-headline">
+                    {team.title}
+                  </h2>
+                </span>
+                <span className={`mb-chevron${isOpen ? " mb-chevron--open" : ""}`} aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </span>
+              </button>
 
-              <div className="mb-grid-wrap">
+              <div className="mb-team-blurb" data-open={isOpen}>
+                <p className="mb-body">{team.blurb}</p>
+              </div>
+
+              <div className="mb-grid-wrap" id={`${team.id}-members`} data-open={isOpen}>
                 <ul className="mb-grid" role="list">
                   {team.members.map((member) => (
                     <li key={`${team.id}-${member.name}-${member.dept}`}>
@@ -233,7 +288,8 @@ export default function Team() {
               </div>
             </div>
           </section>
-        ))}
+          );
+        })}
       </main>
 
       <style>{`
@@ -377,6 +433,18 @@ export default function Team() {
            MEMBER GRID + CARDS
            Same box system as the sponsor cards on About/Sponsors.
            ========================================================= */
+
+        /* ---------- collapsible team header (mobile only) ---------- */
+
+        .mb-team-toggle {
+          display: none;
+        }
+
+        .mb-team-blurb {
+          display: block;
+        }
+
+        /* ---------- grid wrap ---------- */
 
         .mb-grid-wrap {
           position: relative;
@@ -617,6 +685,73 @@ export default function Team() {
           .mb-grid--core {
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 16px;
+          }
+
+          .mb-section {
+            padding: 16px 0;
+          }
+
+          /* collapsible team sections on mobile */
+          .mb-team-toggle {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            width: 100%;
+            padding: 18px 20px;
+            margin: 0;
+            border: 2px solid #1a1a1a;
+            border-radius: 14px;
+            background: #ffffff;
+            box-shadow: 4px 4px 0 #1a1a1a;
+            cursor: pointer;
+            text-align: left;
+            font: inherit;
+            color: inherit;
+          }
+
+          .mb-team-toggle-head {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          }
+
+          .mb-team-toggle-head .mb-label {
+            margin: 0;
+          }
+
+          .mb-team-toggle-head .mb-headline {
+            margin: 0;
+            font-size: clamp(26px, 7vw, 36px);
+          }
+
+          .mb-chevron {
+            flex: none;
+            display: grid;
+            place-items: center;
+            margin-top: 4px;
+            color: #dc0000;
+            transition: transform 0.25s ease;
+          }
+
+          .mb-chevron--open {
+            transform: rotate(180deg);
+          }
+
+          .mb-team-blurb {
+            margin-top: 16px;
+          }
+
+          .mb-team-blurb[data-open="false"] {
+            display: none;
+          }
+
+          .mb-grid-wrap {
+            margin-top: 20px;
+          }
+
+          .mb-grid-wrap[data-open="false"] {
+            display: none;
           }
         }
 
