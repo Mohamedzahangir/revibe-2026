@@ -6,7 +6,7 @@ const AUDIO_SRC = "/audio/the-amazing-spider-man-2---theme.mp3";
 
 export default function SoundToggle() {
   const audioRef = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -30,10 +30,10 @@ export default function SoundToggle() {
       .catch(() => {
         /*
          * Audible autoplay is blocked until the first user
-         * interaction. Keep the toggle visually "on" (default)
-         * and start the track as soon as the visitor interacts.
+         * interaction. Keep the toggle visually "off" until
+         * the track actually starts playing.
          */
-        setIsPlaying(true);
+        setIsPlaying(false);
       });
 
     /*

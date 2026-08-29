@@ -122,8 +122,8 @@ const teams = [
   },
   {
     id: "rest-of-team",
-    label: "The Wider Web",
-    title: "Rest of the Team",
+    label: "Rest of the Team ",
+    title: "The Wider Web",
     blurb:
       "The wider web of SGC, the hands holding the rest of the strands together.",
     members: [
@@ -177,7 +177,7 @@ function MemberCard({ member }) {
       <div className="mb-copy">
         <div className="mb-name-row">
           <h3 className="mb-name">{member.name}</h3>
-          {member.role && (
+          {member.role && !member.lead && (
             <span className="mb-designation">{member.role}</span>
           )}
         </div>
@@ -200,7 +200,7 @@ export default function Team() {
         {/* ============================================================
             HERO
             ============================================================ */}
-        <section className="mb-hero" aria-labelledby="members-title">
+        <section className="mb-hero mb-grid-bg" aria-labelledby="members-title">
           <div className="mb-container mb-container--narrow">
             <p className="mb-label">REVIBE '26 Crew</p>
 
@@ -226,15 +226,33 @@ export default function Team() {
             ============================================================ */}
         <section className="mb-section" aria-labelledby="core-team">
           <div className="mb-container">
-            <p className="mb-label">REVIBE '26 Core</p>
-            <h2 id="core-team" className="mb-headline">
-              The Core Team
-            </h2>
-            <p className="mb-body">
-              The leads of SGC, steering the vision and holding the web together.
-            </p>
+            <button
+              type="button"
+              className="mb-team-toggle"
+              aria-expanded={!!openTeams["core-team"]}
+              aria-controls="core-team-members"
+              onClick={() => toggleTeam("core-team")}
+            >
+              <span className="mb-team-toggle-head">
+                <p className="mb-label">REVIBE '26 Core</p>
+                <h2 id="core-team" className="mb-headline">
+                  The Core Team
+                </h2>
+              </span>
+              <span className={`mb-chevron${openTeams["core-team"] ? " mb-chevron--open" : ""}`} aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </span>
+            </button>
 
-            <div className="mb-grid-wrap">
+            <div className="mb-team-blurb" data-open={!!openTeams["core-team"]}>
+              <p className="mb-body">
+                The leads of SGC, steering the vision and holding the web together.
+              </p>
+            </div>
+
+            <div className="mb-grid-wrap" id="core-team-members" data-open={!!openTeams["core-team"]}>
               <ul className="mb-grid mb-grid--core" role="list">
                 {coreTeam.map((member) => (
                   <li key={`core-${member.name}`}>
@@ -344,6 +362,19 @@ export default function Team() {
 
         .mb-hero .mb-container {
           text-align: center;
+        }
+
+        /* ---------- hero diagonal grid overlay (spider-web pattern) ---------- */
+
+        .mb-grid-bg::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          background-image:
+            repeating-linear-gradient(45deg, rgba(26,26,26,0.05) 0 1px, transparent 1px 28px),
+            repeating-linear-gradient(-45deg, rgba(26,26,26,0.05) 0 1px, transparent 1px 28px);
         }
 
         /* ---------- 2px black panel dividers ---------- */
