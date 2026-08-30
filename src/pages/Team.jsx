@@ -102,8 +102,8 @@ const teams = [
     blurb:
       "Your friendly neighborhood hosts, welcoming every visitor into the web with open arms.",
     members: [
-      { name: "Abishek", dept: "IV Year IT", role: "Team Lead", lead: true, photo: "/placeholder.svg?height=200&width=200" },
-      { name: "Dhurga prasad S", dept: "IV Year EEE", role: "Co-Lead", photo: "https://res.cloudinary.com/douhcccb7/image/upload/v1739638236/WhatsApp_Image_2025-02-15_at_9.36.39_PM_uzlpgq.jpg" },
+      { name: "Abishek", dept: "IV Year IT", role: "Session Incharge", lead: true, showRole: true, photo: "/placeholder.svg?height=200&width=200" },
+      { name: "Dhurga prasad S", dept: "IV Year EEE", role: "Co-Lead", coLead: true, photo: "https://res.cloudinary.com/douhcccb7/image/upload/v1739638236/WhatsApp_Image_2025-02-15_at_9.36.39_PM_uzlpgq.jpg" },
       { name: "Mohammed Zahangir", dept: "III Year AI-DS",  role: "Administrator", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788023717/Zahangir_jdjb0o.jpg" },
     ],
   },
@@ -155,9 +155,12 @@ function MemberCard({ member }) {
   return (
     <article className="mb-card" key={member.name}>
       <div className="mb-photo" aria-label={`${member.name} photo`}>
-        {member.lead && (
-          <span className="mb-lead-pill" aria-label="Lead">
-            Lead
+        {(member.lead || member.coLead) && (
+          <span
+            className="mb-lead-pill"
+            aria-label={member.lead ? "Lead" : "Co-Lead"}
+          >
+            {member.lead ? "Lead" : "Co-Lead"}
           </span>
         )}
         <img className="mb-photo-frame" src={imageTemplate} alt="" aria-hidden="true" />
@@ -177,7 +180,7 @@ function MemberCard({ member }) {
       <div className="mb-copy">
         <div className="mb-name-row">
           <h3 className="mb-name">{member.name}</h3>
-          {member.role && !member.lead && (
+          {member.role && !member.coLead && (!member.lead || member.showRole) && (
             <span className="mb-designation">{member.role}</span>
           )}
         </div>
