@@ -4,7 +4,6 @@ import { useSearchParams } from "react-router-dom";
 import { supabase } from "../services/supabase";
 import { submitRegistration } from "../services/registrationService";
 import eventData from "../data/eventData";
-import { coordinatorDetails } from "../data/coordinatorDetails";
 import {
   validateName,
   validateEmail,
@@ -26,6 +25,8 @@ import {
 const DRAFT_KEY = "revibe26_registration_draft_v3";
 const LEGACY_DRAFT_KEY = "revibe26_registration_draft_v2";
 
+const PAYMENT_COORDINATOR_NUMBER = "+91 94869 76316";
+
 const emptyMember = () => ({
   name: "",
   email: "",
@@ -37,6 +38,7 @@ const emptyMember = () => ({
 
 const emptyEventRegistration = () => ({
   teamSize: "",
+  teamName: "",
   members: [],
 });
 
@@ -46,12 +48,6 @@ function getEventConfig(slug) {
 
 function getEventFromData(slug) {
   return eventData.find((event) => event.slug === slug);
-}
-function getCoordinatorDetails(eventName) {
-  return coordinatorDetails[eventName] || {
-    name: "Event Coordinator",
-    whatsapp: "",
-  };
 }
 
 function mergeEventData(event) {
@@ -132,6 +128,7 @@ function getEventParticipantRange(event) {
   const config = getEventConfig(event?.slug);
 
   const min = Number(config?.minTeamSize) || 1;
+
   const max =
     Number(config?.maxTeamSize) ||
     Number(event?.max_participants) ||
@@ -167,6 +164,7 @@ function normalizeEventRegistrations(value) {
     if (!details || typeof details !== "object") return;
 
     const rawSize = details.teamSize;
+
     const teamSize =
       rawSize === "" || rawSize == null
         ? ""
@@ -176,6 +174,12 @@ function normalizeEventRegistrations(value) {
 
     result[slug] = {
       teamSize,
+
+      teamName:
+        typeof details.teamName === "string"
+          ? details.teamName
+          : "",
+
       members: normalizeMembers(details.members),
     };
   });
@@ -200,8 +204,6 @@ export default function Register() {
     department: "",
     year: "",
 
-    // Multiple events are supported. Each event has its own
-    // participant count and its own additional-member list.
     eventSlugs: [],
     eventRegistrations: {},
 
@@ -227,36 +229,63 @@ export default function Register() {
       const raw =
         localStorage.getItem(DRAFT_KEY) ||
         localStorage.getItem(LEGACY_DRAFT_KEY);
+
       if (!raw) return;
 
       const saved = JSON.parse(raw);
+
       if (!saved || typeof saved !== "object") return;
 
       setForm((previous) => ({
         ...previous,
-        name: typeof saved.name === "string" ? saved.name : "",
-        email: typeof saved.email === "string" ? saved.email : "",
-        phone: typeof saved.phone === "string" ? saved.phone : "",
-        college: typeof saved.college === "string" ? saved.college : "",
+
+        name:
+          typeof saved.name === "string"
+            ? saved.name
+            : "",
+
+        email:
+          typeof saved.email === "string"
+            ? saved.email
+            : "",
+
+        phone:
+          typeof saved.phone === "string"
+            ? saved.phone
+            : "",
+
+        college:
+          typeof saved.college === "string"
+            ? saved.college
+            : "",
+
         department:
-          typeof saved.department === "string" ? saved.department : "",
-        year: typeof saved.year === "string" ? saved.year : "",
-        eventRegistrations: normalizeEventRegistrations(
-          saved.eventRegistrations
-        ),
+          typeof saved.department === "string"
+            ? saved.department
+            : "",
+
+        year:
+          typeof saved.year === "string"
+            ? saved.year
+            : "",
+
+        eventRegistrations:
+          normalizeEventRegistrations(
+            saved.eventRegistrations
+          ),
+
         rememberDetails: true,
       }));
     } catch (error) {
-      console.warn("Unable to restore saved registration details:", error);
+      console.warn(
+        "Unable to restore saved registration details:",
+        error
+      );
     }
   }, []);
 
   /* =========================================================
      SAVE DETAILS ON DEVICE
-
-     Selected events are deliberately not saved as the active
-     selection. Event-specific participant details are saved by
-     event slug, so selecting that event again can restore them.
   ========================================================= */
 
   useEffect(() => {
@@ -276,9 +305,15 @@ export default function Register() {
     };
 
     try {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+      localStorage.setItem(
+        DRAFT_KEY,
+        JSON.stringify(draft)
+      );
     } catch (error) {
-      console.warn("Unable to save registration details:", error);
+      console.warn(
+        "Unable to save registration details:",
+        error
+      );
     }
   }, [
     form.name,
@@ -324,22 +359,35 @@ export default function Register() {
       if (cancelled) return;
 
       if (error) {
-        console.error("Event loading error:", error);
+        console.error(
+          "Event loading error:",
+          error
+        );
+
         setEventsError(
           "Unable to load events right now. Please refresh the page."
         );
+
         setEvents([]);
       } else {
-        const openEvents = (data ?? []).filter((event) => {
-          const registrationStatus = String(
-            event.registration_status ?? ""
-          ).toLowerCase();
-          const eventStatus = String(event.status ?? "").toLowerCase();
+        const openEvents = (data ?? []).filter(
+          (event) => {
+            const registrationStatus =
+              String(
+                event.registration_status ?? ""
+              ).toLowerCase();
 
-          return (
-            registrationStatus === "open" && eventStatus !== "cancelled"
-          );
-        });
+            const eventStatus =
+              String(
+                event.status ?? ""
+              ).toLowerCase();
+
+            return (
+              registrationStatus === "open" &&
+              eventStatus !== "cancelled"
+            );
+          }
+        );
 
         setEvents(openEvents);
       }
@@ -359,23 +407,42 @@ export default function Register() {
   ========================================================= */
 
   useEffect(() => {
-    const eventSlug = searchParams.get("event");
-    if (!eventSlug || events.length === 0) return;
+    const eventSlug =
+      searchParams.get("event");
 
-    const exists = events.some((event) => event.slug === eventSlug);
+    if (
+      !eventSlug ||
+      events.length === 0
+    ) {
+      return;
+    }
+
+    const exists = events.some(
+      (event) =>
+        event.slug === eventSlug
+    );
+
     if (!exists) return;
 
     setForm((previous) => {
       const existingDetails =
-        previous.eventRegistrations[eventSlug] || emptyEventRegistration();
+        previous.eventRegistrations[
+          eventSlug
+        ] ||
+        emptyEventRegistration();
 
       return {
         ...previous,
+
         eventSlugs: [eventSlug],
+
         eventRegistrations: {
           ...previous.eventRegistrations,
-          [eventSlug]: existingDetails,
+
+          [eventSlug]:
+            existingDetails,
         },
+
         paymentScreenshotShared: false,
         referenceId: "",
       };
@@ -390,29 +457,107 @@ export default function Register() {
     return form.eventSlugs
       .map(
         (slug) =>
-          events.find((event) => event.slug === slug) ||
+          events.find(
+            (event) =>
+              event.slug === slug
+          ) ||
           getEventFromData(slug)
       )
       .filter(Boolean)
       .map(mergeEventData);
-  }, [events, form.eventSlugs]);
+  }, [
+    events,
+    form.eventSlugs,
+  ]);
 
   /* =========================================================
      EVENT-SPECIFIC TOTAL
   ========================================================= */
 
   const totalFee = useMemo(() => {
-    return selectedEvents.reduce((total, event) => {
-      const details = form.eventRegistrations[event.slug];
-      const participantCount = Number(details?.teamSize) || 0;
+    return selectedEvents.reduce(
+      (total, event) => {
+        const details =
+          form.eventRegistrations[
+            event.slug
+          ];
 
-      if (participantCount < 1) return total;
+        const participantCount =
+          Number(details?.teamSize) || 0;
 
-      return (
-        total + getTotalFee(event.slug, participantCount)
-      );
-    }, 0);
-  }, [selectedEvents, form.eventRegistrations]);
+        if (participantCount < 1) {
+          return total;
+        }
+
+        return (
+          total +
+          getTotalFee(
+            event.slug,
+            participantCount
+          )
+        );
+      },
+      0
+    );
+  }, [
+    selectedEvents,
+    form.eventRegistrations,
+  ]);
+
+  /* =========================================================
+     TEAM STATUS
+  ========================================================= */
+
+  const hasTeamEvent = useMemo(() => {
+    return selectedEvents.some(
+      (eventItem) => {
+        const details =
+          form.eventRegistrations[
+            eventItem.slug
+          ] ||
+          emptyEventRegistration();
+
+        return (
+          Number(details.teamSize) > 1
+        );
+      }
+    );
+  }, [
+    selectedEvents,
+    form.eventRegistrations,
+  ]);
+
+  const teamEvent = useMemo(() => {
+    return selectedEvents.find(
+      (eventItem) => {
+        const details =
+          form.eventRegistrations[
+            eventItem.slug
+          ] ||
+          emptyEventRegistration();
+
+        return (
+          Number(details.teamSize) > 1
+        );
+      }
+    );
+  }, [
+    selectedEvents,
+    form.eventRegistrations,
+  ]);
+
+  const teamName = useMemo(() => {
+    if (!teamEvent) return "";
+
+    return (
+      form.eventRegistrations[
+        teamEvent.slug
+      ]?.teamName?.trim() || ""
+    );
+  }, [
+    teamEvent,
+    form.eventRegistrations,
+  ]);
 
   /* =========================================================
      GENERIC UPDATE
@@ -437,32 +582,59 @@ export default function Register() {
   ========================================================= */
 
   function handleEventChange(slug) {
-    const exists = events.some((event) => event.slug === slug);
+    const exists = events.some(
+      (event) =>
+        event.slug === slug
+    );
+
     if (!exists) return;
 
     setForm((previous) => {
-      const alreadySelected = previous.eventSlugs.includes(slug);
+      const alreadySelected =
+        previous.eventSlugs.includes(
+          slug
+        );
 
       if (alreadySelected) {
         return {
           ...previous,
-          eventSlugs: previous.eventSlugs.filter((item) => item !== slug),
-          paymentScreenshotShared: false,
+
+          eventSlugs:
+            previous.eventSlugs.filter(
+              (item) => item !== slug
+            ),
+
+          paymentScreenshotShared:
+            false,
+
           referenceId: "",
         };
       }
 
       const restoredDetails =
-        previous.eventRegistrations[slug] || emptyEventRegistration();
+        previous.eventRegistrations[
+          slug
+        ] ||
+        emptyEventRegistration();
 
       return {
         ...previous,
-        eventSlugs: [...previous.eventSlugs, slug],
+
+        eventSlugs: [
+          ...previous.eventSlugs,
+          slug,
+        ],
+
         eventRegistrations: {
           ...previous.eventRegistrations,
-          [slug]: restoredDetails,
+
+          [slug]:
+            restoredDetails,
         },
-        paymentScreenshotShared: false,
+
+        paymentScreenshotShared:
+          false,
+
         referenceId: "",
       };
     });
@@ -475,11 +647,23 @@ export default function Register() {
      EVENT PARTICIPANT COUNT
   ========================================================= */
 
-  function handleEventParticipantCountChange(slug, value) {
-    const event = selectedEvents.find((item) => item.slug === slug);
+  function handleEventParticipantCountChange(
+    slug,
+    value
+  ) {
+    const event =
+      selectedEvents.find(
+        (item) =>
+          item.slug === slug
+      );
+
     if (!event) return;
 
-    const range = getEventParticipantRange(event);
+    const range =
+      getEventParticipantRange(
+        event
+      );
+
     const size = Number(value);
 
     if (
@@ -492,23 +676,53 @@ export default function Register() {
 
     setForm((previous) => {
       const previousDetails =
-        previous.eventRegistrations[slug] || emptyEventRegistration();
+        previous.eventRegistrations[
+          slug
+        ] ||
+        emptyEventRegistration();
 
-      const members = [...(previousDetails.members || [])];
+      const members = [
+        ...(previousDetails.members || []),
+      ];
 
-      while (members.length < size - 1) {
-        members.push(emptyMember());
+      while (
+        members.length <
+        size - 1
+      ) {
+        members.push(
+          emptyMember()
+        );
       }
 
-      members.length = size - 1;
+      members.length =
+        size - 1;
 
       return {
         ...previous,
+
         eventRegistrations: {
           ...previous.eventRegistrations,
+
           [slug]: {
             ...previousDetails,
+
             teamSize: size,
+
+            /*
+             * Keep existing team name when
+             * changing participant count.
+             *
+             * If changed back to solo,
+             * the name remains in draft but
+             * is ignored during validation.
+             */
+            teamName:
+              size > 1
+                ? previousDetails.teamName ||
+                  ""
+                : previousDetails.teamName ||
+                  "",
+
             members,
           },
         },
@@ -517,7 +731,51 @@ export default function Register() {
 
     setErrors((previous) => ({
       ...previous,
-      [`event-${slug}-teamSize`]: "",
+
+      [`event-${slug}-teamSize`]:
+        "",
+
+      [`event-${slug}-teamName`]:
+        "",
+    }));
+
+    setSubmitError("");
+  }
+
+  /* =========================================================
+     TEAM NAME UPDATE
+  ========================================================= */
+
+  function handleEventTeamNameChange(
+    slug,
+    value
+  ) {
+    setForm((previous) => {
+      const previousDetails =
+        previous.eventRegistrations[
+          slug
+        ] ||
+        emptyEventRegistration();
+
+      return {
+        ...previous,
+
+        eventRegistrations: {
+          ...previous.eventRegistrations,
+
+          [slug]: {
+            ...previousDetails,
+            teamName: value,
+          },
+        },
+      };
+    });
+
+    setErrors((previous) => ({
+      ...previous,
+
+      [`event-${slug}-teamName`]:
+        "",
     }));
 
     setSubmitError("");
@@ -527,14 +785,26 @@ export default function Register() {
      EVENT MEMBER UPDATE
   ========================================================= */
 
-  function updateEventMember(slug, index, field, value) {
+  function updateEventMember(
+    slug,
+    index,
+    field,
+    value
+  ) {
     setForm((previous) => {
       const previousDetails =
-        previous.eventRegistrations[slug] || emptyEventRegistration();
-      const members = [...(previousDetails.members || [])];
+        previous.eventRegistrations[
+          slug
+        ] ||
+        emptyEventRegistration();
+
+      const members = [
+        ...(previousDetails.members || []),
+      ];
 
       if (!members[index]) {
-        members[index] = emptyMember();
+        members[index] =
+          emptyMember();
       }
 
       members[index] = {
@@ -544,8 +814,10 @@ export default function Register() {
 
       return {
         ...previous,
+
         eventRegistrations: {
           ...previous.eventRegistrations,
+
           [slug]: {
             ...previousDetails,
             members,
@@ -556,7 +828,9 @@ export default function Register() {
 
     setErrors((previous) => ({
       ...previous,
-      [`event-${slug}-member-${index}-${field}`]: "",
+
+      [`event-${slug}-member-${index}-${field}`]:
+        "",
     }));
 
     setSubmitError("");
@@ -570,98 +844,245 @@ export default function Register() {
     const nextErrors = {};
 
     const validators = [
-      ["name", validateName(form.name)],
-      ["email", validateEmail(form.email)],
-      ["phone", validatePhone(form.phone)],
-      ["college", validateCollege(form.college)],
-      ["department", validateDepartment(form.department)],
-      ["year", validateYear(form.year)],
+      [
+        "name",
+        validateName(form.name),
+      ],
+      [
+        "email",
+        validateEmail(form.email),
+      ],
+      [
+        "phone",
+        validatePhone(form.phone),
+      ],
+      [
+        "college",
+        validateCollege(form.college),
+      ],
+      [
+        "department",
+        validateDepartment(
+          form.department
+        ),
+      ],
+      [
+        "year",
+        validateYear(form.year),
+      ],
     ];
 
-    validators.forEach(([field, error]) => {
-      if (error) nextErrors[field] = error;
-    });
+    validators.forEach(
+      ([field, error]) => {
+        if (error) {
+          nextErrors[field] =
+            error;
+        }
+      }
+    );
 
     setErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
+
+    return (
+      Object.keys(
+        nextErrors
+      ).length === 0
+    );
   }
 
   /* =========================================================
-     EVENT + PER-EVENT PARTICIPANT VALIDATION
+     TEAM NAME VALIDATION
+  ========================================================= */
+
+  function validateTeamName(
+    slug,
+    details,
+    participantCount,
+    nextErrors
+  ) {
+    if (participantCount <= 1) {
+      return;
+    }
+
+    const teamNameValue =
+      String(
+        details.teamName || ""
+      ).trim();
+
+    if (!teamNameValue) {
+      nextErrors[
+        `event-${slug}-teamName`
+      ] =
+        "Team name is required when registering more than one participant.";
+
+      return;
+    }
+
+    if (teamNameValue.length < 2) {
+      nextErrors[
+        `event-${slug}-teamName`
+      ] =
+        "Team name must contain at least 2 characters.";
+
+      return;
+    }
+
+    if (teamNameValue.length > 100) {
+      nextErrors[
+        `event-${slug}-teamName`
+      ] =
+        "Team name must not exceed 100 characters.";
+    }
+  }
+
+  /* =========================================================
+     EVENT + PARTICIPANT VALIDATION
   ========================================================= */
 
   function validateEventSelectionStep() {
     const nextErrors = {};
 
-    if (form.eventSlugs.length === 0) {
-      nextErrors.eventSlug = "Please select at least one event.";
+    if (
+      form.eventSlugs.length ===
+      0
+    ) {
+      nextErrors.eventSlug =
+        "Please select at least one event.";
     }
 
     for (const slug of form.eventSlugs) {
-      const event = selectedEvents.find((item) => item.slug === slug);
+      const event =
+        selectedEvents.find(
+          (item) =>
+            item.slug === slug
+        );
+
       if (!event) continue;
 
-      const eventError = validateEvent(slug);
+      const eventError =
+        validateEvent(slug);
+
       if (eventError) {
-        nextErrors.eventSlug = eventError;
+        nextErrors.eventSlug =
+          eventError;
+
         break;
       }
 
-      const range = getEventParticipantRange(event);
+      const range =
+        getEventParticipantRange(
+          event
+        );
+
       const details =
-        form.eventRegistrations[slug] || emptyEventRegistration();
-      const participantCount = Number(details.teamSize) || 0;
+        form.eventRegistrations[
+          slug
+        ] ||
+        emptyEventRegistration();
+
+      const participantCount =
+        Number(details.teamSize) ||
+        0;
 
       if (!details.teamSize) {
-        nextErrors[`event-${slug}-teamSize`] =
+        nextErrors[
+          `event-${slug}-teamSize`
+        ] =
           "Please select the number of participants for this event.";
+
         continue;
       }
 
       if (
-        participantCount < range.min ||
-        participantCount > range.max
+        participantCount <
+          range.min ||
+        participantCount >
+          range.max
       ) {
-        nextErrors[`event-${slug}-teamSize`] =
+        nextErrors[
+          `event-${slug}-teamSize`
+        ] =
           `Select between ${range.min} and ${range.max} participants for this event.`;
+
         continue;
       }
 
-      const expectedMembers = Math.max(0, participantCount - 1);
-const members = Array.isArray(details.members)
-  ? details.members
-  : [];
+      validateTeamName(
+        slug,
+        details,
+        participantCount,
+        nextErrors
+      );
 
-if (members.length < expectedMembers) {
-  nextErrors[`event-${slug}-teamSize`] =
-    `Please provide details for all ${expectedMembers} additional team member(s).`;
-  continue;
-}
-
-      if (expectedMembers > 0) {
-        const memberErrors = validateTeamMembers(
-          members,
-          form.email,
-          participantCount
+      const expectedMembers =
+        Math.max(
+          0,
+          participantCount - 1
         );
 
-        Object.entries(memberErrors || {}).forEach(([key, message]) => {
-          const indexMatch = String(key).match(/member-(\d+)-(.+)/);
+      const members =
+        Array.isArray(
+          details.members
+        )
+          ? details.members
+          : [];
 
-          if (indexMatch) {
-            const [, index, field] = indexMatch;
-            nextErrors[
-              `event-${slug}-member-${index}-${field}`
-            ] = message;
-          } else {
-            nextErrors[`event-${slug}-members`] = message;
+      if (
+        members.length <
+        expectedMembers
+      ) {
+        nextErrors[
+          `event-${slug}-teamSize`
+        ] =
+          `Please provide details for all ${expectedMembers} additional team member(s).`;
+
+        continue;
+      }
+
+      if (expectedMembers > 0) {
+        const memberErrors =
+          validateTeamMembers(
+            members,
+            form.email,
+            participantCount
+          );
+
+        Object.entries(
+          memberErrors || {}
+        ).forEach(
+          ([key, message]) => {
+            const indexMatch =
+              String(key).match(
+                /member-(\d+)-(.+)/
+              );
+
+            if (indexMatch) {
+              const [
+                ,
+                index,
+                field,
+              ] = indexMatch;
+
+              nextErrors[
+                `event-${slug}-member-${index}-${field}`
+              ] = message;
+            } else {
+              nextErrors[
+                `event-${slug}-members`
+              ] = message;
+            }
           }
-        });
+        );
       }
     }
 
     setErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
+
+    return (
+      Object.keys(
+        nextErrors
+      ).length === 0
+    );
   }
 
   /* =========================================================
@@ -676,13 +1097,20 @@ if (members.length < expectedMembers) {
       return true;
     }
 
-    if (!form.paymentScreenshotShared) {
+    if (
+      !form.paymentScreenshotShared
+    ) {
       nextErrors.paymentScreenshotShared =
-        "Please confirm that you have sent the payment screenshot to the respective event coordinator.";
+        `Please confirm that you have sent the payment screenshot to our coordinator at ${PAYMENT_COORDINATOR_NUMBER}.`;
     }
 
     setErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
+
+    return (
+      Object.keys(
+        nextErrors
+      ).length === 0
+    );
   }
 
   /* =========================================================
@@ -693,92 +1121,192 @@ if (members.length < expectedMembers) {
     const nextErrors = {};
 
     const personalValidators = [
-      ["name", validateName(form.name)],
-      ["email", validateEmail(form.email)],
-      ["phone", validatePhone(form.phone)],
-      ["college", validateCollege(form.college)],
-      ["department", validateDepartment(form.department)],
-      ["year", validateYear(form.year)],
+      [
+        "name",
+        validateName(form.name),
+      ],
+      [
+        "email",
+        validateEmail(form.email),
+      ],
+      [
+        "phone",
+        validatePhone(form.phone),
+      ],
+      [
+        "college",
+        validateCollege(form.college),
+      ],
+      [
+        "department",
+        validateDepartment(
+          form.department
+        ),
+      ],
+      [
+        "year",
+        validateYear(form.year),
+      ],
     ];
 
-    personalValidators.forEach(([field, error]) => {
-      if (error) nextErrors[field] = error;
-    });
+    personalValidators.forEach(
+      ([field, error]) => {
+        if (error) {
+          nextErrors[field] =
+            error;
+        }
+      }
+    );
 
-    if (form.eventSlugs.length === 0) {
-      nextErrors.eventSlug = "Please select at least one event.";
+    if (
+      form.eventSlugs.length ===
+      0
+    ) {
+      nextErrors.eventSlug =
+        "Please select at least one event.";
     }
 
     for (const slug of form.eventSlugs) {
-      const event = selectedEvents.find((item) => item.slug === slug);
+      const event =
+        selectedEvents.find(
+          (item) =>
+            item.slug === slug
+        );
+
       if (!event) continue;
 
-      const eventError = validateEvent(slug);
+      const eventError =
+        validateEvent(slug);
+
       if (eventError) {
-        nextErrors.eventSlug = eventError;
+        nextErrors.eventSlug =
+          eventError;
+
         continue;
       }
 
-      const range = getEventParticipantRange(event);
+      const range =
+        getEventParticipantRange(
+          event
+        );
+
       const details =
-        form.eventRegistrations[slug] || emptyEventRegistration();
-      const participantCount = Number(details.teamSize) || 0;
+        form.eventRegistrations[
+          slug
+        ] ||
+        emptyEventRegistration();
+
+      const participantCount =
+        Number(details.teamSize) ||
+        0;
 
       if (!details.teamSize) {
-        nextErrors[`event-${slug}-teamSize`] =
+        nextErrors[
+          `event-${slug}-teamSize`
+        ] =
           "Please select the number of participants for this event.";
+
         continue;
       }
 
       if (
-        participantCount < range.min ||
-        participantCount > range.max
+        participantCount <
+          range.min ||
+        participantCount >
+          range.max
       ) {
-        nextErrors[`event-${slug}-teamSize`] =
+        nextErrors[
+          `event-${slug}-teamSize`
+        ] =
           `Select between ${range.min} and ${range.max} participants for this event.`;
+
         continue;
       }
 
-      const expectedMembers = Math.max(0, participantCount - 1);
-const members = Array.isArray(details.members)
-  ? details.members
-  : [];
+      validateTeamName(
+        slug,
+        details,
+        participantCount,
+        nextErrors
+      );
 
-if (members.length < expectedMembers) {
-  nextErrors[`event-${slug}-teamSize`] =
-    `Please provide details for all ${expectedMembers} additional team member(s).`;
-  continue;
-}
-
-      if (expectedMembers > 0) {
-        const memberErrors = validateTeamMembers(
-          members,
-          form.email,
-          participantCount
+      const expectedMembers =
+        Math.max(
+          0,
+          participantCount - 1
         );
 
-        Object.entries(memberErrors || {}).forEach(([key, message]) => {
-          const indexMatch = String(key).match(/member-(\d+)-(.+)/);
+      const members =
+        Array.isArray(
+          details.members
+        )
+          ? details.members
+          : [];
 
-          if (indexMatch) {
-            const [, index, field] = indexMatch;
-            nextErrors[
-              `event-${slug}-member-${index}-${field}`
-            ] = message;
-          } else {
-            nextErrors[`event-${slug}-members`] = message;
+      if (
+        members.length <
+        expectedMembers
+      ) {
+        nextErrors[
+          `event-${slug}-teamSize`
+        ] =
+          `Please provide details for all ${expectedMembers} additional team member(s).`;
+
+        continue;
+      }
+
+      if (expectedMembers > 0) {
+        const memberErrors =
+          validateTeamMembers(
+            members,
+            form.email,
+            participantCount
+          );
+
+        Object.entries(
+          memberErrors || {}
+        ).forEach(
+          ([key, message]) => {
+            const indexMatch =
+              String(key).match(
+                /member-(\d+)-(.+)/
+              );
+
+            if (indexMatch) {
+              const [
+                ,
+                index,
+                field,
+              ] = indexMatch;
+
+              nextErrors[
+                `event-${slug}-member-${index}-${field}`
+              ] = message;
+            } else {
+              nextErrors[
+                `event-${slug}-members`
+              ] = message;
+            }
           }
-        });
+        );
       }
     }
 
-    if (totalFee > 0 && !form.paymentScreenshotShared) {
+    if (
+      totalFee > 0 &&
+      !form.paymentScreenshotShared
+    ) {
       nextErrors.paymentScreenshotShared =
-        "Please confirm that you have sent the payment screenshot to the respective event coordinator.";
+        `Please confirm that you have sent the payment screenshot to our coordinator at ${PAYMENT_COORDINATOR_NUMBER}.`;
     }
 
     setErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
+
+    return (
+      Object.keys(
+        nextErrors
+      ).length === 0
+    );
   }
 
   /* =========================================================
@@ -787,7 +1315,9 @@ if (members.length < expectedMembers) {
 
   function handleNext() {
     if (step === 1) {
-      if (!validatePersonalInfoStep()) {
+      if (
+        !validatePersonalInfoStep()
+      ) {
         scrollToError();
         return;
       }
@@ -798,7 +1328,9 @@ if (members.length < expectedMembers) {
     }
 
     if (step === 2) {
-      if (!validateEventSelectionStep()) {
+      if (
+        !validateEventSelectionStep()
+      ) {
         scrollToError();
         return;
       }
@@ -811,9 +1343,14 @@ if (members.length < expectedMembers) {
   function handleBack() {
     if (step === 1) return;
 
-    setStep((previous) => previous - 1);
+    setStep(
+      (previous) =>
+        previous - 1
+    );
+
     setErrors({});
     setSubmitError("");
+
     scrollTop();
   }
 
@@ -822,238 +1359,305 @@ if (members.length < expectedMembers) {
   ========================================================= */
 
   async function handleSubmit(event) {
-  event.preventDefault();
+    event.preventDefault();
 
-  if (!validateCompleteRegistration()) {
-    scrollToError();
-    return;
-  }
-
-  if (selectedEvents.length === 0) {
-    setSubmitError("Please select at least one event.");
-    setStep(2);
-    scrollTop();
-    return;
-  }
-
-  setSubmitting(true);
-  setSubmitError("");
-
-  try {
-    const primary = {
-      fullName: form.name.trim(),
-      email: form.email.trim().toLowerCase(),
-      phone: form.phone.trim(),
-      college: form.college.trim(),
-      department: form.department.trim(),
-      year: form.year.trim(),
-    };
-
-    /*
-     * =====================================================
-     * EVENT-SPECIFIC REGISTRATION DATA
-     * =====================================================
-     *
-     * Each selected event can now have its own
-     * participant count and member list.
-     *
-     * Example:
-     *
-     * Coding & Debugging
-     *   → 1 participant
-     *
-     * Free Fire
-     *   → 4 participants
-     *
-     * Both are allowed in ONE registration.
-     */
-
-    const eventRegistrations = selectedEvents.map(
-      (eventItem) => {
-        const details =
-          form.eventRegistrations[eventItem.slug] ||
-          emptyEventRegistration();
-
-        const members = Array.isArray(details.members)
-          ? details.members
-          : [];
-
-        return {
-          eventId: eventItem.id,
-
-          maxParticipants:
-            eventItem.max_participants ??
-            eventItem.maxParticipants ??
-            null,
-
-          participants: [
-            {
-              fullName: primary.fullName,
-              email: primary.email,
-              phone: primary.phone,
-              college: primary.college,
-              department: primary.department,
-              year: primary.year,
-            },
-
-            ...members.map((member) => ({
-              fullName:
-                member.name?.trim() ||
-                member.fullName?.trim() ||
-                "",
-
-              email:
-                member.email?.trim().toLowerCase() ||
-                "",
-
-              phone:
-                member.phone?.trim() ||
-                "",
-
-              college:
-                member.college?.trim() ||
-                "",
-
-              department:
-                member.department?.trim() ||
-                "",
-
-              year:
-                member.year?.trim() ||
-                "",
-            })),
-          ],
-        };
-      }
-    );
-
-    /*
-     * =====================================================
-     * REGISTRATION TYPE
-     * =====================================================
-     *
-     * Overall registration is considered a team if
-     * at least one selected event has additional members.
-     */
-
-    const hasTeamEvent =
-      eventRegistrations.some(
-        (event) =>
-          event.participants.length > 1
-      );
-
-    const registrationType =
-      hasTeamEvent
-        ? "team"
-        : "individual";
-
-    /*
-     * =====================================================
-     * ONE COMBINED REGISTRATION
-     * ONE COMBINED PAYMENT
-     * =====================================================
-     */
-
-    const result = await submitRegistration({
-      selectedEvents: selectedEvents.map(
-        (eventItem) => ({
-          id: eventItem.id,
-
-          maxParticipants:
-            eventItem.max_participants ??
-            eventItem.maxParticipants ??
-            null,
-        })
-      ),
-
-      eventRegistrations,
-
-      registrationType,
-
-      teamName: null,
-
-      primary,
-
-      /*
-       * Kept for compatibility with the service.
-       * Event-specific members are now handled through
-       * eventRegistrations.
-       */
-      members: [],
-
-      payment: {
-        amount: totalFee,
-
-        paymentMethod:
-          totalFee > 0
-            ? paymentData.paymentMethod ||
-              "Google Pay"
-            : null,
-
-        transactionReference:
-          form.referenceId.trim() || null,
-
-        screenshotShared:
-          totalFee > 0
-            ? form.paymentScreenshotShared
-            : false,
-      },
-    });
-
-    /*
-     * =====================================================
-     * SUCCESS
-     * =====================================================
-     */
-
-    const number =
-      result?.registrationNumber ||
-      result?.registration_number ||
-      "";
-
-    setRegistrationNumbers(
-      number
-        ? [
-            {
-              eventName:
-                selectedEvents.length === 1
-                  ? selectedEvents[0].name
-                  : `${selectedEvents.length} selected events`,
-
-              registrationNumber:
-                number,
-            },
-          ]
-        : []
-    );
-
-    setSubmitted(true);
-
-    if (!form.rememberDetails) {
-      localStorage.removeItem(DRAFT_KEY);
-      localStorage.removeItem(
-        LEGACY_DRAFT_KEY
-      );
+    if (
+      !validateCompleteRegistration()
+    ) {
+      scrollToError();
+      return;
     }
 
-    scrollTop();
-  } catch (error) {
-    console.error(
-      "Registration submission error:",
-      error
-    );
+    if (
+      selectedEvents.length === 0
+    ) {
+      setSubmitError(
+        "Please select at least one event."
+      );
 
-    setSubmitError(
-      error instanceof Error
-        ? error.message
-        : "Registration could not be completed. Please try again."
-    );
+      setStep(2);
+      scrollTop();
 
-    scrollToError();
-  } finally {
-    setSubmitting(false);
+      return;
+    }
+
+    setSubmitting(true);
+    setSubmitError("");
+
+    try {
+      const primary = {
+        fullName:
+          form.name.trim(),
+
+        email:
+          form.email
+            .trim()
+            .toLowerCase(),
+
+        phone:
+          form.phone.trim(),
+
+        college:
+          form.college.trim(),
+
+        department:
+          form.department.trim(),
+
+        year:
+          form.year.trim(),
+      };
+
+      /* =====================================================
+         EVENT-SPECIFIC REGISTRATION DATA
+      ===================================================== */
+
+      const eventRegistrations =
+        selectedEvents.map(
+          (eventItem) => {
+            const details =
+              form.eventRegistrations[
+                eventItem.slug
+              ] ||
+              emptyEventRegistration();
+
+            const members =
+              Array.isArray(
+                details.members
+              )
+                ? details.members
+                : [];
+
+            return {
+              eventId:
+                eventItem.id,
+
+              maxParticipants:
+                eventItem.max_participants ??
+                eventItem.maxParticipants ??
+                null,
+
+              teamName:
+                Number(
+                  details.teamSize
+                ) > 1
+                  ? details.teamName
+                      ?.trim() ||
+                    null
+                  : null,
+
+              participants: [
+                {
+                  fullName:
+                    primary.fullName,
+
+                  email:
+                    primary.email,
+
+                  phone:
+                    primary.phone,
+
+                  college:
+                    primary.college,
+
+                  department:
+                    primary.department,
+
+                  year:
+                    primary.year,
+                },
+
+                ...members.map(
+                  (member) => ({
+                    fullName:
+                      member.name
+                        ?.trim() ||
+                      member.fullName
+                        ?.trim() ||
+                      "",
+
+                    email:
+                      member.email
+                        ?.trim()
+                        .toLowerCase() ||
+                      "",
+
+                    phone:
+                      member.phone
+                        ?.trim() ||
+                      "",
+
+                    college:
+                      member.college
+                        ?.trim() ||
+                      "",
+
+                    department:
+                      member.department
+                        ?.trim() ||
+                      "",
+
+                    year:
+                      member.year
+                        ?.trim() ||
+                      "",
+                  })
+                ),
+              ],
+            };
+          }
+        );
+
+      /* =====================================================
+         REGISTRATION TYPE
+      ===================================================== */
+
+      const hasTeamEventSubmission =
+        eventRegistrations.some(
+          (event) =>
+            event.participants
+              .length > 1
+        );
+
+      const registrationType =
+        hasTeamEventSubmission
+          ? "team"
+          : "individual";
+
+      /* =====================================================
+         ONE TEAM NAME FOR REGISTRATION
+         
+         Existing DB has:
+         registrations.team_name
+         
+         Therefore use the team name from
+         the first selected team event.
+      ===================================================== */
+
+      const combinedTeamName =
+        eventRegistrations.find(
+          (event) =>
+            event.participants
+              .length > 1
+        )?.teamName || null;
+
+      /* =====================================================
+         SUBMIT REGISTRATION
+      ===================================================== */
+
+      const result =
+        await submitRegistration({
+          selectedEvents:
+            selectedEvents.map(
+              (eventItem) => ({
+                id:
+                  eventItem.id,
+
+                maxParticipants:
+                  eventItem.max_participants ??
+                  eventItem.maxParticipants ??
+                  null,
+              })
+            ),
+
+          eventRegistrations,
+
+          registrationType,
+
+          teamName:
+            combinedTeamName,
+
+          primary,
+
+          /*
+           * Event-specific members are
+           * handled through eventRegistrations.
+           */
+          members: [],
+
+          payment: {
+            amount:
+              totalFee,
+
+            paymentMethod:
+              totalFee > 0
+                ? paymentData.paymentMethod ||
+                  "Google Pay"
+                : null,
+
+            transactionReference:
+              form.referenceId
+                .trim() ||
+              null,
+
+            screenshotShared:
+              totalFee > 0
+                ? form.paymentScreenshotShared
+                : false,
+          },
+        });
+
+      /* =====================================================
+         SUCCESS
+      ===================================================== */
+
+      const number =
+        result?.registrationNumber ||
+        result?.registration_number ||
+        "";
+
+      setRegistrationNumbers(
+        number
+          ? [
+              {
+                eventName:
+                  selectedEvents.length ===
+                  1
+                    ? selectedEvents[0]
+                        .name
+                    : `${selectedEvents.length} selected events`,
+
+                registrationNumber:
+                  number,
+
+                registrationType:
+                  registrationType,
+              },
+            ]
+          : []
+      );
+
+      setSubmitted(true);
+
+      if (
+        !form.rememberDetails
+      ) {
+        localStorage.removeItem(
+          DRAFT_KEY
+        );
+
+        localStorage.removeItem(
+          LEGACY_DRAFT_KEY
+        );
+      }
+
+      scrollTop();
+    } catch (error) {
+      console.error(
+        "Registration submission error:",
+        error
+      );
+
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Registration could not be completed. Please try again."
+      );
+
+      scrollToError();
+    } finally {
+      setSubmitting(false);
+    }
   }
-}
 
   /* =========================================================
      SUCCESS SCREEN
@@ -1065,94 +1669,254 @@ if (members.length < expectedMembers) {
         <section className="register-success-section">
           <div className="register-shell">
             <div className="register-success-card">
-              <div className="success-icon">✓</div>
+              <div className="success-icon">
+                ✓
+              </div>
 
-              <p className="register-eyebrow">REVIBE '26</p>
+              <p className="register-eyebrow">
+                REVIBE '26
+              </p>
 
-              <h1>Registration Submitted</h1>
+              <h1>
+                Registration Submitted
+              </h1>
 
               <p className="success-intro">
-                Your registration has been submitted successfully.
+                Your registration has
+                been submitted
+                successfully.
               </p>
 
               <div className="success-details">
+                {/* =================================================
+                    REGISTRATION TYPE
+                ================================================= */}
+
                 <div>
-                  <span>Participant</span>
-                  <strong>{form.name}</strong>
+                  <span>
+                    Registration Type
+                  </span>
+
+                  <strong>
+                    {hasTeamEvent
+                      ? "TEAM"
+                      : "SOLO"}
+                  </strong>
                 </div>
 
-                <div>
-                  <span>Events</span>
-                  <div className="success-event-list">
-                    {selectedEvents.map((eventItem) => {
-                      const details =
-                        form.eventRegistrations[eventItem.slug] ||
-                        emptyEventRegistration();
+                {/* =================================================
+                    SOLO / TEAM DETAILS
+                ================================================= */}
 
-                      return (
-                        <div
-                          className="success-event-item"
-                          key={eventItem.id || eventItem.slug}
-                        >
-                          <strong>{eventItem.name}</strong>
-                          <span>
-                            {details.teamSize} participant(s) • {formatEventSchedule(eventItem)} • {getEventVenue(eventItem)}
-                          </span>
-                        </div>
-                      );
-                    })}
+                {hasTeamEvent ? (
+                  <>
+                    <div>
+                      <span>
+                        Team Name
+                      </span>
+
+                      <strong>
+                        {teamName ||
+                          "—"}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>
+                        Lead Name
+                      </span>
+
+                      <strong>
+                        {form.name}
+                      </strong>
+                    </div>
+                  </>
+                ) : (
+                  <div>
+                    <span>
+                      Participant Name
+                    </span>
+
+                    <strong>
+                      {form.name}
+                    </strong>
+                  </div>
+                )}
+
+                {/* =================================================
+                    EVENTS REGISTERED
+                ================================================= */}
+
+                <div>
+                  <span>
+                    Events Registered
+                  </span>
+
+                  <div className="success-event-list">
+                    {selectedEvents.map(
+                      (eventItem) => {
+                        const details =
+                          form
+                            .eventRegistrations[
+                            eventItem
+                              .slug
+                          ] ||
+                          emptyEventRegistration();
+
+                        return (
+                          <div
+                            className="success-event-item"
+                            key={
+                              eventItem.id ||
+                              eventItem.slug
+                            }
+                          >
+                            <strong>
+                              {
+                                eventItem.name
+                              }
+                            </strong>
+
+                            <span>
+                              {
+                                details.teamSize
+                              }{" "}
+                              participant
+                              {Number(
+                                details.teamSize
+                              ) !== 1
+                                ? "s"
+                                : ""}
+                            </span>
+                          </div>
+                        );
+                      }
+                    )}
                   </div>
                 </div>
 
-                {registrationNumbers.length > 0 && (
+                {/* =================================================
+                    REGISTRATION NUMBER
+                ================================================= */}
+
+                {registrationNumbers.length >
+                  0 && (
                   <div>
-                    <span>Registration No.</span>
+                    <span>
+                      Registration No.
+                    </span>
+
                     <div className="success-event-list">
-                      {registrationNumbers.map((item) => (
-                        <div
-                          className="success-event-item"
-                          key={item.registrationNumber}
-                        >
-                          <strong>{item.registrationNumber}</strong>
-                          <span>{item.eventName}</span>
-                        </div>
-                      ))}
+                      {registrationNumbers.map(
+                        (item) => (
+                          <div
+                            className="success-event-item"
+                            key={
+                              item.registrationNumber
+                            }
+                          >
+                            <strong>
+                              {
+                                item.registrationNumber
+                              }
+                            </strong>
+                          </div>
+                        )
+                      )}
                     </div>
                   </div>
                 )}
 
+                {/* =================================================
+                    AMOUNT
+                ================================================= */}
+
                 <div>
-                  <span>Amount</span>
-                  <strong>₹{totalFee}</strong>
+                  <span>
+                    Amount
+                  </span>
+
+                  <strong>
+                    ₹{totalFee}
+                  </strong>
                 </div>
               </div>
 
+              {/* =================================================
+                  PAYMENT PENDING
+              ================================================= */}
+
               {totalFee > 0 && (
                 <div className="success-warning">
-                  <strong>Payment verification pending</strong>
+                  <strong>
+                    Payment verification
+                    pending
+                  </strong>
+
                   <ol>
-  <li>Your payment details have been submitted.</li>
-  <li>Your registration will be considered confirmed only after successful payment verification.</li>
-  <li>After successful verification, you will be added to the respective event WhatsApp group.</li>
-</ol>
+                    <li>
+                      Your payment
+                      details have
+                      been submitted.
+                    </li>
+
+                    <li>
+                      Our coordinator will verify
+your screenshot
+against the actual
+Google Pay
+transaction.
+                    </li>
+
+                    <li>
+                      Your registration
+                      will be confirmed
+                      only after the
+                      payment is
+                      successfully
+                      verified.
+                    </li>
+
+                    <li>
+                      After successful
+                      verification,
+                      you will receive
+                      the official
+                      confirmation
+                      email.
+                    </li>
+                  </ol>
                 </div>
               )}
 
               {totalFee === 0 && (
                 <div className="success-warning">
-                  <strong>Registration submitted</strong>
-                  <p>No payment is required for these events.</p>
+                  <strong>
+                    Registration
+                    submitted
+                  </strong>
+
+                  <p>
+                    No payment is
+                    required for these
+                    events.
+                  </p>
                 </div>
               )}
 
               <p className="success-note">
-                Please keep your registration number(s) safely for future reference.
+                Please keep your
+                registration number(s)
+                safely for future
+                reference.
               </p>
             </div>
           </div>
         </section>
 
-        <style>{registerStyles}</style>
+        <style>
+          {registerStyles}
+        </style>
       </main>
     );
   }
@@ -1167,20 +1931,67 @@ if (members.length < expectedMembers) {
         <section className="register-main">
           <div className="register-shell">
             <div className="register-heading">
-              <p className="register-eyebrow">PARTICIPANT REGISTRATION</p>
-              <h1>Register for REVIBE '26</h1>
-              <p>Complete your registration in three simple steps.</p>
+              <p className="register-eyebrow">
+                PARTICIPANT REGISTRATION
+              </p>
+
+              <h1>
+                Register for REVIBE '26
+              </h1>
+
+              <p>
+                Complete your
+                registration in three
+                simple steps.
+              </p>
             </div>
 
-            <div className="register-steps" aria-label="Registration progress">
-              <Step number="01" title="Personal Info" active={step === 1} completed={step > 1} />
-              <div className={`step-line ${step > 1 ? "completed" : ""}`} />
-              <Step number="02" title="Select Event" active={step === 2} completed={step > 2} />
-              <div className={`step-line ${step > 2 ? "completed" : ""}`} />
-              <Step number="03" title="Payment" active={step === 3} completed={false} />
+            <div
+              className="register-steps"
+              aria-label="Registration progress"
+            >
+              <Step
+                number="01"
+                title="Personal Info"
+                active={step === 1}
+                completed={step > 1}
+              />
+
+              <div
+                className={`step-line ${
+                  step > 1
+                    ? "completed"
+                    : ""
+                }`}
+              />
+
+              <Step
+                number="02"
+                title="Select Event"
+                active={step === 2}
+                completed={step > 2}
+              />
+
+              <div
+                className={`step-line ${
+                  step > 2
+                    ? "completed"
+                    : ""
+                }`}
+              />
+
+              <Step
+                number="03"
+                title="Payment"
+                active={step === 3}
+                completed={false}
+              />
             </div>
 
-            <form onSubmit={handleSubmit} noValidate>
+            <form
+              onSubmit={handleSubmit}
+              noValidate
+            >
               {/* =================================================
                   STEP 1
               ================================================= */}
@@ -1188,81 +1999,173 @@ if (members.length < expectedMembers) {
               {step === 1 && (
                 <section className="register-card">
                   <div className="card-heading">
-                    <span className="card-number">01</span>
+                    <span className="card-number">
+                      01
+                    </span>
+
                     <div>
-                      <p>STEP ONE</p>
-                      <h2>Personal Information</h2>
+                      <p>
+                        STEP ONE
+                      </p>
+
+                      <h2>
+                        Personal
+                        Information
+                      </h2>
                     </div>
                   </div>
 
                   <p className="card-description">
-                    Enter your details exactly as they should appear on your registration.
+                    Enter your details
+                    exactly as they
+                    should appear on your
+                    registration.
                   </p>
 
                   <div className="field-grid">
-                    <Field label="Full Name" required error={errors.name}>
+                    <Field
+                      label="Full Name"
+                      required
+                      error={errors.name}
+                    >
                       <input
                         type="text"
                         value={form.name}
-                        onChange={(event) => update("name", event.target.value)}
+                        onChange={(event) =>
+                          update(
+                            "name",
+                            event.target
+                              .value
+                          )
+                        }
                         placeholder="Enter your full name"
                         autoComplete="name"
                       />
                     </Field>
 
-                    <Field label="Email Address" required error={errors.email}>
+                    <Field
+                      label="Email Address"
+                      required
+                      error={errors.email}
+                    >
                       <input
                         type="email"
                         value={form.email}
-                        onChange={(event) => update("email", event.target.value)}
+                        onChange={(event) =>
+                          update(
+                            "email",
+                            event.target
+                              .value
+                          )
+                        }
                         placeholder="your@email.com"
                         autoComplete="email"
                       />
                     </Field>
 
-                    <Field label="Mobile Number" required error={errors.phone}>
+                    <Field
+                      label="Mobile Number"
+                      required
+                      error={errors.phone}
+                    >
                       <input
                         type="tel"
                         inputMode="numeric"
                         value={form.phone}
                         maxLength={10}
                         onChange={(event) =>
-                          update("phone", event.target.value.replace(/\D/g, ""))
+                          update(
+                            "phone",
+                            event.target.value.replace(
+                              /\D/g,
+                              ""
+                            )
+                          )
                         }
                         placeholder="10-digit mobile number"
                         autoComplete="tel"
                       />
                     </Field>
 
-                    <Field label="College Name" required error={errors.college}>
+                    <Field
+                      label="College Name"
+                      required
+                      error={errors.college}
+                    >
                       <input
                         type="text"
-                        value={form.college}
-                        onChange={(event) => update("college", event.target.value)}
+                        value={
+                          form.college
+                        }
+                        onChange={(event) =>
+                          update(
+                            "college",
+                            event.target
+                              .value
+                          )
+                        }
                         placeholder="Enter your college name"
                         autoComplete="organization"
                       />
                     </Field>
 
-                    <Field label="Department" required error={errors.department}>
+                    <Field
+                      label="Department"
+                      required
+                      error={
+                        errors.department
+                      }
+                    >
                       <input
                         type="text"
-                        value={form.department}
-                        onChange={(event) => update("department", event.target.value)}
+                        value={
+                          form.department
+                        }
+                        onChange={(event) =>
+                          update(
+                            "department",
+                            event.target
+                              .value
+                          )
+                        }
                         placeholder="e.g. CSE, IT, ECE"
                       />
                     </Field>
 
-                    <Field label="Year of Study" required error={errors.year}>
+                    <Field
+                      label="Year of Study"
+                      required
+                      error={errors.year}
+                    >
                       <select
                         value={form.year}
-                        onChange={(event) => update("year", event.target.value)}
+                        onChange={(event) =>
+                          update(
+                            "year",
+                            event.target
+                              .value
+                          )
+                        }
                       >
-                        <option value="">Select year</option>
-                        <option value="1st Year">1st Year</option>
-                        <option value="2nd Year">2nd Year</option>
-                        <option value="3rd Year">3rd Year</option>
-                        <option value="4th Year">4th Year</option>
+                        <option value="">
+                          Select year
+                        </option>
+
+                        <option value="1st Year">
+                          1st Year
+                        </option>
+
+                        <option value="2nd Year">
+                          2nd Year
+                        </option>
+
+                        <option value="3rd Year">
+                          3rd Year
+                        </option>
+
+                        <option value="4th Year">
+                          4th Year
+                        </option>
                       </select>
                     </Field>
                   </div>
@@ -1270,23 +2173,46 @@ if (members.length < expectedMembers) {
                   <label className="remember-details">
                     <input
                       type="checkbox"
-                      checked={form.rememberDetails}
+                      checked={
+                        form.rememberDetails
+                      }
                       onChange={(event) =>
-                        update("rememberDetails", event.target.checked)
+                        update(
+                          "rememberDetails",
+                          event.target
+                            .checked
+                        )
                       }
                     />
+
                     <span className="remember-details-text">
-                      <strong>Remember my details on this device</strong>
+                      <strong>
+                        Remember my details
+                        on this device
+                      </strong>
+
                       <span>
-                        Your participant and event member details will be saved locally so you can continue later.
+                        Your participant and
+                        event member details
+                        will be saved locally
+                        so you can continue
+                        later.
                       </span>
                     </span>
                   </label>
 
                   <div className="step-actions">
                     <span />
-                    <button type="button" className="register-primary-btn" onClick={handleNext}>
-                      Continue <span>→</span>
+
+                    <button
+                      type="button"
+                      className="register-primary-btn"
+                      onClick={handleNext}
+                    >
+                      Continue{" "}
+                      <span>
+                        →
+                      </span>
                     </button>
                   </div>
                 </section>
@@ -1299,445 +2225,884 @@ if (members.length < expectedMembers) {
               {step === 2 && (
                 <section className="register-card">
                   <div className="card-heading">
-                    <span className="card-number">02</span>
+                    <span className="card-number">
+                      02
+                    </span>
+
                     <div>
-                      <p>STEP TWO</p>
-                      <h2>Select Events</h2>
+                      <p>
+                        STEP TWO
+                      </p>
+
+                      <h2>
+                        Select Events
+                      </h2>
                     </div>
                   </div>
 
                   <p className="card-description">
-                    Select one or more events. Each selected event has its own participant count and team member details.
+                    Select one or more
+                    events. Each selected
+                    event has its own
+                    participant count and
+                    team member details.
                   </p>
 
                   {eventsLoading && (
-                    <div className="register-loading">Loading available events...</div>
+                    <div className="register-loading">
+                      Loading available
+                      events...
+                    </div>
                   )}
 
                   {eventsError && (
                     <div className="register-error-box">
-                      <strong>Unable to load events</strong>
-                      <p>{eventsError}</p>
-                      <button type="button" onClick={() => window.location.reload()}>
+                      <strong>
+                        Unable to load
+                        events
+                      </strong>
+
+                      <p>
+                        {eventsError}
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          window.location.reload()
+                        }
+                      >
                         Refresh
                       </button>
                     </div>
                   )}
 
-                  {!eventsLoading && !eventsError && (
-                    <>
-                      <div className="event-selection">
-                        <div className="event-selection-title">
-                          <span>SELECT ONE OR MORE EVENTS</span>
-                          <span className="selected-events-count">
-                            {form.eventSlugs.length} selected
-                          </span>
+                  {!eventsLoading &&
+                    !eventsError && (
+                      <>
+                        <div className="event-selection">
+                          <div className="event-selection-title">
+                            <span>
+                              SELECT ONE OR MORE
+                              EVENTS
+                            </span>
+
+                            <span className="selected-events-count">
+                              {
+                                form
+                                  .eventSlugs
+                                  .length
+                              }{" "}
+                              selected
+                            </span>
+                          </div>
+
+                          <div className="event-selection-note">
+                            <strong>
+                              NOTE:
+                            </strong>{" "}
+                            Selecting more
+                            than 1 event —
+                            please check the
+                            timings carefully
+                            and make sure you
+                            are available for
+                            all your selected
+                            events.
+                          </div>
+
+                          {errors.eventSlug && (
+                            <p className="field-error">
+                              {
+                                errors.eventSlug
+                              }
+                            </p>
+                          )}
+
+                          {technicalEvents(
+                            events
+                          ).length >
+                            0 && (
+                            <EventCategory
+                              title="Technical Events"
+                              icon="🔧"
+                              events={technicalEvents(
+                                events
+                              )}
+                              selectedSlugs={
+                                form.eventSlugs
+                              }
+                              onSelect={
+                                handleEventChange
+                              }
+                            />
+                          )}
+
+                          {nonTechnicalEvents(
+                            events
+                          ).length >
+                            0 && (
+                            <EventCategory
+                              title="Non-Technical Events"
+                              icon="🎭"
+                              events={nonTechnicalEvents(
+                                events
+                              )}
+                              selectedSlugs={
+                                form.eventSlugs
+                              }
+                              onSelect={
+                                handleEventChange
+                              }
+                            />
+                          )}
+
+                          {events.length ===
+                            0 && (
+                            <div className="register-loading">
+                              No events are
+                              currently open
+                              for
+                              registration.
+                            </div>
+                          )}
                         </div>
 
-                        <div className="event-selection-note">
-  <strong>NOTE:</strong> Selecting more than 1 event — please check the timings carefully and make sure you are available for all your selected events.
-</div>
+                        {selectedEvents.length >
+                          0 && (
+                          <>
+                            <div className="selected-event-card">
+                              <div>
+                                <span>
+                                  SELECTED
+                                  EVENTS
+                                </span>
 
-                        {errors.eventSlug && (
-                          <p className="field-error">{errors.eventSlug}</p>
-                        )}
+                                <h3>
+                                  {
+                                    selectedEvents.length
+                                  }{" "}
+                                  Event
+                                  {selectedEvents.length !==
+                                  1
+                                    ? "s"
+                                    : ""}
+                                </h3>
 
-                        {technicalEvents(events).length > 0 && (
-                          <EventCategory
-                            title="Technical Events"
-                            icon="🔧"
-                            events={technicalEvents(events)}
-                            selectedSlugs={form.eventSlugs}
-                            onSelect={handleEventChange}
-                          />
-                        )}
+                                <p>
+                                  Select the
+                                  participant
+                                  count
+                                  separately
+                                  for each
+                                  selected
+                                  event.
+                                </p>
+                              </div>
 
-                        {nonTechnicalEvents(events).length > 0 && (
-                          <EventCategory
-                            title="Non-Technical Events"
-                            icon="🎭"
-                            events={nonTechnicalEvents(events)}
-                            selectedSlugs={form.eventSlugs}
-                            onSelect={handleEventChange}
-                          />
-                        )}
+                              <div className="event-rule-badge">
+                                <span>
+                                  PARTICIPANT
+                                  LIMITS
+                                </span>
 
-                        {events.length === 0 && (
-                          <div className="register-loading">
-                            No events are currently open for registration.
-                          </div>
-                        )}
-                      </div>
-
-                      {selectedEvents.length > 0 && (
-                        <>
-                          <div className="selected-event-card">
-                            <div>
-                              <span>SELECTED EVENTS</span>
-                              <h3>
-                                {selectedEvents.length} Event{selectedEvents.length !== 1 ? "s" : ""}
-                              </h3>
-                              <p>
-                                Select the participant count separately for each selected event.
-                              </p>
+                                <strong>
+                                  Set separately
+                                  per event
+                                </strong>
+                              </div>
                             </div>
 
-                            <div className="event-rule-badge">
-                              <span>PARTICIPANT LIMITS</span>
-                              <strong>Set separately per event</strong>
-                            </div>
-                          </div>
+                            <div className="selected-event-details-list">
+                              {selectedEvents.map(
+                                (
+                                  eventItem
+                                ) => {
+                                  const range =
+                                    getEventParticipantRange(
+                                      eventItem
+                                    );
 
-                          <div className="selected-event-details-list">
-                            {selectedEvents.map((eventItem) => {
-                              const range = getEventParticipantRange(eventItem);
-                              const details =
-                                form.eventRegistrations[eventItem.slug] ||
-                                emptyEventRegistration();
-                              const participantCount = Number(details.teamSize) || 0;
-                              const expectedMembers = Math.max(0, participantCount - 1);
-                              const members = details.members || [];
-                              const eventError =
-                                errors[`event-${eventItem.slug}-teamSize`];
+                                  const details =
+                                    form
+                                      .eventRegistrations[
+                                      eventItem
+                                        .slug
+                                    ] ||
+                                    emptyEventRegistration();
 
-                              return (
-                                <div
-                                  className="selected-event-detail-card"
-                                  key={eventItem.id || eventItem.slug}
-                                >
-                                  <div className="selected-event-detail-header">
-                                    <div>
-                                      <span className="selected-event-detail-kicker">
-                                        EVENT DETAILS
-                                      </span>
-                                      <h4>{eventItem.name}</h4>
-                                      <p className="selected-event-detail-schedule">
-                                        {formatEventSchedule(eventItem)} • {getEventVenue(eventItem)}
-                                      </p>
-                                    </div>
+                                  const participantCount =
+                                    Number(
+                                      details.teamSize
+                                    ) ||
+                                    0;
 
-                                    <div className="selected-event-fee">
-                                      <small>EVENT FEE</small>
-                                      ₹
-                                      {participantCount
-                                        ? getTotalFee(eventItem.slug, participantCount)
-                                        : getEventFee(eventItem)}
-                                    </div>
-                                  </div>
+                                  const expectedMembers =
+                                    Math.max(
+                                      0,
+                                      participantCount -
+                                        1
+                                    );
 
-                                  <div className="event-participant-selector">
-                                    <Field
-                                      label="Number of Participants"
-                                      required
-                                      error={eventError}
+                                  const members =
+                                    details.members ||
+                                    [];
+
+                                  const eventError =
+                                    errors[
+                                      `event-${eventItem.slug}-teamSize`
+                                    ];
+
+                                  const teamNameError =
+                                    errors[
+                                      `event-${eventItem.slug}-teamName`
+                                    ];
+
+                                  return (
+                                    <div
+                                      className="selected-event-detail-card"
+                                      key={
+                                        eventItem.id ||
+                                        eventItem.slug
+                                      }
                                     >
-                                      <select
-                                        value={details.teamSize}
-                                        onChange={(event) =>
-                                          handleEventParticipantCountChange(
-                                            eventItem.slug,
-                                            event.target.value
-                                          )
-                                        }
-                                      >
-                                        <option value="">
-                                          Select participant count
-                                        </option>
-
-                                        {Array.from(
-                                          { length: range.max - range.min + 1 },
-                                          (_, index) => {
-                                            const size = range.min + index;
-                                            return (
-                                              <option key={size} value={size}>
-                                                {size} {size === 1 ? "Participant" : "Participants"}
-                                              </option>
-                                            );
-                                          }
-                                        )}
-                                      </select>
-                                    </Field>
-
-                                    <div className="event-participant-info">
-                                      <strong>
-                                        Min: {range.min} | Max: {range.max}
-                                      </strong>
-                                      <span>
-                                        Choose the actual number of participants for {eventItem.name}.
-                                      </span>
-                                    </div>
-                                  </div>
-
-                                  {participantCount > 1 && (
-                                    <div className="event-members-section">
-                                      <div className="event-members-heading">
+                                      <div className="selected-event-detail-header">
                                         <div>
                                           <span className="selected-event-detail-kicker">
-                                            TEAM DETAILS
+                                            EVENT
+                                            DETAILS
                                           </span>
-                                          <h3>
-                                            TEAM MEMBER DETAILS
-                                          </h3>
+
+                                          <h4>
+                                            {
+                                              eventItem.name
+                                            }
+                                          </h4>
+
+                                          <p className="selected-event-detail-schedule">
+                                            {formatEventSchedule(
+                                              eventItem
+                                            )}{" "}
+                                            •{" "}
+                                            {getEventVenue(
+                                              eventItem
+                                            )}
+                                          </p>
                                         </div>
-                                        <strong>
-                                          {participantCount} participants • {expectedMembers} additional member{expectedMembers !== 1 ? "s" : ""}
-                                        </strong>
+
+                                        <div className="selected-event-fee">
+                                          <small>
+                                            EVENT
+                                            FEE
+                                          </small>
+
+                                          ₹
+                                          {participantCount
+                                            ? getTotalFee(
+                                                eventItem.slug,
+                                                participantCount
+                                              )
+                                            : getEventFee(
+                                                eventItem
+                                              )}
+                                        </div>
                                       </div>
 
-                                      <p className="members-note">
-                                        Enter the complete details of every additional participant for this event.
-                                      </p>
+                                      <div className="event-participant-selector">
+                                        <Field
+                                          label="Number of Participants"
+                                          required
+                                          error={
+                                            eventError
+                                          }
+                                        >
+                                          <select
+                                            value={
+                                              details.teamSize
+                                            }
+                                            onChange={(
+                                              event
+                                            ) =>
+                                              handleEventParticipantCountChange(
+                                                eventItem.slug,
+                                                event
+                                                  .target
+                                                  .value
+                                              )
+                                            }
+                                          >
+                                            <option value="">
+                                              Select
+                                              participant
+                                              count
+                                            </option>
 
-                                      {errors[`event-${eventItem.slug}-members`] && (
-                                        <p className="field-error">
-                                          {errors[`event-${eventItem.slug}-members`]}
-                                        </p>
-                                      )}
+                                            {Array.from(
+                                              {
+                                                length:
+                                                  range.max -
+                                                  range.min +
+                                                  1,
+                                              },
+                                              (
+                                                _,
+                                                index
+                                              ) => {
+                                                const size =
+                                                  range.min +
+                                                  index;
 
-                                      {members.map((member, index) => (
-                                        <div className="event-member-card" key={`${eventItem.slug}-${index}`}>
-                                          <div className="member-number">
-                                            MEMBER {index + 2}
+                                                return (
+                                                  <option
+                                                    key={
+                                                      size
+                                                    }
+                                                    value={
+                                                      size
+                                                    }
+                                                  >
+                                                    {
+                                                      size
+                                                    }{" "}
+                                                    {size ===
+                                                    1
+                                                      ? "Participant"
+                                                      : "Participants"}
+                                                  </option>
+                                                );
+                                              }
+                                            )}
+                                          </select>
+                                        </Field>
+
+                                        <div className="event-participant-info">
+                                          <strong>
+                                            Min:{" "}
+                                            {
+                                              range.min
+                                            }{" "}
+                                            | Max:{" "}
+                                            {
+                                              range.max
+                                            }
+                                          </strong>
+
+                                          <span>
+                                            Choose the
+                                            actual
+                                            number of
+                                            participants
+                                            for{" "}
+                                            {
+                                              eventItem.name
+                                            }
+                                            .
+                                          </span>
+                                        </div>
+                                      </div>
+
+                                      {/* =================================================
+                                          TEAM DETAILS
+                                      ================================================= */}
+
+                                      {participantCount >
+                                        1 && (
+                                        <div className="event-members-section">
+                                          <div className="team-name-field">
+                                            <Field
+                                              label="Team Name"
+                                              required
+                                              error={
+                                                teamNameError
+                                              }
+                                            >
+                                              <input
+                                                type="text"
+                                                value={
+                                                  details.teamName ||
+                                                  ""
+                                                }
+                                                onChange={(
+                                                  event
+                                                ) =>
+                                                  handleEventTeamNameChange(
+                                                    eventItem.slug,
+                                                    event
+                                                      .target
+                                                      .value
+                                                  )
+                                                }
+                                                placeholder="Enter your team name"
+                                                maxLength={
+                                                  100
+                                                }
+                                                autoComplete="off"
+                                              />
+                                            </Field>
                                           </div>
 
-                                          <div className="field-grid">
-                                            <Field
-                                              label="Full Name"
-                                              required
-                                              error={
-                                                errors[
-                                                  `event-${eventItem.slug}-member-${index}-name`
-                                                ]
-                                              }
-                                            >
-                                              <input
-                                                type="text"
-                                                value={member.name}
-                                                onChange={(event) =>
-                                                  updateEventMember(
-                                                    eventItem.slug,
-                                                    index,
-                                                    "name",
-                                                    event.target.value
-                                                  )
-                                                }
-                                                placeholder="Enter full name"
-                                              />
-                                            </Field>
+                                          <div className="event-members-heading">
+                                            <div>
+                                              <span className="selected-event-detail-kicker">
+                                                TEAM
+                                                DETAILS
+                                              </span>
 
-                                            <Field
-                                              label="Email Address"
-                                              required
-                                              error={
-                                                errors[
-                                                  `event-${eventItem.slug}-member-${index}-email`
-                                                ]
-                                              }
-                                            >
-                                              <input
-                                                type="email"
-                                                value={member.email}
-                                                onChange={(event) =>
-                                                  updateEventMember(
-                                                    eventItem.slug,
-                                                    index,
-                                                    "email",
-                                                    event.target.value
-                                                  )
-                                                }
-                                                placeholder="Enter email address"
-                                              />
-                                            </Field>
+                                              <h3>
+                                                TEAM
+                                                MEMBER
+                                                DETAILS
+                                              </h3>
+                                            </div>
 
-                                            <Field
-                                              label="Mobile Number"
-                                              required
-                                              error={
-                                                errors[
-                                                  `event-${eventItem.slug}-member-${index}-phone`
-                                                ]
-                                              }
-                                            >
-                                              <input
-                                                type="tel"
-                                                inputMode="numeric"
-                                                maxLength={10}
-                                                value={member.phone}
-                                                onChange={(event) =>
-                                                  updateEventMember(
-                                                    eventItem.slug,
-                                                    index,
-                                                    "phone",
-                                                    event.target.value.replace(/\D/g, "")
-                                                  )
-                                                }
-                                                placeholder="10-digit mobile number"
-                                              />
-                                            </Field>
+                                            <strong>
+                                              {
+                                                participantCount
+                                              }{" "}
+                                              participants
+                                              {" • "}
+                                              {
+                                                expectedMembers
+                                              }{" "}
+                                              additional
+                                              member
+                                              {expectedMembers !==
+                                              1
+                                                ? "s"
+                                                : ""}
+                                            </strong>
+                                          </div>
 
-                                            <Field
-                                              label="College Name"
-                                              required
-                                              error={
-                                                errors[
-                                                  `event-${eventItem.slug}-member-${index}-college`
-                                                ]
-                                              }
-                                            >
-                                              <input
-                                                type="text"
-                                                value={member.college}
-                                                onChange={(event) =>
-                                                  updateEventMember(
-                                                    eventItem.slug,
-                                                    index,
-                                                    "college",
-                                                    event.target.value
-                                                  )
-                                                }
-                                                placeholder="Enter college name"
-                                              />
-                                            </Field>
+                                          <p className="members-note">
+                                            Enter the
+                                            complete
+                                            details of
+                                            every
+                                            additional
+                                            participant
+                                            for this
+                                            event.
+                                          </p>
 
-                                            <Field
-                                              label="Department"
-                                              required
-                                              error={
+                                          {errors[
+                                            `event-${eventItem.slug}-members`
+                                          ] && (
+                                            <p className="field-error">
+                                              {
                                                 errors[
-                                                  `event-${eventItem.slug}-member-${index}-department`
+                                                  `event-${eventItem.slug}-members`
                                                 ]
                                               }
-                                            >
-                                              <input
-                                                type="text"
-                                                value={member.department}
-                                                onChange={(event) =>
-                                                  updateEventMember(
-                                                    eventItem.slug,
-                                                    index,
-                                                    "department",
-                                                    event.target.value
-                                                  )
-                                                }
-                                                placeholder="e.g. CSE, IT, ECE"
-                                              />
-                                            </Field>
+                                            </p>
+                                          )}
 
-                                            <Field
-                                              label="Year of Study"
-                                              required
-                                              error={
-                                                errors[
-                                                  `event-${eventItem.slug}-member-${index}-year`
-                                                ]
-                                              }
-                                            >
-                                              <select
-                                                value={member.year}
-                                                onChange={(event) =>
-                                                  updateEventMember(
-                                                    eventItem.slug,
-                                                    index,
-                                                    "year",
-                                                    event.target.value
-                                                  )
-                                                }
+                                          {members.map(
+                                            (
+                                              member,
+                                              index
+                                            ) => (
+                                              <div
+                                                className="event-member-card"
+                                                key={`${eventItem.slug}-${index}`}
                                               >
-                                                <option value="">Select year</option>
-                                                <option value="1st Year">1st Year</option>
-                                                <option value="2nd Year">2nd Year</option>
-                                                <option value="3rd Year">3rd Year</option>
-                                                <option value="4th Year">4th Year</option>
-                                              </select>
-                                            </Field>
-                                          </div>
+                                                <div className="member-number">
+                                                  MEMBER{" "}
+                                                  {
+                                                    index +
+                                                    2
+                                                  }
+                                                </div>
+
+                                                <div className="field-grid">
+                                                  <Field
+                                                    label="Full Name"
+                                                    required
+                                                    error={
+                                                      errors[
+                                                        `event-${eventItem.slug}-member-${index}-name`
+                                                      ]
+                                                    }
+                                                  >
+                                                    <input
+                                                      type="text"
+                                                      value={
+                                                        member.name
+                                                      }
+                                                      onChange={(
+                                                        event
+                                                      ) =>
+                                                        updateEventMember(
+                                                          eventItem.slug,
+                                                          index,
+                                                          "name",
+                                                          event
+                                                            .target
+                                                            .value
+                                                        )
+                                                      }
+                                                      placeholder="Enter full name"
+                                                    />
+                                                  </Field>
+
+                                                  <Field
+                                                    label="Email Address"
+                                                    required
+                                                    error={
+                                                      errors[
+                                                        `event-${eventItem.slug}-member-${index}-email`
+                                                      ]
+                                                    }
+                                                  >
+                                                    <input
+                                                      type="email"
+                                                      value={
+                                                        member.email
+                                                      }
+                                                      onChange={(
+                                                        event
+                                                      ) =>
+                                                        updateEventMember(
+                                                          eventItem.slug,
+                                                          index,
+                                                          "email",
+                                                          event
+                                                            .target
+                                                            .value
+                                                        )
+                                                      }
+                                                      placeholder="Enter email address"
+                                                    />
+                                                  </Field>
+
+                                                  <Field
+                                                    label="Mobile Number"
+                                                    required
+                                                    error={
+                                                      errors[
+                                                        `event-${eventItem.slug}-member-${index}-phone`
+                                                      ]
+                                                    }
+                                                  >
+                                                    <input
+                                                      type="tel"
+                                                      inputMode="numeric"
+                                                      maxLength={
+                                                        10
+                                                      }
+                                                      value={
+                                                        member.phone
+                                                      }
+                                                      onChange={(
+                                                        event
+                                                      ) =>
+                                                        updateEventMember(
+                                                          eventItem.slug,
+                                                          index,
+                                                          "phone",
+                                                          event.target.value.replace(
+                                                            /\D/g,
+                                                            ""
+                                                          )
+                                                        )
+                                                      }
+                                                      placeholder="10-digit mobile number"
+                                                    />
+                                                  </Field>
+
+                                                  <Field
+                                                    label="College Name"
+                                                    required
+                                                    error={
+                                                      errors[
+                                                        `event-${eventItem.slug}-member-${index}-college`
+                                                      ]
+                                                    }
+                                                  >
+                                                    <input
+                                                      type="text"
+                                                      value={
+                                                        member.college
+                                                      }
+                                                      onChange={(
+                                                        event
+                                                      ) =>
+                                                        updateEventMember(
+                                                          eventItem.slug,
+                                                          index,
+                                                          "college",
+                                                          event
+                                                            .target
+                                                            .value
+                                                        )
+                                                      }
+                                                      placeholder="Enter college name"
+                                                    />
+                                                  </Field>
+
+                                                  <Field
+                                                    label="Department"
+                                                    required
+                                                    error={
+                                                      errors[
+                                                        `event-${eventItem.slug}-member-${index}-department`
+                                                      ]
+                                                    }
+                                                  >
+                                                    <input
+                                                      type="text"
+                                                      value={
+                                                        member.department
+                                                      }
+                                                      onChange={(
+                                                        event
+                                                      ) =>
+                                                        updateEventMember(
+                                                          eventItem.slug,
+                                                          index,
+                                                          "department",
+                                                          event
+                                                            .target
+                                                            .value
+                                                        )
+                                                      }
+                                                      placeholder="e.g. CSE, IT, ECE"
+                                                    />
+                                                  </Field>
+
+                                                  <Field
+                                                    label="Year of Study"
+                                                    required
+                                                    error={
+                                                      errors[
+                                                        `event-${eventItem.slug}-member-${index}-year`
+                                                      ]
+                                                    }
+                                                  >
+                                                    <select
+                                                      value={
+                                                        member.year
+                                                      }
+                                                      onChange={(
+                                                        event
+                                                      ) =>
+                                                        updateEventMember(
+                                                          eventItem.slug,
+                                                          index,
+                                                          "year",
+                                                          event
+                                                            .target
+                                                            .value
+                                                        )
+                                                      }
+                                                    >
+                                                      <option value="">
+                                                        Select
+                                                        year
+                                                      </option>
+
+                                                      <option value="1st Year">
+                                                        1st
+                                                        Year
+                                                      </option>
+
+                                                      <option value="2nd Year">
+                                                        2nd
+                                                        Year
+                                                      </option>
+
+                                                      <option value="3rd Year">
+                                                        3rd
+                                                        Year
+                                                      </option>
+
+                                                      <option value="4th Year">
+                                                        4th
+                                                        Year
+                                                      </option>
+                                                    </select>
+                                                  </Field>
+                                                </div>
+                                              </div>
+                                            )
+                                          )}
                                         </div>
-                                      ))}
+                                      )}
                                     </div>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
+                                  );
+                                }
+                              )}
+                            </div>
 
-                          <div className="fee-summary">
-                            <div>
-                              <span>REGISTRATION FEE</span>
+                            <div className="fee-summary">
+                              <div>
+                                <span>
+                                  REGISTRATION
+                                  FEE
+                                </span>
+
+                                <strong>
+                                  {selectedEvents.length ===
+                                    1 &&
+                                  selectedEvents[0]
+                                    .slug &&
+                                  Number(
+                                    form
+                                      .eventRegistrations[
+                                      selectedEvents[0]
+                                        .slug
+                                    ]?.teamSize
+                                  )
+                                    ? getFeeLabel(
+                                        selectedEvents[0]
+                                          .slug
+                                      )
+                                    : `${selectedEvents.length} event(s) • per-event participant count`}
+                                </strong>
+                              </div>
+
+                              <div className="total-fee">
+                                <span>
+                                  TOTAL
+                                </span>
+
+                                <strong>
+                                  ₹{totalFee}
+                                </strong>
+                              </div>
+                            </div>
+
+                            <div className="selected-events-preview">
+                              <div className="selected-events-preview-header">
+                                <span>
+                                  REGISTRATION
+                                  SUMMARY
+                                </span>
+
+                                <span>
+                                  {
+                                    selectedEvents.length
+                                  }{" "}
+                                  event
+                                  {selectedEvents.length !==
+                                  1
+                                    ? "s"
+                                    : ""}
+                                </span>
+                              </div>
+
+                              <div className="event-review-list">
+                                {selectedEvents.map(
+                                  (
+                                    eventItem
+                                  ) => {
+                                    const details =
+                                      form
+                                        .eventRegistrations[
+                                        eventItem
+                                          .slug
+                                      ] ||
+                                      emptyEventRegistration();
+
+                                    const participantCount =
+                                      Number(
+                                        details.teamSize
+                                      ) ||
+                                      0;
+
+                                    const eventFee =
+                                      participantCount
+                                        ? getTotalFee(
+                                            eventItem.slug,
+                                            participantCount
+                                          )
+                                        : 0;
+
+                                    return (
+                                      <div
+                                        className="event-review-item"
+                                        key={
+                                          eventItem.id ||
+                                          eventItem.slug
+                                        }
+                                      >
+                                        <div>
+                                          <div className="event-review-name">
+                                            {
+                                              eventItem.name
+                                            }
+                                          </div>
+
+                                          <div className="event-review-meta">
+                                            {formatEventSchedule(
+                                              eventItem
+                                            )}{" "}
+                                            •{" "}
+                                            {getEventVenue(
+                                              eventItem
+                                            )}
+                                          </div>
+
+                                          <div className="event-review-participants">
+                                            Participants:{" "}
+                                            {participantCount ||
+                                              "Not selected"}
+                                          </div>
+
+                                          {participantCount >
+                                            1 &&
+                                            details.teamName && (
+                                              <div className="event-review-team-name">
+                                                Team:{" "}
+                                                {
+                                                  details.teamName
+                                                }
+                                              </div>
+                                            )}
+                                        </div>
+
+                                        <div />
+
+                                        <div className="event-review-fee">
+                                          ₹
+                                          {
+                                            eventFee
+                                          }
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+                                )}
+                              </div>
+
+                              <div className="review-total">
+                                <span>
+                                  TOTAL AMOUNT
+                                  TO BE PAID
+                                </span>
+
+                                <strong>
+                                  ₹{totalFee}
+                                </strong>
+                              </div>
+                            </div>
+
+                            <div className="bottom-timing-note">
                               <strong>
-                                {selectedEvents.length === 1 &&
-                                selectedEvents[0].slug &&
-                                Number(
-                                  form.eventRegistrations[selectedEvents[0].slug]?.teamSize
-                                )
-                                  ? getFeeLabel(selectedEvents[0].slug)
-                                  : `${selectedEvents.length} event(s) • per-event participant count`}
-                              </strong>
+                                NOTE:
+                              </strong>{" "}
+                              Selecting more
+                              than 1 event —
+                              please check the
+                              timings carefully
+                              and make sure you
+                              are available for
+                              all your selected
+                              events.
                             </div>
-
-                            <div className="total-fee">
-                              <span>TOTAL</span>
-                              <strong>₹{totalFee}</strong>
-                            </div>
-                          </div>
-
-                          <div className="selected-events-preview">
-                            <div className="selected-events-preview-header">
-                              <span>REGISTRATION SUMMARY</span>
-                              <span>
-                                {selectedEvents.length} event{selectedEvents.length !== 1 ? "s" : ""}
-                              </span>
-                            </div>
-
-                            <div className="event-review-list">
-                              {selectedEvents.map((eventItem) => {
-                                const details =
-                                  form.eventRegistrations[eventItem.slug] ||
-                                  emptyEventRegistration();
-                                const participantCount = Number(details.teamSize) || 0;
-                                const eventFee = participantCount
-                                  ? getTotalFee(eventItem.slug, participantCount)
-                                  : 0;
-
-                                return (
-                                  <div
-                                    className="event-review-item"
-                                    key={eventItem.id || eventItem.slug}
-                                  >
-                                    <div>
-                                      <div className="event-review-name">
-                                        {eventItem.name}
-                                      </div>
-                                      <div className="event-review-meta">
-                                        {formatEventSchedule(eventItem)} • {getEventVenue(eventItem)}
-                                      </div>
-                                      <div className="event-review-participants">
-                                        Participants: {participantCount || "Not selected"}
-                                      </div>
-                                    </div>
-
-                                    <div />
-
-                                    <div className="event-review-fee">
-                                      ₹{eventFee}
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-
-                            <div className="review-total">
-                              <span>TOTAL AMOUNT TO BE PAID</span>
-                              <strong>₹{totalFee}</strong>
-                            </div>
-                          </div>
-
-                          <div className="bottom-timing-note">
-  <strong>NOTE:</strong> Selecting more than 1 event — please check the timings carefully and make sure you are available for all your selected events.
-</div>
-                        </>
-                      )}
-                    </>
-                  )}
+                          </>
+                        )}
+                      </>
+                    )}
 
                   <div className="step-actions">
                     <button
@@ -1755,10 +3120,14 @@ if (members.length < expectedMembers) {
                       disabled={
                         eventsLoading ||
                         !!eventsError ||
-                        selectedEvents.length === 0
+                        selectedEvents.length ===
+                          0
                       }
                     >
-                      Continue <span>→</span>
+                      Continue{" "}
+                      <span>
+                        →
+                      </span>
                     </button>
                   </div>
                 </section>
@@ -1771,325 +3140,397 @@ if (members.length < expectedMembers) {
               {step === 3 && (
                 <section className="register-card">
                   <div className="card-heading">
-                    <span className="card-number">03</span>
+                    <span className="card-number">
+                      03
+                    </span>
+
                     <div>
-                      <p>STEP THREE</p>
-                      <h2>Payment</h2>
+                      <p>
+                        STEP THREE
+                      </p>
+
+                      <h2>
+                        Payment
+                      </h2>
                     </div>
                   </div>
 
                   <p className="card-description">
-                    Complete the payment using Google Pay.
+                    Complete the payment
+                    using Google Pay.
                   </p>
 
-                  {selectedEvents.length > 0 && (
+                  {selectedEvents.length >
+                    0 && (
                     <div className="payment-summary">
                       <div>
-                        <span>EVENTS</span>
-                        <strong>{selectedEvents.length} selected</strong>
-                      </div>
-                      <div>
-                        <span>PARTICIPANTS</span>
+                        <span>
+                          EVENTS
+                        </span>
+
                         <strong>
-                          {selectedEvents.reduce((total, eventItem) => {
-                            const count = Number(
-                              form.eventRegistrations[eventItem.slug]?.teamSize
-                            );
-                            return total + (count || 0);
-                          }, 0)} total selections
+                          {
+                            selectedEvents.length
+                          }{" "}
+                          selected
                         </strong>
                       </div>
+
                       <div>
-                        <span>TOTAL AMOUNT</span>
-                        <strong>₹{totalFee}</strong>
+                        <span>
+                          PARTICIPANTS
+                        </span>
+
+                        <strong>
+                          {selectedEvents.reduce(
+                            (
+                              total,
+                              eventItem
+                            ) => {
+                              const count =
+                                Number(
+                                  form
+                                    .eventRegistrations[
+                                    eventItem
+                                      .slug
+                                  ]?.teamSize
+                                );
+
+                              return (
+                                total +
+                                (count ||
+                                  0)
+                              );
+                            },
+                            0
+                          )}{" "}
+                          total selections
+                        </strong>
+                      </div>
+
+                      <div>
+                        <span>
+                          TOTAL AMOUNT
+                        </span>
+
+                        <strong>
+                          ₹{totalFee}
+                        </strong>
                       </div>
                     </div>
                   )}
 
-                  {selectedEvents.length > 1 && (
+                  {selectedEvents.length >
+                    1 && (
                     <div className="multi-payment-events">
-                      {selectedEvents.map((eventItem) => {
-                        const details =
-                          form.eventRegistrations[eventItem.slug] ||
-                          emptyEventRegistration();
-                        const participantCount = Number(details.teamSize) || 0;
+                      {selectedEvents.map(
+                        (eventItem) => {
+                          const details =
+                            form
+                              .eventRegistrations[
+                              eventItem
+                                .slug
+                            ] ||
+                            emptyEventRegistration();
 
-                        return (
-                          <div
-                            className="multi-payment-event"
-                            key={eventItem.id || eventItem.slug}
-                          >
-                            <strong>{eventItem.name}</strong>
-                            <span>
-                              {participantCount} participant(s) • {formatEventSchedule(eventItem)} • {getEventVenue(eventItem)} • ₹
-                              {getTotalFee(eventItem.slug, participantCount)}
-                            </span>
-                          </div>
-                        );
-                      })}
+                          const participantCount =
+                            Number(
+                              details.teamSize
+                            ) ||
+                            0;
+
+                          return (
+                            <div
+                              className="multi-payment-event"
+                              key={
+                                eventItem.id ||
+                                eventItem.slug
+                              }
+                            >
+                              <strong>
+                                {
+                                  eventItem.name
+                                }
+                              </strong>
+
+                              <span>
+                                {
+                                  participantCount
+                                }{" "}
+                                participant
+                                {participantCount !==
+                                1
+                                  ? "s"
+                                  : ""}{" "}
+                                •{" "}
+                                {formatEventSchedule(
+                                  eventItem
+                                )}{" "}
+                                •{" "}
+                                {getEventVenue(
+                                  eventItem
+                                )}{" "}
+                                • ₹
+                                {getTotalFee(
+                                  eventItem.slug,
+                                  participantCount
+                                )}
+                              </span>
+                            </div>
+                          );
+                        }
+                      )}
                     </div>
                   )}
 
                   {totalFee > 0 && (
                     <>
                       <div className="payment-instructions">
-                        <span>PAYMENT INSTRUCTIONS</span>
+                        <span>
+                          PAYMENT
+                          INSTRUCTIONS
+                        </span>
 
                         <ol>
-  <li>
-    <strong>Take a screenshot of the successful payment.</strong>
-  </li>
+                          <li>
+                            <strong>
+                              Complete the
+                              required
+                              payment using
+                              Google Pay.
+                            </strong>
+                          </li>
 
-  <li>
-    <strong>
-      Send the payment screenshot to the respective event
-      coordinator(s) on WhatsApp.
-    </strong>
+                          <li>
+                            <strong>
+                              Take a screenshot
+                              of the successful
+                              payment.
+                            </strong>
+                          </li>
 
-    <div style={{ marginTop: "0.6rem" }}>
-      {selectedEvents.map((eventItem) => {
-        const coordinator = getCoordinatorDetails(eventItem.name);
+                          <li>
+                            <strong>
+                              Send the payment
+screenshot to our
+coordinator on
+WhatsApp:
+                            </strong>
 
-        return (
-          <div
-            key={eventItem.id || eventItem.slug}
-            style={{
-              marginBottom: "0.5rem",
-              padding: "0.6rem 0.7rem",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: "6px",
-              background: "rgba(255,255,255,0.025)",
-            }}
-          >
-            <strong style={{ color: "#ffffff" }}>
-              {eventItem.name}
-            </strong>
+                            <div
+                              className="abbas-payment-contact"
+                            >
+                              <strong>
+                                Coordinator (Abbas) —{" "}
+{
+  PAYMENT_COORDINATOR_NUMBER
+}
+                              </strong>
+                            </div>
+                          </li>
 
-            <div
-              style={{
-                marginTop: "0.25rem",
-                color: "rgba(255,255,255,0.55)",
-                fontSize: "0.72rem",
-              }}
-            >
-              Coordinator:{" "}
-              <span style={{ color: "#ffffff" }}>
-                {coordinator.name}
-              </span>
+                          <li>
+                            Our coordinator will verify
+your screenshot
+against the actual
+Google Pay
+transaction.
+                          </li>
 
-              {coordinator.whatsapp && (
-                <>
-                  {" • "}
-                  <a
-                    href={`https://wa.me/91${String(
-                      coordinator.whatsapp
-                    ).replace(/\D/g, "")}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "0.35rem",
-                      marginTop: "0.45rem",
-                      padding: "0.45rem 0.7rem",
-                      borderRadius: "6px",
-                      background: "rgba(37, 211, 102, 0.1)",
-                      border: "1px solid rgba(37, 211, 102, 0.25)",
-                      color: "#25D366",
-                      fontWeight: 700,
-                      textDecoration: "none",
-                      fontSize: "0.7rem",
-                    }}
-                  >
-                    💬 {coordinator.whatsapp}
-                  </a>
-                </>
-              )}
-            </div>
-          </div>
-        );
-      })}
-    </div>
+                          <li>
+                            After sending the
+                            screenshot, tick
+                            the confirmation
+                            checkbox below.
+                          </li>
 
-    <div
-      style={{
-        marginTop: "0.7rem",
-        padding: "0.65rem 0.75rem",
-        borderRadius: "6px",
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.08)",
-      }}
-    >
-      <strong>
-        For multiple events, make ONE combined payment and mention
-        the amount for each event + the total amount when sharing
-        the screenshot with the respective coordinators.
-      </strong>
-
-      <div
-        style={{
-          marginTop: "0.35rem",
-          color: "rgba(255,255,255,0.65)",
-          fontSize: "0.75rem",
-        }}
-      >
-        Example: Paper Presentation ₹150 + Free Fire ₹150 = ₹300 Total.
-      </div>
-    </div>
-  </li>
-
-  <li>
-    If you have selected multiple events, send the same payment
-    screenshot to the coordinator of each selected event.
-  </li>
-
-  <li>
-    After sending the screenshot, tick the confirmation checkbox below.
-  </li>
-
-  <li>
-    Click "Register for the Event" to submit your registration.
-  </li>
-</ol>
+                          <li>
+                            Click "Register for
+                            the Event" to
+                            submit your
+                            registration.
+                          </li>
+                        </ol>
                       </div>
 
                       <div className="payment-layout">
                         <div className="qr-card">
-                          <span className="payment-label">SCAN TO PAY</span>
+                          <span className="payment-label">
+                            SCAN TO PAY
+                          </span>
+
                           <div className="qr-wrapper">
                             <img
-                              src={paymentData.qrImage}
+                              src={
+                                paymentData.qrImage
+                              }
                               alt="Google Pay QR code"
-                              onError={(event) => {
-                                event.currentTarget.style.display = "none";
-                                event.currentTarget.parentElement.classList.add("qr-missing");
+                              onError={(
+                                event
+                              ) => {
+                                event.currentTarget.style.display =
+                                  "none";
+
+                                event.currentTarget.parentElement.classList.add(
+                                  "qr-missing"
+                                );
                               }}
                             />
+
                             <span className="qr-missing-text">
-                              GPay QR code will appear here.
+                              GPay QR code
+                              will appear
+                              here.
                             </span>
                           </div>
-                          <strong>Google Pay</strong>
+
+                          <strong>
+                            Google Pay
+                          </strong>
                         </div>
 
                         <div className="gpay-card">
-                          <span className="payment-label">PAY USING GPAY</span>
-                          <h3>GPay Number</h3>
-                          <div className="gpay-number">{paymentData.gpayNumber}</div>
-                          <p>Send exactly ₹{totalFee} using Google Pay.</p>
+                          <span className="payment-label">
+                            PAY USING GPAY
+                          </span>
+
+                          <h3>
+                            GPay Number
+                          </h3>
+
+                          <div className="gpay-number">
+                            {
+                              paymentData.gpayNumber
+                            }
+                          </div>
+
+                          <p>
+                            Send exactly ₹
+                            {totalFee} using
+                            Google Pay.
+                          </p>
 
                           <div className="payment-important">
-                            <strong>IMPORTANT</strong>
+                            <strong>
+                              IMPORTANT
+                            </strong>
+
                             <p>
-                              Keep the successful payment screenshot after completing the payment.
+                              Keep the
+                              successful
+                              payment
+                              screenshot
+                              after
+                              completing the
+                              payment.
                             </p>
                           </div>
                         </div>
                       </div>
 
                       <label
-  className={`payment-checkbox ${
-    errors.paymentScreenshotShared
-      ? "payment-checkbox-error-state"
-      : ""
-  }`}
->
-  <input
-    type="checkbox"
-    checked={form.paymentScreenshotShared}
-    onChange={(event) =>
-      update("paymentScreenshotShared", event.target.checked)
-    }
-  />
+                        className={`payment-checkbox ${
+                          errors.paymentScreenshotShared
+                            ? "payment-checkbox-error-state"
+                            : ""
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={
+                            form.paymentScreenshotShared
+                          }
+                          onChange={(event) =>
+                            update(
+                              "paymentScreenshotShared",
+                              event.target
+                                .checked
+                            )
+                          }
+                        />
 
-  <span className="checkbox-text">
-    I confirm that I have sent my successful payment screenshot to the respective event coordinator(s).
-
-    <span
-      style={{
-        display: "block",
-        marginTop: "0.55rem",
-      }}
-    >
-      {selectedEvents.map((eventItem) => {
-        const coordinator = getCoordinatorDetails(eventItem.name);
-
-        return (
-          <span
-            key={eventItem.id || eventItem.slug}
-            style={{
-              display: "block",
-              marginBottom: "0.35rem",
-            }}
-          >
-            <strong style={{ color: "#ffffff" }}>
-              {eventItem.name}
-            </strong>
-
-            {" — "}
-
-            <span style={{ color: "rgba(255,255,255,0.65)" }}>
-              {coordinator.name}
-            </span>
-
-            {coordinator.whatsapp && (
-              <>
-                {" • "}
-                <a
-                  href={`https://wa.me/91${String(
-                    coordinator.whatsapp
-                  ).replace(/\D/g, "")}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    color: "#25D366",
-                    fontWeight: 700,
-                    textDecoration: "none",
-                  }}
-                >
-                  {coordinator.whatsapp}
-                </a>
-              </>
-            )}
-          </span>
-        );
-      })}
-    </span>
-  </span>
-</label>
+                        <span className="checkbox-text">
+                          I confirm that I
+have sent my
+successful payment
+screenshot to our coordinator
+at{" "}
+<strong>
+  {
+    PAYMENT_COORDINATOR_NUMBER
+  }
+</strong>
+.
+                        </span>
+                      </label>
 
                       {errors.paymentScreenshotShared && (
                         <p className="field-error payment-checkbox-error">
-                          {errors.paymentScreenshotShared}
+                          {
+                            errors.paymentScreenshotShared
+                          }
                         </p>
                       )}
 
                       <div className="final-warning">
-                        <strong>IMPORTANT: Registration is not confirmed yet.</strong>
-<p>
-  Your registration will be confirmed only after the respective event coordinator verifies your payment. Once your payment is verified, the coordinator will add your WhatsApp number to the respective event WhatsApp group.
-</p>
+                        <strong>
+                          IMPORTANT:
+                          Registration is not
+                          confirmed yet.
+                        </strong>
+
+                        <p>
+                          Your registration is
+                          currently pending
+                          payment verification.
+                          Our Coordinator will verify the
+                          payment using your
+                          screenshot and the
+                          actual Google Pay
+                          transaction. Once
+                          your payment is
+                          successfully
+                          verified, your
+                          registration will be
+                          confirmed and you will
+                          receive the official
+                          confirmation email.
+                        </p>
                       </div>
                     </>
                   )}
 
                   {totalFee === 0 && (
                     <div className="free-event-box">
-                      <strong>These events are free.</strong>
+                      <strong>
+                        These events are
+                        free.
+                      </strong>
+
                       <p>
-                        No payment is required. You can submit your registration directly.
+                        No payment is
+                        required. You can
+                        submit your
+                        registration
+                        directly.
                       </p>
                     </div>
                   )}
 
-                  {submitError && <div className="submit-error">{submitError}</div>}
+                  {submitError && (
+                    <div className="submit-error">
+                      {submitError}
+                    </div>
+                  )}
 
                   <div className="step-actions">
                     <button
                       type="button"
                       className="register-secondary-btn"
                       onClick={handleBack}
-                      disabled={submitting}
+                      disabled={
+                        submitting
+                      }
                     >
                       ← Back
                     </button>
@@ -2097,10 +3538,19 @@ if (members.length < expectedMembers) {
                     <button
                       type="submit"
                       className="register-primary-btn register-submit"
-                      disabled={submitting}
+                      disabled={
+                        submitting
+                      }
                     >
-                      {submitting ? "Submitting..." : "Register for the Event"}
-                      {!submitting && <span>✓</span>}
+                      {submitting
+                        ? "Submitting..."
+                        : "Register for the Event"}
+
+                      {!submitting && (
+                        <span>
+                          ✓
+                        </span>
+                      )}
                     </button>
                   </div>
                 </section>
@@ -2110,7 +3560,9 @@ if (members.length < expectedMembers) {
         </section>
       </main>
 
-      <style>{registerStyles}</style>
+      <style>
+        {registerStyles}
+      </style>
     </>
   );
 }
@@ -2119,12 +3571,24 @@ if (members.length < expectedMembers) {
    EVENT HELPERS
 ========================================================= */
 
-function technicalEvents(events) {
-  return events.filter((event) => getCategory(event) === "technical");
+function technicalEvents(
+  events
+) {
+  return events.filter(
+    (event) =>
+      getCategory(event) ===
+      "technical"
+  );
 }
 
-function nonTechnicalEvents(events) {
-  return events.filter((event) => getCategory(event) === "non_technical");
+function nonTechnicalEvents(
+  events
+) {
+  return events.filter(
+    (event) =>
+      getCategory(event) ===
+      "non_technical"
+  );
 }
 
 /* =========================================================
@@ -2142,39 +3606,86 @@ function EventCategory({
     <div className="event-category">
       <div className="event-category-heading">
         <h3>
-          <span>{icon}</span>
+          <span>
+            {icon}
+          </span>
+
           {title}
         </h3>
       </div>
 
       <div className="event-grid">
         {events.map((event) => {
-          const selected = selectedSlugs.includes(event.slug);
-          const fee = getEventFee(event);
-          const maxTeam = getEventParticipantRange(event).max;
+          const selected =
+            selectedSlugs.includes(
+              event.slug
+            );
+
+          const fee =
+            getEventFee(event);
+
+          const maxTeam =
+            getEventParticipantRange(
+              event
+            ).max;
 
           return (
             <button
               type="button"
-              key={event.id || event.slug}
-              className={`event-option ${selected ? "selected" : ""}`}
-              onClick={() => onSelect(event.slug)}
+              key={
+                event.id ||
+                event.slug
+              }
+              className={`event-option ${
+                selected
+                  ? "selected"
+                  : ""
+              }`}
+              onClick={() =>
+                onSelect(
+                  event.slug
+                )
+              }
             >
               <div className="event-option-top">
-                <h4>{event.name}</h4>
-                <span className={`event-radio ${selected ? "checked" : ""}`}>
-                  {selected ? "✓" : ""}
+                <h4>
+                  {event.name}
+                </h4>
+
+                <span
+                  className={`event-radio ${
+                    selected
+                      ? "checked"
+                      : ""
+                  }`}
+                >
+                  {selected
+                    ? "✓"
+                    : ""}
                 </span>
               </div>
 
               {event.description && (
-                <p className="event-description">{event.description}</p>
+                <p className="event-description">
+                  {
+                    event.description
+                  }
+                </p>
               )}
 
               <div className="event-option-bottom">
-                <strong>{fee > 0 ? `₹${fee}` : "FREE"}</strong>
+                <strong>
+                  {fee > 0
+                    ? `₹${fee}`
+                    : "FREE"}
+                </strong>
+
                 <span>
-                  Max {maxTeam} {maxTeam === 1 ? "participant" : "participants"}
+                  Max{" "}
+                  {maxTeam}{" "}
+                  {maxTeam === 1
+                    ? "participant"
+                    : "participants"}
                 </span>
               </div>
             </button>
@@ -2189,11 +3700,33 @@ function EventCategory({
    STEP
 ========================================================= */
 
-function Step({ number, title, active, completed }) {
+function Step({
+  number,
+  title,
+  active,
+  completed,
+}) {
   return (
-    <div className={`register-step ${active ? "active" : ""} ${completed ? "completed" : ""}`}>
-      <div className="step-circle">{completed ? "✓" : number}</div>
-      <span>{title}</span>
+    <div
+      className={`register-step ${
+        active
+          ? "active"
+          : ""
+      } ${
+        completed
+          ? "completed"
+          : ""
+      }`}
+    >
+      <div className="step-circle">
+        {completed
+          ? "✓"
+          : number}
+      </div>
+
+      <span>
+        {title}
+      </span>
     </div>
   );
 }
@@ -2202,15 +3735,31 @@ function Step({ number, title, active, completed }) {
    FIELD
 ========================================================= */
 
-function Field({ label, required = false, error, children }) {
+function Field({
+  label,
+  required = false,
+  error,
+  children,
+}) {
   return (
     <label className="register-field">
       <span className="field-label">
         {label}
-        {required && <b aria-hidden="true">*</b>}
+
+        {required && (
+          <b aria-hidden="true">
+            *
+          </b>
+        )}
       </span>
+
       {children}
-      {error && <span className="field-error">{error}</span>}
+
+      {error && (
+        <span className="field-error">
+          {error}
+        </span>
+      )}
     </label>
   );
 }
@@ -2228,7 +3777,10 @@ function scrollTop() {
 
 function scrollToError() {
   setTimeout(() => {
-    const errorElement = document.querySelector(".field-error");
+    const errorElement =
+      document.querySelector(
+        ".field-error"
+      );
 
     if (errorElement) {
       errorElement.scrollIntoView({
@@ -2505,12 +4057,6 @@ const registerStyles = `
     line-height: 1.4;
   }
 
-  /*
-  =========================================================
-  EVENT SELECTION
-  =========================================================
-  */
-
   .event-selection {
     margin-top: 0.5rem;
   }
@@ -2529,11 +4075,6 @@ const registerStyles = `
     font-size: 0.62rem;
     font-weight: 700;
     letter-spacing: 0.1em;
-  }
-
-  .event-selection-title small {
-    color: #ff5b5b;
-    font-size: 0.72rem;
   }
 
   .event-category {
@@ -2716,87 +4257,143 @@ const registerStyles = `
     font-size: 0.8rem;
   }
 
-  .team-size-section {
+  .event-participant-selector {
     display: grid;
     grid-template-columns: minmax(0,1fr) minmax(0,1fr);
     gap: 1rem;
     align-items: start;
   }
 
-  .team-info {
+  .event-participant-info {
     margin-top: 1.55rem;
     padding: 0.85rem;
     border-left: 2px solid #dc0000;
     background: rgba(255,255,255,0.025);
   }
 
-  .team-info strong {
+  .event-participant-info strong {
     display: block;
     color: #ffffff;
     font-family: 'Orbitron', sans-serif;
-    font-size: 0.65rem;
+    font-size: 0.63rem;
     letter-spacing: 0.05em;
   }
 
-  .team-info span {
+  .event-participant-info span {
     display: block;
     margin-top: 0.35rem;
     color: rgba(255,255,255,0.52);
-    font-size: 0.75rem;
+    font-size: 0.73rem;
     line-height: 1.5;
   }
 
-  /*
-  =========================================================
-  TEAM MEMBER DETAILS
-  =========================================================
-  */
-
-  .members-section {
-    margin-top: 1.2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid rgba(255,255,255,0.08);
-  }
-
-  .members-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
+  .selected-event-details-list {
+    display: grid;
     gap: 1rem;
+    margin-top: 1.2rem;
   }
 
-  .members-heading span {
+  .selected-event-detail-card {
+    padding: 1rem;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    background: rgba(0,0,0,0.2);
+  }
+
+  .selected-event-detail-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .selected-event-detail-header > div:first-child {
+    min-width: 0;
+  }
+
+  .selected-event-detail-kicker {
+    display: block;
+    margin-bottom: 0.25rem;
     color: #dc0000;
     font-family: 'Orbitron', sans-serif;
-    font-size: 0.55rem;
+    font-size: 0.52rem;
     letter-spacing: 0.12em;
   }
 
-  .members-heading h3 {
-    margin: 0.25rem 0 0;
+  .selected-event-detail-header h4 {
+    margin: 0;
+    color: #ffffff;
     font-family: 'Anton', sans-serif;
-    font-size: 1.4rem;
+    font-size: 1.25rem;
     font-weight: 400;
+    letter-spacing: 0.02em;
   }
 
-  .members-heading strong {
-    color: rgba(255,255,255,0.6);
-    font-size: 0.75rem;
+  .selected-event-detail-schedule {
+    margin: 0.3rem 0 0;
+    color: rgba(255,255,255,0.55);
+    font-size: 0.68rem;
+    line-height: 1.45;
   }
 
-  .members-note {
-    margin: 0.5rem 0 1rem;
-    color: rgba(255,255,255,0.5);
-    font-size: 0.78rem;
-    line-height: 1.5;
+  .selected-event-fee {
+    flex: 0 0 auto;
+    color: #f0a000;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-align: right;
   }
 
-  .member-card {
-    margin-bottom: 0.9rem;
-    padding: 1rem;
-    border: 1px solid rgba(255,255,255,0.09);
-    border-radius: 10px;
-    background: rgba(0,0,0,0.22);
+  .selected-event-fee small {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: rgba(255,255,255,0.42);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.48rem;
+    letter-spacing: 0.08em;
+  }
+
+  .event-members-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .team-name-field {
+    margin-bottom: 0.5rem;
+  }
+
+  .event-members-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .event-members-heading h3 {
+    margin: 0.25rem 0 0;
+    color: #ffffff;
+    font-family: 'Anton', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  .event-members-heading strong {
+    color: rgba(255,255,255,0.55);
+    font-size: 0.68rem;
+  }
+
+  .event-member-card {
+    margin-top: 0.75rem;
+    padding: 0.9rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 9px;
+    background: rgba(0,0,0,0.18);
   }
 
   .member-number {
@@ -2807,15 +4404,9 @@ const registerStyles = `
     letter-spacing: 0.12em;
   }
 
-  .member-card .register-field {
+  .event-member-card .register-field {
     margin-bottom: 0.8rem;
   }
-
-  /*
-  =========================================================
-  FEE
-  =========================================================
-  */
 
   .fee-summary {
     display: flex;
@@ -2842,12 +4433,6 @@ const registerStyles = `
     font-size: 1.6rem;
     font-weight: 400;
   }
-
-  /*
-  =========================================================
-  PAYMENT
-  =========================================================
-  */
 
   .payment-summary {
     display: grid;
@@ -3013,11 +4598,17 @@ const registerStyles = `
     line-height: 1.8;
   }
 
-  /*
-  =========================================================
-  PROPER CLICKABLE PAYMENT CHECKBOX
-  =========================================================
-  */
+  .abbas-payment-contact {
+    margin-top: 0.6rem;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    background: rgba(255,255,255,0.025);
+  }
+
+  .abbas-payment-contact strong {
+    color: #ffffff;
+  }
 
   .payment-checkbox {
     display: flex;
@@ -3103,12 +4694,6 @@ const registerStyles = `
     font-size: 0.8rem;
   }
 
-  /*
-  =========================================================
-  LOADING / ERRORS
-  =========================================================
-  */
-
   .register-loading {
     padding: 1.5rem;
     border: 1px solid rgba(255,255,255,0.08);
@@ -3145,12 +4730,6 @@ const registerStyles = `
     color: #ffffff;
     cursor: pointer;
   }
-
-  /*
-  =========================================================
-  BUTTONS
-  =========================================================
-  */
 
   .step-actions {
     display: flex;
@@ -3212,12 +4791,6 @@ const registerStyles = `
   .register-submit {
     min-width: 230px;
   }
-
-  /*
-  =========================================================
-  SUCCESS
-  =========================================================
-  */
 
   .register-success-section {
     min-height: 100vh;
@@ -3312,11 +4885,16 @@ const registerStyles = `
     font-size: 0.8rem;
   }
 
-  .success-warning p {
+  .success-warning p,
+  .success-warning ol {
     margin: 0.4rem 0 0;
     color: rgba(255,255,255,0.58);
     font-size: 0.75rem;
     line-height: 1.6;
+  }
+
+  .success-warning ol {
+    padding-left: 1.2rem;
   }
 
   .success-note {
@@ -3325,187 +4903,18 @@ const registerStyles = `
     font-size: 0.7rem;
   }
 
-  /*
-  =========================================================
-  RESPONSIVE
-  =========================================================
-  */
-
-  @media (max-width: 768px) {
-    .register-main {
-      padding-top: 2.5rem;
-    }
-
-    .field-grid,
-    .payment-layout,
-    .team-size-section,
-    .event-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .team-info {
-      margin-top: 0;
-    }
-
-    .payment-summary {
-      grid-template-columns: 1fr;
-    }
-
-    .selected-event-card {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-
-    .event-rule-badge {
-      width: 100%;
-      box-sizing: border-box;
-      text-align: left;
-    }
-
-    .register-submit {
-      min-width: 0;
-    }
-  }
-
-  @media (max-width: 560px) {
-    .register-main {
-      padding:
-        2rem
-        0.75rem
-        3rem;
-    }
-
-    .register-heading {
-      margin-bottom: 1.8rem;
-    }
-
-    .register-steps {
-      margin-bottom: 1.5rem;
-    }
-
-    .register-step {
-      min-width: 72px;
-    }
-
-    .step-circle {
-      width: 38px;
-      height: 38px;
-      font-size: 0.58rem;
-    }
-
-    .register-step span:last-child {
-      font-size: 0.48rem;
-    }
-
-    .step-line {
-      margin-top: 19px;
-    }
-
-    .register-card {
-      border-radius: 12px;
-      padding: 1rem;
-    }
-
-    .card-heading {
-      gap: 0.7rem;
-    }
-
-    .card-number {
-      width: 34px;
-      height: 34px;
-      font-size: 0.55rem;
-    }
-
-    .card-description {
-      font-size: 0.78rem;
-    }
-
-    .field-grid {
-      gap: 0;
-    }
-
-    .register-field input,
-    .register-field select {
-      font-size: 16px;
-    }
-
-    .members-heading {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-
-    .fee-summary {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-
-    .fee-summary .total-fee {
-      text-align: left;
-    }
-
-    .step-actions {
-      align-items: stretch;
-      flex-direction: column-reverse;
-    }
-
-    .register-primary-btn,
-    .register-secondary-btn {
-      width: 100%;
-    }
-
-    .payment-checkbox {
-      padding: 0.85rem;
-    }
-
-    .success-details > div {
-      align-items: flex-start;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-
-    .success-details strong {
-      text-align: left;
-    }
-  }
-
-  @media (max-width: 360px) {
-    .register-main {
-      padding-inline: 0.55rem;
-    }
-
-    .register-card {
-      padding: 0.85rem;
-    }
-
-    .register-step {
-      min-width: 60px;
-    }
-
-    .register-step span:last-child {
-      font-size: 0.43rem;
-    }
-
-    .step-line {
-      max-width: 45px;
-    }
-  }
-
-  /* =========================================================
-     MULTI-EVENT / DRAFT / REVIEW
-  ========================================================= */
-
   .event-selection-note {
-  margin: -0.2rem 0 1rem;
-  padding: 1rem 1.1rem;
-  border-left: 4px solid #f0a000;
-  border-radius: 6px;
-  background: rgba(240,160,0,0.14);
-  color: #ffffff;
-  font-size: 0.82rem;
-  font-weight: 700;
-  line-height: 1.6;
-  box-shadow: 0 0 18px rgba(240,160,0,0.06);
-}
+    margin: -0.2rem 0 1rem;
+    padding: 1rem 1.1rem;
+    border-left: 4px solid #f0a000;
+    border-radius: 6px;
+    background: rgba(240,160,0,0.14);
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.6;
+    box-shadow: 0 0 18px rgba(240,160,0,0.06);
+  }
 
   .event-selection-note strong {
     color: #ffffff;
@@ -3570,6 +4979,19 @@ const registerStyles = `
     color: rgba(255,255,255,0.5);
     font-size: 0.68rem;
     line-height: 1.45;
+  }
+
+  .event-review-participants {
+    margin-top: 0.18rem;
+    color: rgba(255,255,255,0.62);
+    font-size: 0.65rem;
+  }
+
+  .event-review-team-name {
+    margin-top: 0.18rem;
+    color: #dc0000;
+    font-size: 0.65rem;
+    font-weight: 700;
   }
 
   .event-review-fee {
@@ -3662,7 +5084,188 @@ const registerStyles = `
     font-size: 0.68rem;
   }
 
+  .bottom-timing-note {
+    margin-top: 1.2rem;
+    padding: 1rem 1.1rem;
+    border-left: 4px solid #f0a000;
+    border-radius: 6px;
+    background: rgba(240,160,0,0.14);
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.6;
+    box-shadow: 0 0 18px rgba(240,160,0,0.06);
+  }
+
+  .bottom-timing-note strong {
+    color: #ffffff;
+  }
+
+  .multi-payment-events {
+    display: grid;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+  }
+
+  .multi-payment-event {
+    padding: 0.75rem;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.02);
+  }
+
+  .multi-payment-event strong {
+    display: block;
+    color: #ffffff;
+    font-size: 0.78rem;
+  }
+
+  .multi-payment-event span {
+    display: block;
+    margin-top: 0.25rem;
+    color: rgba(255,255,255,0.5);
+    font-size: 0.68rem;
+  }
+
+  @media (max-width: 768px) {
+    .register-main {
+      padding-top: 2.5rem;
+    }
+
+    .field-grid,
+    .payment-layout,
+    .event-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .event-participant-selector {
+      grid-template-columns: 1fr;
+    }
+
+    .event-participant-info {
+      margin-top: 0;
+    }
+
+    .payment-summary {
+      grid-template-columns: 1fr;
+    }
+
+    .selected-event-card {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .event-rule-badge {
+      width: 100%;
+      box-sizing: border-box;
+      text-align: left;
+    }
+
+    .register-submit {
+      min-width: 0;
+    }
+  }
+
   @media (max-width: 560px) {
+    .register-main {
+      padding:
+        2rem
+        0.75rem
+        3rem;
+    }
+
+    .register-heading {
+      margin-bottom: 1.8rem;
+    }
+
+    .register-steps {
+      margin-bottom: 1.5rem;
+    }
+
+    .register-step {
+      min-width: 72px;
+    }
+
+    .step-circle {
+      width: 38px;
+      height: 38px;
+      font-size: 0.58rem;
+    }
+
+    .register-step span:last-child {
+      font-size: 0.48rem;
+    }
+
+    .step-line {
+      margin-top: 19px;
+    }
+
+    .register-card {
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .card-heading {
+      gap: 0.7rem;
+    }
+
+    .card-number {
+      width: 34px;
+      height: 34px;
+      font-size: 0.55rem;
+    }
+
+    .card-description {
+      font-size: 0.78rem;
+    }
+
+    .field-grid {
+      gap: 0;
+    }
+
+    .register-field input,
+    .register-field select {
+      font-size: 16px;
+    }
+
+    .event-members-heading {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .fee-summary {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .fee-summary .total-fee {
+      text-align: left;
+    }
+
+    .step-actions {
+      align-items: stretch;
+      flex-direction: column-reverse;
+    }
+
+    .register-primary-btn,
+    .register-secondary-btn {
+      width: 100%;
+    }
+
+    .payment-checkbox {
+      padding: 0.85rem;
+    }
+
+    .success-details > div {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .success-details strong {
+      text-align: left;
+    }
+
     .event-review-item {
       grid-template-columns: 1fr auto;
     }
@@ -3681,185 +5284,12 @@ const registerStyles = `
       align-items: flex-start;
       flex-direction: column;
     }
-  }
 
-  /* =========================================================
-     PER-EVENT PARTICIPANT DETAILS
-  ========================================================= */
-
-  .selected-event-details-list {
-    display: grid;
-    gap: 1rem;
-    margin-top: 1.2rem;
-  }
-
-  .selected-event-detail-card {
-    padding: 1rem;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    background: rgba(0,0,0,0.2);
-  }
-
-  .selected-event-detail-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    padding-bottom: 0.85rem;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-
-  .selected-event-detail-header > div:first-child {
-    min-width: 0;
-  }
-
-  .selected-event-detail-kicker {
-    display: block;
-    margin-bottom: 0.25rem;
-    color: #dc0000;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.52rem;
-    letter-spacing: 0.12em;
-  }
-
-  .selected-event-detail-header h4 {
-    margin: 0;
-    color: #ffffff;
-    font-family: 'Anton', sans-serif;
-    font-size: 1.25rem;
-    font-weight: 400;
-    letter-spacing: 0.02em;
-  }
-
-  .selected-event-detail-schedule {
-    margin: 0.3rem 0 0;
-    color: rgba(255,255,255,0.55);
-    font-size: 0.68rem;
-    line-height: 1.45;
-  }
-
-  .selected-event-fee {
-    flex: 0 0 auto;
-    color: #f0a000;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-align: right;
-  }
-
-  .selected-event-fee small {
-    display: block;
-    margin-bottom: 0.2rem;
-    color: rgba(255,255,255,0.42);
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.48rem;
-    letter-spacing: 0.08em;
-  }
-
-  .event-participant-selector {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 1rem;
-    align-items: start;
-  }
-
-  .event-participant-info {
-    margin-top: 1.55rem;
-    padding: 0.85rem;
-    border-left: 2px solid #dc0000;
-    background: rgba(255,255,255,0.025);
-  }
-
-  .event-participant-info strong {
-    display: block;
-    color: #ffffff;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.63rem;
-    letter-spacing: 0.05em;
-  }
-
-  .event-participant-info span {
-    display: block;
-    margin-top: 0.35rem;
-    color: rgba(255,255,255,0.52);
-    font-size: 0.73rem;
-    line-height: 1.5;
-  }
-
-  .event-members-section {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(255,255,255,0.07);
-  }
-
-  .event-members-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .event-members-heading h3 {
-    margin: 0.25rem 0 0;
-    color: #ffffff;
-    font-family: 'Anton', sans-serif;
-    font-size: 1.15rem;
-    font-weight: 400;
-    letter-spacing: 0.02em;
-  }
-
-  .event-members-heading strong {
-    color: rgba(255,255,255,0.55);
-    font-size: 0.68rem;
-  }
-
-  .event-member-card {
-    margin-top: 0.75rem;
-    padding: 0.9rem;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 9px;
-    background: rgba(0,0,0,0.18);
-  }
-
-  .event-member-card .member-number {
-    margin-bottom: 0.7rem;
-  }
-
-  .bottom-timing-note {
-  margin-top: 1.2rem;
-  padding: 1rem 1.1rem;
-  border-left: 4px solid #f0a000;
-  border-radius: 6px;
-  background: rgba(240,160,0,0.14);
-  color: #ffffff;
-  font-size: 0.82rem;
-  font-weight: 700;
-  line-height: 1.6;
-  box-shadow: 0 0 18px rgba(240,160,0,0.06);
-}
-
-  .bottom-timing-note strong {
-    color: #ffffff;
-  }
-
-  .event-review-participants {
-    margin-top: 0.18rem;
-    color: rgba(255,255,255,0.62);
-    font-size: 0.65rem;
-  }
-
-  @media (max-width: 768px) {
-    .event-participant-selector {
-      grid-template-columns: 1fr;
+    .event-selection-note,
+    .bottom-timing-note {
+      font-size: 0.7rem;
     }
 
-    .event-participant-info {
-      margin-top: 0;
-    }
-  }
-
-  @media (max-width: 560px) {
     .selected-event-detail-header {
       flex-direction: column;
     }
@@ -3867,11 +5297,27 @@ const registerStyles = `
     .selected-event-fee {
       text-align: left;
     }
-
-    .event-selection-note,
-    .bottom-timing-note {
-      font-size: 0.7rem;
-    }
   }
 
+  @media (max-width: 360px) {
+    .register-main {
+      padding-inline: 0.55rem;
+    }
+
+    .register-card {
+      padding: 0.85rem;
+    }
+
+    .register-step {
+      min-width: 60px;
+    }
+
+    .register-step span:last-child {
+      font-size: 0.43rem;
+    }
+
+    .step-line {
+      max-width: 45px;
+    }
+  }
 `;

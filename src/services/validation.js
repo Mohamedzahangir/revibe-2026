@@ -7,15 +7,21 @@
 export function validateName(name = "") {
   const value = String(name).trim();
 
-  if (!value) return "Full name is required";
+  if (!value) {
+    return "Full name is required";
+  }
+
   if (value.length < 2) {
     return "Name must be at least 2 characters";
   }
+
   if (value.length > 60) {
     return "Name must not exceed 60 characters";
   }
 
-  if (!/^[A-Za-zÀ-ÖØ-öø-ÿ.' -]+$/.test(value)) {
+  if (
+    !/^[A-Za-zÀ-ÖØ-öø-ÿ.' -]+$/.test(value)
+  ) {
     return "Name contains invalid characters";
   }
 
@@ -23,16 +29,24 @@ export function validateName(name = "") {
 }
 
 export function validateEmail(email = "") {
-  const value = String(email).trim().toLowerCase();
+  const value =
+    String(email)
+      .trim()
+      .toLowerCase();
 
-  if (!value) return "Email is required";
+  if (!value) {
+    return "Email is required";
+  }
 
   if (value.length > 254) {
     return "Email is too long";
   }
 
-  // Correct email validation
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+  if (
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+      value
+    )
+  ) {
     return "Enter a valid email address";
   }
 
@@ -71,7 +85,9 @@ export function validateCollege(college = "") {
   return null;
 }
 
-export function validateDepartment(department = "") {
+export function validateDepartment(
+  department = ""
+) {
   const value = String(department).trim();
 
   if (!value) {
@@ -110,10 +126,70 @@ export function validateYear(year = "") {
 // Event validation
 // ─────────────────────────────────────────────
 
-export function validateEvent(eventSlug = "") {
+export function validateEvent(
+  eventSlug = ""
+) {
   if (!String(eventSlug).trim()) {
     return "Please select an event";
   }
+
+  return null;
+}
+
+// ─────────────────────────────────────────────
+// Team name validation
+//
+// Team name is REQUIRED when more than
+// one participant is registered.
+//
+// Allowed:
+// - Letters
+// - Numbers
+// - Spaces
+// - Special characters
+//
+// No restrictive character pattern is used.
+// ─────────────────────────────────────────────
+
+export function validateTeamName(
+  teamName = "",
+  teamSize = 1
+) {
+  const size = Number(teamSize);
+
+  /*
+   * Solo registration does not require
+   * a team name.
+   */
+  if (size <= 1) {
+    return null;
+  }
+
+  const value = String(teamName).trim();
+
+  if (!value) {
+    return "Team name is required for team registration";
+  }
+
+  if (value.length < 1) {
+    return "Team name is required";
+  }
+
+  if (value.length > 100) {
+    return "Team name must not exceed 100 characters";
+  }
+
+  /*
+   * Intentionally no character restriction.
+   *
+   * Examples allowed:
+   *
+   * Spider Squad
+   * Team 404
+   * Avengers@26
+   * X-Men #1
+   * AI_ Warriors
+   */
 
   return null;
 }
@@ -168,7 +244,9 @@ export function validateTeamSize(
     event?.maxTeamSize ??
     maxTeamSize;
 
-  const min = Number(eventMin) || 1;
+  const min =
+    Number(eventMin) || 1;
+
   const max =
     Number(eventMax) ||
     Math.max(min, 1);
@@ -195,7 +273,7 @@ export function validateTeamSize(
 // ─────────────────────────────────────────────
 // Team member validation
 //
-// The primary participant is already stored in:
+// Primary participant is already stored in:
 //
 // form.name
 // form.email
@@ -224,13 +302,15 @@ export function validateTeamMembers(
 
   if (!Array.isArray(members)) {
     return {
-      members: "Invalid team member data",
+      members:
+        "Invalid team member data",
     };
   }
 
-  const primary = String(primaryEmail)
-    .trim()
-    .toLowerCase();
+  const primary =
+    String(primaryEmail)
+      .trim()
+      .toLowerCase();
 
   /*
    * Expected number of additional members.
@@ -240,16 +320,22 @@ export function validateTeamMembers(
    * Team size 4 → 3 additional members
    */
 
-  const expectedMembers = Math.max(
-    0,
-    Number(teamSize) - 1
-  );
+  const expectedMembers =
+    Math.max(
+      0,
+      Number(teamSize) - 1
+    );
 
-  if (members.length !== expectedMembers) {
+  if (
+    members.length !==
+    expectedMembers
+  ) {
     return {
       teamSize:
         `Please provide details for all ${expectedMembers} additional team member${
-          expectedMembers === 1 ? "" : "s"
+          expectedMembers === 1
+            ? ""
+            : "s"
         }.`,
     };
   }
@@ -271,133 +357,159 @@ export function validateTeamMembers(
     });
   }
 
-  members.forEach((member, index) => {
-    const name = String(
-      member?.name ?? ""
-    ).trim();
+  members.forEach(
+    (member, index) => {
+      const name = String(
+        member?.name ?? ""
+      ).trim();
 
-    const email = String(
-      member?.email ?? ""
-    )
-      .trim()
-      .toLowerCase();
-
-    /*
-     * NAME
-     */
-
-    if (!name) {
-      errors[`member-${index}-name`] =
-        "Member name is required";
-    } else if (name.length < 2) {
-      errors[`member-${index}-name`] =
-        "Member name must be at least 2 characters";
-    } else if (name.length > 60) {
-      errors[`member-${index}-name`] =
-        "Member name is too long";
-    } else if (
-      !/^[A-Za-zÀ-ÖØ-öø-ÿ.' -]+$/.test(
-        name
+      const email = String(
+        member?.email ?? ""
       )
-    ) {
-      errors[`member-${index}-name`] =
-        "Member name contains invalid characters";
+        .trim()
+        .toLowerCase();
+
+      /*
+       * NAME
+       */
+
+      if (!name) {
+        errors[
+          `member-${index}-name`
+        ] =
+          "Member name is required";
+      } else if (
+        name.length < 2
+      ) {
+        errors[
+          `member-${index}-name`
+        ] =
+          "Member name must be at least 2 characters";
+      } else if (
+        name.length > 60
+      ) {
+        errors[
+          `member-${index}-name`
+        ] =
+          "Member name is too long";
+      } else if (
+        !/^[A-Za-zÀ-ÖØ-öø-ÿ.' -]+$/.test(
+          name
+        )
+      ) {
+        errors[
+          `member-${index}-name`
+        ] =
+          "Member name contains invalid characters";
+      }
+
+      /*
+       * EMAIL
+       */
+
+      if (!email) {
+        errors[
+          `member-${index}-email`
+        ] =
+          "Member email is required";
+      } else if (
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+          email
+        )
+      ) {
+        errors[
+          `member-${index}-email`
+        ] =
+          "Enter a valid email";
+      }
+
+      /*
+       * Add email for duplicate checking.
+       */
+
+      if (email) {
+        emails.push({
+          email,
+          index,
+        });
+      }
     }
-
-    /*
-     * EMAIL
-     */
-
-    if (!email) {
-      errors[`member-${index}-email`] =
-        "Member email is required";
-    } else if (
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-        email
-      )
-    ) {
-      errors[`member-${index}-email`] =
-        "Enter a valid email";
-    }
-
-    /*
-     * Add email for duplicate checking.
-     */
-
-    if (email) {
-      emails.push({
-        email,
-        index,
-      });
-    }
-  });
+  );
 
   /*
    * DUPLICATE EMAIL CHECK
    *
-   * This catches:
+   * Catches:
    *
    * Leader ↔ Member
    * Member ↔ Member
    */
 
-  const emailMap = new Map();
+  const emailMap =
+    new Map();
 
-  emails.forEach(({ email, index }) => {
-    if (!emailMap.has(email)) {
-      emailMap.set(email, []);
+  emails.forEach(
+    ({ email, index }) => {
+      if (!emailMap.has(email)) {
+        emailMap.set(
+          email,
+          []
+        );
+      }
+
+      emailMap
+        .get(email)
+        .push(index);
     }
+  );
 
-    emailMap
-      .get(email)
-      .push(index);
-  });
-
-  emailMap.forEach((indexes) => {
-    if (indexes.length <= 1) {
-      return;
-    }
-
-    indexes.forEach((index) => {
-      /*
-       * Primary participant
-       */
-
-      if (index === -1) {
+  emailMap.forEach(
+    (indexes) => {
+      if (indexes.length <= 1) {
         return;
       }
 
-      errors[`member-${index}-email`] =
-        "This email is already used by another participant";
-    });
+      indexes.forEach(
+        (index) => {
+          /*
+           * Primary participant
+           */
+          if (index === -1) {
+            return;
+          }
 
-    /*
-     * If the duplicate is the primary
-     * participant, mark the member fields.
-     *
-     * The primary field itself is already
-     * validated separately.
-     */
-  });
+          errors[
+            `member-${index}-email`
+          ] =
+            "This email is already used by another participant";
+        }
+      );
+    }
+  );
 
   return errors;
 }
 
 // ─────────────────────────────────────────────
-// Payment validation
+// Payment screenshot validation
 //
-// Payment flow:
+// NEW PAYMENT FLOW:
 //
-// GPay QR / GPay Number
-//        ↓
-// Make payment
-//        ↓
-// Send screenshot to coordinator
-//        ↓
-// Tick confirmation checkbox
+// Student
+//   ↓
+// Pays using GPay
+//   ↓
+// Takes screenshot
+//   ↓
+// Sends screenshot directly to Abbas
+//   ↓
+// Ticks confirmation checkbox
+//   ↓
+// Submits registration
 //
-// No Razorpay.
-// No online payment gateway.
+// Abbas verifies the actual payment later.
+//
+// Transaction ID is NOT mandatory here.
 // ─────────────────────────────────────────────
 
 export function validatePaymentScreenshot(
@@ -409,19 +521,22 @@ export function validatePaymentScreenshot(
   }
 
   if (!screenshotShared) {
-    return "Please confirm that you have sent the payment screenshot to the event coordinator";
+    return "Please send the payment screenshot to Abbas on WhatsApp and confirm it here";
   }
 
   return null;
 }
 
 // ─────────────────────────────────────────────
-// Optional transaction/reference validation
+// Payment reference validation
 //
 // Kept for compatibility with existing code.
 //
-// This is NOT mandatory for the new GPay
-// screenshot-based flow.
+// Transaction ID is NOT required for the
+// student-side registration flow.
+//
+// Abbas can verify the actual transaction
+// later from his GPay transaction history.
 // ─────────────────────────────────────────────
 
 export function validatePaymentReference(
@@ -429,29 +544,9 @@ export function validatePaymentReference(
   paymentRequired = false
 ) {
   /*
-   * New payment flow does not require
-   * a transaction reference.
+   * New GPay flow does not require the
+   * participant to enter a transaction ID.
    */
-
-  if (!paymentRequired) {
-    return null;
-  }
-
-  const value = String(
-    referenceId ?? ""
-  ).trim();
-
-  if (!value) {
-    return "Enter your UPI transaction reference";
-  }
-
-  if (value.length < 6) {
-    return "Transaction reference is too short";
-  }
-
-  if (value.length > 50) {
-    return "Transaction reference is too long";
-  }
 
   return null;
 }
@@ -472,36 +567,44 @@ export function validateRegistrationForm({
    * PERSONAL DETAILS
    */
 
-  const nameError = validateName(
-    form?.name
-  );
+  const nameError =
+    validateName(
+      form?.name
+    );
 
   if (nameError) {
-    errors.name = nameError;
+    errors.name =
+      nameError;
   }
 
-  const emailError = validateEmail(
-    form?.email
-  );
+  const emailError =
+    validateEmail(
+      form?.email
+    );
 
   if (emailError) {
-    errors.email = emailError;
+    errors.email =
+      emailError;
   }
 
-  const phoneError = validatePhone(
-    form?.phone
-  );
+  const phoneError =
+    validatePhone(
+      form?.phone
+    );
 
   if (phoneError) {
-    errors.phone = phoneError;
+    errors.phone =
+      phoneError;
   }
 
-  const collegeError = validateCollege(
-    form?.college
-  );
+  const collegeError =
+    validateCollege(
+      form?.college
+    );
 
   if (collegeError) {
-    errors.college = collegeError;
+    errors.college =
+      collegeError;
   }
 
   const departmentError =
@@ -514,24 +617,28 @@ export function validateRegistrationForm({
       departmentError;
   }
 
-  const yearError = validateYear(
-    form?.year
-  );
+  const yearError =
+    validateYear(
+      form?.year
+    );
 
   if (yearError) {
-    errors.year = yearError;
+    errors.year =
+      yearError;
   }
 
   /*
    * EVENT
    */
 
-  const eventError = validateEvent(
-    form?.eventSlug
-  );
+  const eventError =
+    validateEvent(
+      form?.eventSlug
+    );
 
   if (eventError) {
-    errors.eventSlug = eventError;
+    errors.eventSlug =
+      eventError;
   }
 
   /*
@@ -551,16 +658,27 @@ export function validateRegistrationForm({
   }
 
   /*
+   * TEAM NAME
+   *
+   * REQUIRED whenever participant
+   * count is greater than 1.
+   */
+
+  const teamNameError =
+    validateTeamName(
+      form?.teamName,
+      Number(form?.teamSize) || 1
+    );
+
+  if (teamNameError) {
+    errors.teamName =
+      teamNameError;
+  }
+
+  /*
    * TEAM MEMBERS
    *
-   * Only required when teamSize > 1.
-   *
-   * Solo registration:
-   *
-   * teamSize = 1
-   * members = []
-   *
-   * No extra fields required.
+   * Required only when team size > 1.
    */
 
   const memberErrors =
@@ -576,12 +694,10 @@ export function validateRegistrationForm({
   );
 
   /*
-   * PAYMENT
+   * PAYMENT SCREENSHOT
    *
-   * New flow:
-   *
-   * QR → GPay → Screenshot →
-   * Coordinator → Checkbox
+   * Must be confirmed before submitting
+   * a paid registration.
    */
 
   const paymentError =
