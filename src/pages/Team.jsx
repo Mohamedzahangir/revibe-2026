@@ -271,8 +271,6 @@ export default function Team() {
           </div>
         </section>
 
-        <hr className="mb-rule" aria-hidden="true" />
-
         {teams.map((team) => {
           const isOpen = !!openTeams[team.id];
           return (
