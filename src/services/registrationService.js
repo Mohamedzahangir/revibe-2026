@@ -2,6 +2,59 @@ import { supabase } from "./supabase";
 
 /*
 =========================================================
+REVIBE '26 - REGISTRATION SERVICE
+=========================================================
+
+REGISTRATION FLOW
+
+Student
+  ↓
+Registers for event(s)
+  ↓
+Pays via Google Pay
+  ↓
+Sends payment screenshot to Coordinator (Abbas)
+  ↓
+Registration created as PENDING
+  ↓
+Coordinator manually checks:
+  • Screenshot
+  • Actual GPay transaction
+  • Payer name
+  • Transaction ID
+  • Amount
+  ↓
+Later:
+Coordinator marks payment as VERIFIED / PAID
+  ↓
+Official confirmation email can be sent
+
+IMPORTANT:
+- No event coordinator is involved in payment submission.
+- Payment screenshot is shared directly with the payment coordinator.
+- This service does NOT upload/store the screenshot.
+- The checkbox only records that the participant says
+  the screenshot was sent.
+=========================================================
+*/
+
+/*
+=========================================================
+CONSTANTS
+=========================================================
+*/
+
+const PAYMENT_METHOD = "Google Pay";
+
+const PAYMENT_PENDING_STATUS = "pending";
+
+const PAYMENT_VERIFIED_STATUS = "verified";
+
+const REGISTRATION_PENDING_STATUS =
+  "pending_payment";
+
+/*
+=========================================================
 UUID GENERATOR
 =========================================================
 */
@@ -10,18 +63,25 @@ function generateUUID() {
   if (
     typeof globalThis !== "undefined" &&
     globalThis.crypto &&
-    typeof globalThis.crypto.getRandomValues === "function"
+    typeof globalThis.crypto.getRandomValues ===
+      "function"
   ) {
     const bytes = new Uint8Array(16);
 
     globalThis.crypto.getRandomValues(bytes);
 
     // UUID v4
-    bytes[6] = (bytes[6] & 0x0f) | 0x40;
-    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    bytes[6] =
+      (bytes[6] & 0x0f) | 0x40;
 
-    const hex = Array.from(bytes).map((byte) =>
-      byte.toString(16).padStart(2, "0")
+    bytes[8] =
+      (bytes[8] & 0x3f) | 0x80;
+
+    const hex = Array.from(bytes).map(
+      (byte) =>
+        byte
+          .toString(16)
+          .padStart(2, "0")
     );
 
     return (
@@ -36,7 +96,8 @@ function generateUUID() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
     /[xy]/g,
     (character) => {
-      const random = Math.floor(Math.random() * 16);
+      const random =
+        Math.floor(Math.random() * 16);
 
       const value =
         character === "x"
@@ -55,9 +116,11 @@ REGISTRATION NUMBER
 */
 
 function generateRegistrationNumber() {
-  const randomNumber = Math.floor(
-    100000 + Math.random() * 900000
-  );
+  const randomNumber =
+    Math.floor(
+      100000 +
+        Math.random() * 900000
+    );
 
   return `REVIBE26-${randomNumber}`;
 }
@@ -78,10 +141,14 @@ function normalizeSelectedEvents({
   ) {
     return selectedEvents
       .map((event) => {
-        if (typeof event === "string") {
+        if (
+          typeof event ===
+          "string"
+        ) {
           return {
             id: event,
             maxParticipants: null,
+            slug: null,
           };
         }
 
@@ -91,13 +158,20 @@ function normalizeSelectedEvents({
             event?.eventId ||
             null,
 
+          slug:
+            event?.slug ||
+            null,
+
           maxParticipants:
             event?.maxParticipants ??
             event?.max_participants ??
+            event?.maxMembers ??
             null,
         };
       })
-      .filter((event) => event.id);
+      .filter(
+        (event) => event.id
+      );
   }
 
   if (
@@ -108,62 +182,12 @@ function normalizeSelectedEvents({
       .filter(Boolean)
       .map((id) => ({
         id,
+        slug: null,
         maxParticipants: null,
       }));
   }
 
   return [];
-}
-
-/*
-=========================================================
-VALIDATE EVENT CAPACITY
-=========================================================
-
-Capacity is now checked PER EVENT.
-
-Example:
-
-Coding & Debugging → 1 participant
-Free Fire           → 4 participants
-
-Both are allowed.
-
-=========================================================
-*/
-
-function validateEventCapacity({
-  selectedEvents,
-}) {
-  for (const event of selectedEvents) {
-    const participantCount =
-      Array.isArray(event.participants)
-        ? event.participants.length
-        : 0;
-
-    if (participantCount < 1) {
-      throw new Error(
-        "Each selected event must have at least one participant."
-      );
-    }
-
-    if (event.maxParticipants == null) {
-      continue;
-    }
-
-    const maxParticipants = Number(
-      event.maxParticipants
-    );
-
-    if (
-      Number.isFinite(maxParticipants) &&
-      participantCount > maxParticipants
-    ) {
-      throw new Error(
-        `This event allows a maximum of ${maxParticipants} participant(s).`
-      );
-    }
-  }
 }
 
 /*
@@ -216,31 +240,33 @@ async function insertParticipant({
     );
   }
 
-  const participantId = generateUUID();
+  const participantId =
+    generateUUID();
 
-  const { error } = await supabase
-    .from("participants")
-    .insert({
-      id: participantId,
+  const { error } =
+    await supabase
+      .from("participants")
+      .insert({
+        id: participantId,
 
-      full_name:
-        fullName.trim(),
+        full_name:
+          fullName.trim(),
 
-      email:
-        email.trim().toLowerCase(),
+        email:
+          email.trim().toLowerCase(),
 
-      phone:
-        phone.trim(),
+        phone:
+          phone.trim(),
 
-      college_name:
-        college.trim(),
+        college_name:
+          college.trim(),
 
-      department:
-        department.trim(),
+        department:
+          department.trim(),
 
-      year:
-        year.trim(),
-    });
+        year:
+          year.trim(),
+      });
 
   if (error) {
     throw new Error(
@@ -276,32 +302,36 @@ async function insertRegistrationWithRetry(
     const registrationId =
       generateUUID();
 
-    const { error } = await supabase
-      .from("registrations")
-      .insert({
-        id:
-          registrationId,
+    const normalizedTeamName =
+      registrationType === "team"
+        ? teamName?.trim() || null
+        : null;
 
-        primary_participant_id:
-          primaryParticipantId,
+    const { error } =
+      await supabase
+        .from("registrations")
+        .insert({
+          id: registrationId,
 
-        registration_number:
-          registrationNumber,
+          primary_participant_id:
+            primaryParticipantId,
 
-        registration_type:
-          registrationType,
+          registration_number:
+            registrationNumber,
 
-        team_name:
-          teamName?.trim() || null,
+          registration_type:
+            registrationType,
 
-        status:
-          "pending_payment",
-      });
+          team_name:
+            normalizedTeamName,
+
+          status:
+            REGISTRATION_PENDING_STATUS,
+        });
 
     if (!error) {
       return {
-        id:
-          registrationId,
+        id: registrationId,
 
         registration_number:
           registrationNumber,
@@ -310,7 +340,8 @@ async function insertRegistrationWithRetry(
 
     if (
       error.code !== "23505" ||
-      attempt === attempts - 1
+      attempt ===
+        attempts - 1
     ) {
       throw new Error(
         `Failed to create registration: ${error.message}`
@@ -327,12 +358,6 @@ async function insertRegistrationWithRetry(
 =========================================================
 CREATE REGISTRATION EVENT
 =========================================================
-
-Returns the generated registration_event ID.
-
-That ID is then used by registration_members.
-
-=========================================================
 */
 
 async function insertRegistrationEvent({
@@ -342,18 +367,19 @@ async function insertRegistrationEvent({
   const registrationEventId =
     generateUUID();
 
-  const { error } = await supabase
-    .from("registration_events")
-    .insert({
-      id:
-        registrationEventId,
+  const { error } =
+    await supabase
+      .from("registration_events")
+      .insert({
+        id:
+          registrationEventId,
 
-      registration_id:
-        registrationId,
+        registration_id:
+          registrationId,
 
-      event_id:
-        eventId,
-    });
+        event_id:
+          eventId,
+      });
 
   if (error) {
     throw new Error(
@@ -376,23 +402,23 @@ async function insertRegistrationMember({
   participantId,
   role,
 }) {
-  const { error } = await supabase
-    .from("registration_members")
-    .insert({
-      id:
-        generateUUID(),
+  const { error } =
+    await supabase
+      .from("registration_members")
+      .insert({
+        id: generateUUID(),
 
-      registration_id:
-        registrationId,
+        registration_id:
+          registrationId,
 
-      registration_event_id:
-        registrationEventId,
+        registration_event_id:
+          registrationEventId,
 
-      participant_id:
-        participantId,
+        participant_id:
+          participantId,
 
-      role,
-    });
+        role,
+      });
 
   if (error) {
     throw new Error(
@@ -405,17 +431,12 @@ async function insertRegistrationMember({
 =========================================================
 CREATE PAYMENT
 =========================================================
-
-One registration = ONE combined payment.
-
-=========================================================
 */
 
 async function insertPayment({
   registrationId,
   amount,
   paymentMethod,
-  transactionReference,
   screenshotShared,
 }) {
   const numericAmount =
@@ -424,44 +445,60 @@ async function insertPayment({
   const paymentRequired =
     numericAmount > 0;
 
-  const { error } = await supabase
-    .from("payments")
-    .insert({
-      id:
-        generateUUID(),
+  const paymentStatus =
+    paymentRequired
+      ? PAYMENT_PENDING_STATUS
+      : PAYMENT_VERIFIED_STATUS;
 
-      registration_id:
-        registrationId,
+  let notes;
 
-      amount:
-        numericAmount,
+  if (!paymentRequired) {
+    notes =
+      "No payment required.";
+  } else if (
+    screenshotShared
+  ) {
+    notes =
+      "Participant confirmed that the successful payment screenshot was shared directly with the payment coordinator on WhatsApp. Payment is pending manual verification.";
+  } else {
+    notes =
+      "Payment record created. Payment screenshot confirmation was not provided.";
+  }
 
-      status:
-        "pending",
+  const { error } =
+    await supabase
+      .from("payments")
+      .insert({
+        id: generateUUID(),
 
-      transaction_reference:
-        transactionReference?.trim() ||
-        null,
+        registration_id:
+          registrationId,
 
-      payment_method:
-        paymentRequired
-          ? paymentMethod?.trim() ||
-            "Google Pay"
-          : null,
+        amount:
+          numericAmount,
 
-      paid_at:
-        null,
+        status:
+          paymentStatus,
 
-      verified_at:
-        null,
+        transaction_reference:
+          null,
 
-      notes:
-        paymentRequired
-          ? screenshotShared
-            ? "Participant confirmed that the successful payment screenshot was shared with the respective event coordinator."
-            : "Payment submitted. Screenshot confirmation was not provided."
-          : "No payment required.",
-    });
+        payment_method:
+          paymentRequired
+            ? paymentMethod?.trim() ||
+              PAYMENT_METHOD
+            : null,
+
+        paid_at:
+          paymentRequired
+            ? new Date().toISOString()
+            : null,
+
+        verified_at:
+          null,
+
+        notes,
+      });
 
   if (error) {
     throw new Error(
@@ -471,7 +508,7 @@ async function insertPayment({
 
   return {
     status:
-      "pending",
+      paymentStatus,
   };
 }
 
@@ -538,15 +575,6 @@ function validateParticipant(
 =========================================================
 DUPLICATE EMAIL VALIDATION
 =========================================================
-
-The same participant may legitimately participate
-in multiple events.
-
-Therefore duplicate emails across EVENTS are allowed.
-
-We only reject duplicate emails inside the SAME event.
-
-=========================================================
 */
 
 function validateEventDuplicateEmails(
@@ -560,7 +588,9 @@ function validateEventDuplicateEmails(
       )
       .filter(Boolean)
       .map((email) =>
-        email.trim().toLowerCase()
+        email
+          .trim()
+          .toLowerCase()
       );
 
   const uniqueEmails =
@@ -580,115 +610,105 @@ function validateEventDuplicateEmails(
 =========================================================
 NORMALIZE EVENT PARTICIPANTS
 =========================================================
-
-Expected:
-
-eventRegistrations: [
-  {
-    eventId: "...",
-    maxParticipants: 4,
-    participants: [...]
-  }
-]
-
-=========================================================
 */
 
-function normalizeEventRegistrations({
-  selectedEvents,
+function getEventDetails({
   eventRegistrations,
-  primary,
+  event,
 }) {
-  const source =
-    Array.isArray(eventRegistrations)
-      ? eventRegistrations
-      : [];
+  if (
+    !eventRegistrations
+  ) {
+    return null;
+  }
 
-  return selectedEvents.map(
-    (selectedEvent) => {
-      const eventId =
-        selectedEvent.id;
+  /*
+   * ARRAY FORMAT
+   */
+  if (
+    Array.isArray(
+      eventRegistrations
+    )
+  ) {
+    return (
+      eventRegistrations.find(
+        (item) =>
+          item?.eventId ===
+            event.id ||
+          item?.id ===
+            event.id ||
+          (
+            event.slug &&
+            item?.slug ===
+              event.slug
+          )
+      ) || null
+    );
+  }
 
-      const matchingEvent =
-        source.find(
-          (event) =>
-            event?.eventId ===
-              eventId ||
-            event?.id ===
-              eventId
-        );
-
-      let participants =
-        matchingEvent?.participants;
-
-      /*
-       * Support the current UI structure:
-       *
-       * eventRegistrations[slug]
-       *
-       * This conversion is handled in submitRegistration
-       * when an object keyed by slug is supplied.
-       */
-
-      if (
-        !Array.isArray(participants)
-      ) {
-        participants = [];
-      }
-
-      return {
-        eventId,
-
-        maxParticipants:
-          selectedEvent.maxParticipants,
-
-        participants,
-      };
+  /*
+   * OBJECT FORMAT
+   */
+  if (
+    typeof eventRegistrations ===
+      "object" &&
+    !Array.isArray(
+      eventRegistrations
+    )
+  ) {
+    if (
+      event.slug &&
+      eventRegistrations[
+        event.slug
+      ]
+    ) {
+      return (
+        eventRegistrations[
+          event.slug
+        ]
+      );
     }
-  );
+
+    const matchingKey =
+      Object.keys(
+        eventRegistrations
+      ).find((key) => {
+        const item =
+          eventRegistrations[
+            key
+          ];
+
+        return (
+          item?.eventId ===
+            event.id ||
+          item?.id ===
+            event.id
+        );
+      });
+
+    if (matchingKey) {
+      return (
+        eventRegistrations[
+          matchingKey
+        ]
+      );
+    }
+  }
+
+  return null;
 }
 
 /*
 =========================================================
 MAIN REGISTRATION FUNCTION
 =========================================================
-
-IMPORTANT:
-
-Each event now owns its own participant list.
-
-One participant can appear in multiple events.
-
-One registration.
-
-One combined payment.
-
-=========================================================
 */
 
 export async function submitRegistration({
   eventIds = [],
+
   selectedEvents = [],
 
-  /*
-   * New preferred format:
-   *
-   * [
-   *   {
-   *     eventId: "...",
-   *     participants: [...]
-   *   }
-   * ]
-   *
-   * Also accepts the current UI object:
-   *
-   * {
-   *   "coding-debugging": {
-   *      teamSize: "1",
-   *      members: [...]
-   *   }
-   * }
-   */
   eventRegistrations = [],
 
   registrationType,
@@ -697,11 +717,6 @@ export async function submitRegistration({
 
   primary,
 
-  /*
-   * Kept for backwards compatibility.
-   *
-   * New flow should use eventRegistrations.
-   */
   members = [],
 
   payment = {},
@@ -715,11 +730,13 @@ export async function submitRegistration({
   const normalizedEvents =
     normalizeSelectedEvents({
       eventIds,
+
       selectedEvents,
     });
 
   if (
-    normalizedEvents.length === 0
+    normalizedEvents.length ===
+    0
   ) {
     throw new Error(
       "Please select at least one event."
@@ -734,6 +751,7 @@ export async function submitRegistration({
 
   validateParticipant(
     primary,
+
     "Primary participant"
   );
 
@@ -756,214 +774,206 @@ export async function submitRegistration({
 
   /*
   ========================================================
-  BUILD EVENT-SPECIFIC PARTICIPANTS
+  TEAM NAME VALIDATION
   ========================================================
+  */
 
-  The Register.jsx currently stores:
+  if (
+    registrationType ===
+    "team"
+  ) {
+    const normalizedTeamName =
+      teamName?.trim() || "";
 
-  form.eventRegistrations[event.slug]
+    if (
+      !normalizedTeamName
+    ) {
+      throw new Error(
+        "Team name is required for team registration."
+      );
+    }
 
-  So we support that structure directly.
+    if (
+      normalizedTeamName.length >
+      100
+    ) {
+      throw new Error(
+        "Team name must be 100 characters or less."
+      );
+    }
+  }
 
-  Each event gets:
+  /*
+  ========================================================
+  SOLO REGISTRATION TEAM NAME
+  ========================================================
+  */
 
-  Primary participant
-  +
-  that event's members
+  if (
+    registrationType ===
+    "individual"
+  ) {
+    teamName = null;
+  }
+
+  /*
+  ========================================================
+  BUILD EVENT PARTICIPANT GROUPS
   ========================================================
   */
 
   const eventParticipantGroups =
     normalizedEvents.map(
-      (selectedEvent) => {
-        const eventId =
-          selectedEvent.id;
+      (event) => {
+        const details =
+          getEventDetails({
+            eventRegistrations,
 
-        /*
-         * selectedEvents from Register.jsx
-         * should eventually include slug.
-         *
-         * If it does not, matching can be done
-         * using eventId supplied by the caller.
-         */
+            event,
+          });
 
-        let details = null;
-
-        if (
-          eventRegistrations &&
-          !Array.isArray(
-            eventRegistrations
+        let eventMembers =
+          Array.isArray(
+            details?.participants
           )
-        ) {
-          /*
-           * Object format:
-           *
-           * eventRegistrations[slug]
-           */
-          const possibleKeys =
-            Object.keys(
-              eventRegistrations
-            );
-
-          details =
-            possibleKeys
-              .map(
-                (key) =>
-                  eventRegistrations[
-                    key
-                  ]
+            ? details.participants
+            : Array.isArray(
+                details?.members
               )
-              .find(
-                (item) =>
-                  item?.eventId ===
-                    eventId ||
-                  item?.id ===
-                    eventId
-              );
-        }
-
-        /*
-         * Array format:
-         *
-         * [
-         *   {
-         *     eventId,
-         *     members
-         *   }
-         * ]
-         */
-        if (
-          !details &&
-          Array.isArray(
-            eventRegistrations
-          )
-        ) {
-          details =
-            eventRegistrations.find(
-              (item) =>
-                item?.eventId ===
-                  eventId ||
-                item?.id ===
-                  eventId
-            );
-        }
-
-        /*
-         * Members entered for this event.
-         */
-        const eventMembers =
-          Array.isArray(
-            details?.members
-          )
             ? details.members
             : [];
 
         /*
-         * Every event always includes
-         * the primary participant.
+         * Backward compatibility with
+         * older submitRegistration()
+         * calls using global members.
          */
-        const participants = [
-          {
-            ...primary,
-          },
+        if (
+          eventMembers.length ===
+            0 &&
+          Array.isArray(members) &&
+          members.length > 0
+        ) {
+          eventMembers =
+            members;
+        }
 
-          ...eventMembers.map(
-            (member) => ({
-              fullName:
-                member.fullName ??
-                member.name,
+        /*
+         * Normalize every participant.
+         *
+         * IMPORTANT:
+         * Register.jsx already sends the primary
+         * participant inside eventMembers.
+         *
+         * The previous code used:
+         *
+         * member !== primary
+         *
+         * which compares object references.
+         *
+         * Because Register.jsx can create a different
+         * object containing the same primary participant,
+         * the primary could be added twice.
+         *
+         * We now compare normalized email addresses
+         * instead.
+         */
 
-              email:
-                member.email,
+        const normalizedPrimary = {
+          fullName:
+            primary.fullName,
 
-              phone:
-                member.phone,
+          email:
+            primary.email,
 
-              college:
-                member.college ??
-                member.collegeName,
+          phone:
+            primary.phone,
 
-              department:
-                member.department,
+          college:
+            primary.college,
 
-              year:
-                member.year,
-            })
-          ),
-        ];
+          department:
+            primary.department,
+
+          year:
+            primary.year,
+        };
+
+        const normalizedEventMembers =
+          eventMembers
+            .filter(Boolean)
+            .map(
+              (member) => ({
+                fullName:
+                  member.fullName ??
+                  member.name ??
+                  "",
+
+                email:
+                  member.email ??
+                  "",
+
+                phone:
+                  member.phone ??
+                  "",
+
+                college:
+                  member.college ??
+                  member.collegeName ??
+                  "",
+
+                department:
+                  member.department ??
+                  "",
+
+                year:
+                  member.year ??
+                  "",
+              })
+            );
+
+        const primaryEmail =
+          primary.email
+            .trim()
+            .toLowerCase();
+
+        const hasPrimaryAlready =
+          normalizedEventMembers.some(
+            (member) =>
+              member.email
+                .trim()
+                .toLowerCase() ===
+              primaryEmail
+          );
+
+        /*
+         * If the primary participant is already
+         * included, don't add them again.
+         *
+         * Otherwise prepend the primary.
+         */
+        const participants =
+          hasPrimaryAlready
+            ? normalizedEventMembers
+            : [
+                normalizedPrimary,
+                ...normalizedEventMembers,
+              ];
 
         return {
-          eventId,
+          eventId:
+            event.id,
+
+          slug:
+            event.slug,
 
           maxParticipants:
-            selectedEvent.maxParticipants,
+            event.maxParticipants,
 
           participants,
         };
       }
     );
-
-  /*
-  ========================================================
-  BACKWARD COMPATIBILITY
-  ========================================================
-
-  If the caller still supplies members[]
-  but does not supply event-specific data,
-  use those members for every selected event.
-
-  This prevents an immediate breaking change.
-
-  ========================================================
-  */
-
-  const hasEventSpecificMembers =
-    eventParticipantGroups.some(
-      (event) =>
-        event.participants.length >
-        1
-    );
-
-  if (
-    !hasEventSpecificMembers &&
-    Array.isArray(members) &&
-    members.length > 0
-  ) {
-    for (
-      const event of
-        eventParticipantGroups
-    ) {
-      event.participants = [
-        {
-          ...primary,
-        },
-
-        ...members.map(
-          (member) => ({
-            fullName:
-              member.fullName ??
-              member.name,
-
-            email:
-              member.email,
-
-            phone:
-              member.phone,
-
-            college:
-              member.college ??
-              member.collegeName,
-
-            department:
-              member.department,
-
-            year:
-              member.year,
-          })
-        ),
-      ];
-    }
-  }
 
   /*
   ========================================================
@@ -979,17 +989,20 @@ export async function submitRegistration({
       event.participants;
 
     /*
-     * Validate count against this
-     * event's own limit.
+     * Minimum one participant.
      */
     if (
-      participants.length < 1
+      participants.length <
+      1
     ) {
       throw new Error(
         "Each selected event must have at least one participant."
       );
     }
 
+    /*
+     * Maximum participant count.
+     */
     if (
       event.maxParticipants !=
         null
@@ -1013,8 +1026,8 @@ export async function submitRegistration({
     }
 
     /*
-     * Check duplicate emails only
-     * within this event.
+     * Same email cannot appear twice
+     * inside one event.
      */
     validateEventDuplicateEmails(
       participants
@@ -1024,9 +1037,13 @@ export async function submitRegistration({
      * Validate every participant.
      */
     participants.forEach(
-      (participant, index) => {
+      (
+        participant,
+        index
+      ) => {
         validateParticipant(
           participant,
+
           index === 0
             ? "Event leader"
             : `Event member ${index + 1}`
@@ -1037,18 +1054,7 @@ export async function submitRegistration({
 
   /*
   ========================================================
-  CREATE UNIQUE PARTICIPANT RECORDS
-  ========================================================
-
-  Important:
-
-  The same person can participate in
-  multiple events.
-
-  We reuse their participant ID
-  within this registration when their
-  email matches.
-
+  PARTICIPANT CACHE
   ========================================================
   */
 
@@ -1063,6 +1069,10 @@ export async function submitRegistration({
         .trim()
         .toLowerCase();
 
+    /*
+     * Already processed during
+     * this registration.
+     */
     if (
       participantCache.has(
         normalizedEmail
@@ -1073,6 +1083,47 @@ export async function submitRegistration({
       );
     }
 
+    /*
+     * Try to find an existing
+     * participant by email.
+     */
+    const {
+      data: existingParticipant,
+      error: existingParticipantError,
+    } = await supabase
+      .from("participants")
+      .select("id")
+      .eq(
+        "email",
+        normalizedEmail
+      )
+      .maybeSingle();
+
+    if (
+      existingParticipantError
+    ) {
+      throw new Error(
+        `Failed to check existing participant: ${existingParticipantError.message}`
+      );
+    }
+
+    if (
+      existingParticipant?.id
+    ) {
+      participantCache.set(
+        normalizedEmail,
+
+        existingParticipant.id
+      );
+
+      return (
+        existingParticipant.id
+      );
+    }
+
+    /*
+     * Create a new participant.
+     */
     const participantId =
       await insertParticipant({
         fullName:
@@ -1096,6 +1147,7 @@ export async function submitRegistration({
 
     participantCache.set(
       normalizedEmail,
+
       participantId
     );
 
@@ -1123,10 +1175,6 @@ export async function submitRegistration({
     await insertRegistrationWithRetry({
       primaryParticipantId,
 
-      /*
-       * Overall registration type is based
-       * on the submitted registration.
-       */
       registrationType,
 
       teamName,
@@ -1134,7 +1182,7 @@ export async function submitRegistration({
 
   /*
   ========================================================
-  CREATE EVENT + MEMBERS
+  CREATE REGISTRATION EVENTS
   ========================================================
   */
 
@@ -1146,7 +1194,7 @@ export async function submitRegistration({
       eventParticipantGroups
   ) {
     /*
-     * Create registration_events row.
+     * Create registration_events.
      */
     const registrationEventId =
       await insertRegistrationEvent({
@@ -1162,8 +1210,8 @@ export async function submitRegistration({
     );
 
     /*
-     * First participant is always
-     * the primary participant / leader.
+     * Add every participant
+     * to this event.
      */
     for (
       let index = 0;
@@ -1179,15 +1227,6 @@ export async function submitRegistration({
           participant
         );
 
-      /*
-       * Primary participant is leader.
-       *
-       * For individual event:
-       * leader
-       *
-       * For team event:
-       * leader
-       */
       const role =
         index === 0
           ? "leader"
@@ -1222,10 +1261,7 @@ export async function submitRegistration({
 
       paymentMethod:
         payment?.paymentMethod ||
-        "Google Pay",
-
-      transactionReference:
-        payment?.transactionReference,
+        PAYMENT_METHOD,
 
       screenshotShared:
         Boolean(
@@ -1235,7 +1271,7 @@ export async function submitRegistration({
 
   /*
   ========================================================
-  RETURN SUCCESS
+  RETURN RESULT
   ========================================================
   */
 
@@ -1249,9 +1285,13 @@ export async function submitRegistration({
     paymentStatus:
       paymentResult.status,
 
+    registrationStatus:
+      REGISTRATION_PENDING_STATUS,
+
     selectedEventIds:
       normalizedEvents.map(
-        (event) => event.id
+        (event) =>
+          event.id
       ),
 
     eventRegistrationIds,
