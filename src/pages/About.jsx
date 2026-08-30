@@ -1,7 +1,24 @@
 import { Link } from "react-router-dom";
 import SpiderWeb from "../components/navigation/SpiderWeb";
 
-const galleryItems = [1, 2, 3, 4];
+const galleryItems = [
+  {
+    src: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788092006/IMG_2481_pgbib0.jpg",
+    alt: "REVIBE previous edition highlights",
+  },
+  {
+    src: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788092056/IMG_2819_zgcaav.jpg",
+    alt: "REVIBE previous edition highlights",
+  },
+  {
+    src: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788092056/IMG_20240427_171249_ztrtka.jpg",
+    alt: "REVIBE previous edition highlights",
+  },
+  {
+    src: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788092047/IMG_2672_p41z5f.jpg",
+    alt: "REVIBE previous edition highlights",
+  },
+];
 
 const eliteSponsors = [
   {
@@ -159,20 +176,24 @@ export default function About() {
               Previous REVIBE Gallery
             </h2>
             <p className="ws-body">
-              Highlights and photos from REVIBE '24 will be published here once
-              finalized.
+              Highlights and photos from REVIBE '24.
             </p>
 
-            <div className="ws-gallery-wrap" aria-label="Gallery placeholder">
+            <div className="ws-gallery-wrap" aria-label="Previous REVIBE gallery">
               <SpiderWeb className="ws-gallery-web ws-gallery-web--center" />
               <SpiderWeb className="ws-gallery-web ws-gallery-web--tl" />
               <SpiderWeb className="ws-gallery-web ws-gallery-web--br" />
               <div className="ws-gallery">
-                {galleryItems.map((item) => (
-                  <div key={item} className="ws-card ws-gallery-card">
-                    <span className="ws-card-tag">Slot {String(item).padStart(2, "0")}</span>
-                    <span className="ws-gallery-note">Gallery images will be added.</span>
-                  </div>
+                {galleryItems.map((item, index) => (
+                  <figure key={item.src} className="ws-card ws-gallery-card">
+                    <span className="ws-card-tag">{String(index + 1).padStart(2, "0")}</span>
+                    <img
+                      className="ws-gallery-img"
+                      src={item.src}
+                      alt={item.alt}
+                      loading="lazy"
+                    />
+                  </figure>
                 ))}
               </div>
             </div>
@@ -623,6 +644,22 @@ export default function About() {
           text-transform: uppercase;
         }
 
+        .ws-gallery-card figure,
+        figure.ws-gallery-card {
+          margin: 0;
+          padding: 12px;
+        }
+
+        .ws-gallery-img {
+          position: relative;
+          z-index: 1;
+          width: 100%;
+          height: 220px;
+          object-fit: cover;
+          border-radius: 10px;
+          display: block;
+        }
+
         /* ---------- sponsors (same boxes as gallery) ---------- */
 
         .ws-sponsors-grid {
@@ -762,6 +799,10 @@ export default function About() {
           .ws-gallery-card {
             min-height: 200px;
             padding: 24px;
+          }
+
+          .ws-gallery-img {
+            height: 260px;
           }
 
           .ws-sponsor-card {

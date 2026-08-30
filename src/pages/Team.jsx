@@ -226,6 +226,13 @@ export default function Team() {
             ============================================================ */}
         <section className="mb-section" aria-labelledby="core-team">
           <div className="mb-container">
+            <div className="mb-team-head">
+              <p className="mb-label">REVIBE '26 Core</p>
+              <h2 id="core-team" className="mb-headline">
+                The Core Team
+              </h2>
+            </div>
+
             <button
               type="button"
               className="mb-team-toggle"
@@ -235,7 +242,7 @@ export default function Team() {
             >
               <span className="mb-team-toggle-head">
                 <p className="mb-label">REVIBE '26 Core</p>
-                <h2 id="core-team" className="mb-headline">
+                <h2 className="mb-headline">
                   The Core Team
                 </h2>
               </span>
@@ -271,19 +278,26 @@ export default function Team() {
           return (
           <section key={team.id} className="mb-section" aria-labelledby={team.id}>
             <div className="mb-container">
-              <button
-                type="button"
-                className="mb-team-toggle"
-                aria-expanded={isOpen}
-                aria-controls={`${team.id}-members`}
-                onClick={() => toggleTeam(team.id)}
-              >
-                <span className="mb-team-toggle-head">
-                  <p className="mb-label">{team.label}</p>
-                  <h2 id={team.id} className="mb-headline">
-                    {team.title}
-                  </h2>
-                </span>
+            <div className="mb-team-head">
+              <p className="mb-label">{team.label}</p>
+              <h2 id={team.id} className="mb-headline">
+                {team.title}
+              </h2>
+            </div>
+
+            <button
+              type="button"
+              className="mb-team-toggle"
+              aria-expanded={isOpen}
+              aria-controls={`${team.id}-members`}
+              onClick={() => toggleTeam(team.id)}
+            >
+              <span className="mb-team-toggle-head">
+                <p className="mb-label">{team.label}</p>
+                <h2 className="mb-headline">
+                  {team.title}
+                </h2>
+              </span>
                 <span className={`mb-chevron${isOpen ? " mb-chevron--open" : ""}`} aria-hidden="true">
                   <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="6 9 12 15 18 9" />
@@ -471,8 +485,17 @@ export default function Team() {
           display: none;
         }
 
+        .mb-team-head .mb-label {
+          margin: 0 0 16px;
+        }
+
+        .mb-team-head .mb-headline {
+          margin: 0;
+        }
+
         .mb-team-blurb {
           display: block;
+          margin-top: 8px;
         }
 
         /* ---------- grid wrap ---------- */
@@ -723,6 +746,10 @@ export default function Team() {
           }
 
           /* collapsible team sections on mobile */
+          .mb-team-head {
+            display: none;
+          }
+
           .mb-team-toggle {
             display: flex;
             align-items: flex-start;
