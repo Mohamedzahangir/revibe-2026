@@ -26,7 +26,10 @@ export default function OD() {
 
             <h1 id="od-title" className="od-title">
               <span className="od-line">
-                Just register for <span className="od-revibe">Revibe</span>,
+                Just register for{" "}
+                <span className="od-revibe">
+                  Revibe<span className="od-comma">,</span>
+                </span>
               </span>
               <span className="od-line">get your OD, and enjoy</span>
               <span className="od-line">the attendance in easy way.</span>
@@ -117,6 +120,7 @@ export default function OD() {
           letter-spacing: 0.03em;
           color: ${COLOR.blackDeep};
           text-transform: uppercase;
+          text-wrap: balance;
         }
 
         .od-line {
@@ -133,6 +137,12 @@ export default function OD() {
           display: inline-block;
           vertical-align: baseline;
           padding: 0 0.06em;
+        }
+
+        .od-comma {
+          font-family: 'Anton', sans-serif;
+          font-size: 0.6em;
+          color: ${COLOR.blackDeep};
         }
 
         /* ---------- CTA ---------- */
@@ -221,31 +231,70 @@ export default function OD() {
 
         @media (max-width: 768px) {
           .od-hero {
-            min-height: calc(100vh - 120px);
+            min-height: calc(100vh - 140px);
+            min-height: calc(100dvh - 140px);
             padding: 4rem 0 3.5rem;
+          }
+
+          .od-title {
+            font-size: clamp(1.35rem, 5.8vw, 2rem);
+          }
+
+          .od-revibe {
+            display: block;
+            font-size: clamp(3.4rem, 16vw, 4.6rem);
+            line-height: 1.05;
+            margin: 0.4rem 0 0.5rem;
+          }
+
+          .od-cta-row {
+            margin-top: 2rem;
           }
 
           .od-web-tl {
             top: 0;
             left: 0;
-            width: 150px;
-            height: 150px;
-            opacity: 0.6;
+            width: 110px;
+            height: 110px;
+            opacity: 0.45;
           }
 
           .od-web-br {
-            width: 120px;
-            height: 120px;
+            width: 90px;
+            height: 90px;
+            opacity: 0.35;
           }
         }
 
         @media (max-width: 430px) {
           .od-hero {
-            min-height: calc(100vh - 100px);
-            padding: 3rem 0 2.5rem;
+            min-height: calc(100vh - 120px);
+            min-height: calc(100dvh - 120px);
+            padding: 3rem 0 2.75rem;
+          }
+
+          .od-kicker {
+            font-size: 10px;
+            letter-spacing: 0.14em;
+            margin-bottom: 1.1rem;
+          }
+
+          .od-title {
+            font-size: clamp(1.25rem, 6.4vw, 1.6rem);
+            line-height: 1.18;
+          }
+
+          .od-revibe {
+            font-size: clamp(3.2rem, 19vw, 4rem);
+          }
+
+          .od-cta-row {
+            margin-top: 1.75rem;
           }
 
           .od-primary-btn {
+            width: 100%;
+            max-width: 340px;
             min-height: 46px;
             padding: 0.75rem 1.3rem;
             font-size: 0.98rem;
