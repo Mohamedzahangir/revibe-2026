@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import SpiderWeb from "../components/navigation/SpiderWeb";
+import samosaPNG from "../assets/Photos/samosa.png";
 
 const COLOR = {
   red: "#e63946",
@@ -24,12 +25,16 @@ export default function Canteen() {
               REVIBE '26 · Canteen Special
             </p>
 
+            <div className="cn-samosa" aria-hidden="true">
+              <img className="cn-samosa-img" src={samosaPNG} alt="" />
+            </div>
+
             <h1 id="cn-title" className="cn-title">
               <span className="cn-line">You came for a free samosa.</span>
               <span className="cn-line">
                 You got{" "}
                 <span className="cn-revibe">
-                  REVIBE<span className="cn-tail"> instead. 💀</span>
+                  Revibe '26<span className="cn-tail"> instead. 💀</span>
                 </span>
               </span>
             </h1>
@@ -112,6 +117,26 @@ export default function Canteen() {
           height: 8px;
           background: ${COLOR.red};
           display: inline-block;
+        }
+
+        /* ---------- samosa ---------- */
+
+        .cn-samosa {
+          width: 170px;
+          margin: 0 auto 1.2rem;
+          transform: rotate(-6deg);
+          transition: transform 0.2s ease;
+          filter: drop-shadow(0 8px 14px rgba(26, 26, 26, 0.22));
+        }
+
+        .cn-samosa:hover {
+          transform: rotate(-2deg) scale(1.05);
+        }
+
+        .cn-samosa-img {
+          width: 100%;
+          height: auto;
+          display: block;
         }
 
         /* ---------- headline ---------- */
@@ -320,6 +345,11 @@ export default function Canteen() {
             margin-bottom: 1.1rem;
           }
 
+          .cn-samosa {
+            width: 108px;
+            margin-bottom: 1.1rem;
+          }
+
           .cn-title {
             font-size: clamp(1.2rem, 6vw, 1.55rem);
             line-height: 1.18;
@@ -348,7 +378,8 @@ export default function Canteen() {
 
         @media (prefers-reduced-motion: reduce) {
           .cn-primary-btn,
-          .cn-primary-btn::after {
+          .cn-primary-btn::after,
+          .cn-samosa {
             transition: none;
           }
         }
