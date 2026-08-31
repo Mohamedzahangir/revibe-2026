@@ -76,7 +76,7 @@ const teams = [
     blurb:
       "The amplifiers of the web, carrying the signal of REVIBE '26 across every channel.",
     members: [
-      { name: "Mohammed Abuzar", dept: "IV Year CSE", role: "Social Media Lead", lead: true, photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787941459/Md_Abuzar_w1qi0d.jpg" },
+      { name: "Mohammed Abuzar", dept: "IV Year CSE", role: "Social Media Lead", lead: true, photo: "https://res.cloudinary.com/dbqjkjl0c/image/upload/v1788170104/ABUZPIC2_elgeqj.jpg" },
       { name: "Mohammed Sufyaan", dept: "II Year IT" },
       { name: "A MOHAMMED SAAD", dept: "II Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935198/A_Muhammad_Saad_dqvnob.jpg " },
       { name: "Mohammed Fahad Khan FM", dept: "II Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935189/Fahad_Khan_gtft9u.png" },

@@ -14,6 +14,7 @@ import Location from "./pages/Location";
 import Login from "./pages/Login";
 import CoordinatorDashboard from "./pages/CoordinatorDashboard";
 import Register from "./pages/Register";
+import OD from "./pages/OD";
 import Confirmation from "./pages/Confirmation";
 import NotFound from "./pages/NotFound";
 
@@ -36,6 +37,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/coordinator" element={<CoordinatorDashboard />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/od" element={<OD />} />
             <Route
               path="/confirmation/:registrationNumber"
               element={<Confirmation />}
