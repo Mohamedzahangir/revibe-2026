@@ -12,7 +12,7 @@ const LOCATIONS = [
   { id: "mech", name: "Mech Block", x: 62, y: 44, desc: "Department of Mechanical Engineering.", tag: "Art&Painting , IPL auction", color: "red" },
   { id: "eee-mba", name: "EEE Block", x: 63, y: 57, desc: "Departments of EEE and MBA.", tag: "Connections , Games", color: "red" },
   { id: "auditorium", name: "Auditorium", x: 50, y: 82, desc: "Main auditorium for symposium events.", tag: "Innauguration Ceremony , Closing Ceremony", color: "cyan" },
-  { id: "lab", name: "MBA / PHY Lab", x: 63, y: 70, desc: "MBA seminar hall and Physics lab", tag: "Tech quiz :- MBA smeinar hall , Cooking :- Phy lab", color: "cyan" },
+  { id: "lab", name: "MCA / PHY Lab", x: 63, y: 70, desc: "MCA seminar hall and Physics lab", tag: "Tech quiz :- MBA smeinar hall , Cooking :- Phy lab", color: "cyan" },
 ];
 
 const MIN_ZOOM = 0.6;

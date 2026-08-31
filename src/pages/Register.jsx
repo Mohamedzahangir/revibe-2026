@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { createPortal } from "react-dom";
 
+import SpiderWeb from "../components/navigation/SpiderWeb";
 import { supabase } from "../services/supabase";
 import { submitRegistration } from "../services/registrationService";
 import eventData from "../data/eventData";
@@ -27,6 +29,29 @@ const LEGACY_DRAFT_KEY = "revibe26_registration_draft_v2";
 
 const PAYMENT_COORDINATOR_NUMBER = "+91 94869 76316";
 
+const YEAR_OPTIONS = [
+  { value: "", label: "Select year" },
+  { value: "1st Year", label: "1st Year" },
+  { value: "2nd Year", label: "2nd Year" },
+  { value: "3rd Year", label: "3rd Year" },
+  { value: "4th Year", label: "4th Year" },
+];
+
+function buildUpiParams(amount, note) {
+  const params = new URLSearchParams({
+    pa: paymentData.upiId,
+    pn: "Abbas",
+    am: String(amount),
+    tn: note || "REVIBE 26 Registration",
+    cu: "INR",
+  });
+  return params.toString();
+}
+
+function getUniversalUpiLink(amount, note) {
+  return `upi://pay?${buildUpiParams(amount, note)}`;
+}
+
 const emptyMember = () => ({
   name: "",
   email: "",
@@ -37,7 +62,7 @@ const emptyMember = () => ({
 });
 
 const emptyEventRegistration = () => ({
-  teamSize: "",
+  teamSize: "1",
   teamName: "",
   members: [],
 });
@@ -215,6 +240,7 @@ export default function Register() {
 
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState("");
+  const [timingConflict, setTimingConflict] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   const [submitted, setSubmitted] = useState(false);
@@ -559,6 +585,11 @@ export default function Register() {
     form.eventRegistrations,
   ]);
 
+  const paymentNote = useMemo(() => {
+    if (teamName) return `REVIBE 26 - ${teamName}`;
+    return `REVIBE 26 - ${form.name || "Registration"}`;
+  }, [teamName, form.name]);
+
   /* =========================================================
      GENERIC UPDATE
   ========================================================= */
@@ -589,55 +620,92 @@ export default function Register() {
 
     if (!exists) return;
 
-    setForm((previous) => {
-      const alreadySelected =
-        previous.eventSlugs.includes(
-          slug
+    const alreadySelected =
+      form.eventSlugs.includes(slug);
+
+    if (alreadySelected) {
+      setForm((previous) => ({
+        ...previous,
+
+        eventSlugs:
+          previous.eventSlugs.filter(
+            (item) => item !== slug
+          ),
+
+        paymentScreenshotShared:
+          false,
+
+        referenceId: "",
+      }));
+    } else {
+      const newEvent = events.find(
+        (e) => e.slug === slug
+      );
+
+      if (newEvent) {
+        const newTime = getEventTime(
+          newEvent
         );
 
-      if (alreadySelected) {
+        const conflicting =
+          form.eventSlugs
+            .map((s) =>
+              events.find(
+                (e) => e.slug === s
+              )
+            )
+            .filter(
+              (e) =>
+                e &&
+                getEventTime(e) === newTime
+            );
+
+        if (conflicting.length > 0) {
+          setTimingConflict({
+            time: newTime,
+            events: [
+              newEvent.name,
+              ...conflicting.map(
+                (e) => e.name
+              ),
+            ],
+          });
+          setTimeout(
+            () => setTimingConflict(null),
+            4000
+          );
+        }
+      }
+
+      setForm((previous) => {
+        const restoredDetails =
+          previous.eventRegistrations[
+            slug
+          ] ||
+          emptyEventRegistration();
+
         return {
           ...previous,
 
-          eventSlugs:
-            previous.eventSlugs.filter(
-              (item) => item !== slug
-            ),
+          eventSlugs: [
+            ...previous.eventSlugs,
+            slug,
+          ],
+
+          eventRegistrations: {
+            ...previous.eventRegistrations,
+
+            [slug]:
+              restoredDetails,
+          },
 
           paymentScreenshotShared:
             false,
 
           referenceId: "",
         };
-      }
-
-      const restoredDetails =
-        previous.eventRegistrations[
-          slug
-        ] ||
-        emptyEventRegistration();
-
-      return {
-        ...previous,
-
-        eventSlugs: [
-          ...previous.eventSlugs,
-          slug,
-        ],
-
-        eventRegistrations: {
-          ...previous.eventRegistrations,
-
-          [slug]:
-            restoredDetails,
-        },
-
-        paymentScreenshotShared:
-          false,
-
-        referenceId: "",
-      };
-    });
+      });
+    }
 
     setErrors({});
     setSubmitError("");
@@ -1665,15 +1733,16 @@ export default function Register() {
 
   if (submitted) {
     return (
-      <main className="register-page">
+      <main className="reg-page">
         <section className="register-success-section">
-          <div className="register-shell">
+          <div className="reg-shell">
             <div className="register-success-card">
               <div className="success-icon">
                 ✓
               </div>
 
-              <p className="register-eyebrow">
+              <p className="reg-kicker">
+                <span className="reg-kicker-dot" />
                 REVIBE '26
               </p>
 
@@ -1927,27 +1996,31 @@ transaction.
 
   return (
     <>
-      <main className="register-page">
-        <section className="register-main">
-          <div className="register-shell">
-            <div className="register-heading">
-              <p className="register-eyebrow">
-                PARTICIPANT REGISTRATION
+      <main className="reg-page">
+        <section className="reg-hero">
+          <SpiderWeb className="reg-hero-web reg-hero-web--tl" />
+          <SpiderWeb className="reg-hero-web reg-hero-web--br" />
+          <div className="reg-shell">
+            <div className="reg-hero-copy">
+              <p className="reg-kicker">
+                <span className="reg-kicker-dot" />
+                Participant Registration
               </p>
-
-              <h1>
+              <h1 className="reg-hero-title">
                 Register for REVIBE '26
               </h1>
-
-              <p>
-                Complete your
-                registration in three
+              <p className="reg-hero-subtitle">
+                Complete your registration in three
                 simple steps.
               </p>
             </div>
+          </div>
+        </section>
 
+        <section className="reg-main">
+          <div className="reg-shell">
             <div
-              className="register-steps"
+              className="reg-steps"
               aria-label="Registration progress"
             >
               <Step
@@ -1958,27 +2031,27 @@ transaction.
               />
 
               <div
-                className={`step-line ${
-                  step > 1
-                    ? "completed"
-                    : ""
-                }`}
-              />
+              className={`step-line ${
+                step > 1
+                  ? "completed"
+                  : ""
+              }`}
+            />
 
-              <Step
-                number="02"
-                title="Select Event"
-                active={step === 2}
-                completed={step > 2}
-              />
+            <Step
+              number="02"
+              title="Select Event"
+              active={step === 2}
+              completed={step > 2}
+            />
 
-              <div
-                className={`step-line ${
-                  step > 2
-                    ? "completed"
-                    : ""
-                }`}
-              />
+            <div
+              className={`step-line ${
+                step > 2
+                  ? "completed"
+                  : ""
+              }`}
+            />
 
               <Step
                 number="03"
@@ -1997,7 +2070,7 @@ transaction.
               ================================================= */}
 
               {step === 1 && (
-                <section className="register-card">
+                <section className="reg-card">
                   <div className="card-heading">
                     <span className="card-number">
                       01
@@ -2137,36 +2210,14 @@ transaction.
                       required
                       error={errors.year}
                     >
-                      <select
+                      <CustomSelect
                         value={form.year}
-                        onChange={(event) =>
-                          update(
-                            "year",
-                            event.target
-                              .value
-                          )
+                        onChange={(val) =>
+                          update("year", val)
                         }
-                      >
-                        <option value="">
-                          Select year
-                        </option>
-
-                        <option value="1st Year">
-                          1st Year
-                        </option>
-
-                        <option value="2nd Year">
-                          2nd Year
-                        </option>
-
-                        <option value="3rd Year">
-                          3rd Year
-                        </option>
-
-                        <option value="4th Year">
-                          4th Year
-                        </option>
-                      </select>
+                        options={YEAR_OPTIONS}
+                        placeholder="Select year"
+                      />
                     </Field>
                   </div>
 
@@ -2209,10 +2260,7 @@ transaction.
                       className="register-primary-btn"
                       onClick={handleNext}
                     >
-                      Continue{" "}
-                      <span>
-                        →
-                      </span>
+                      Continue
                     </button>
                   </div>
                 </section>
@@ -2223,7 +2271,7 @@ transaction.
               ================================================= */}
 
               {step === 2 && (
-                <section className="register-card">
+                <section className="reg-card">
                   <div className="card-heading">
                     <span className="card-number">
                       02
@@ -2516,63 +2564,46 @@ transaction.
                                             eventError
                                           }
                                         >
-                                          <select
+                                          <CustomSelect
                                             value={
                                               details.teamSize
                                             }
                                             onChange={(
-                                              event
+                                              val
                                             ) =>
                                               handleEventParticipantCountChange(
                                                 eventItem.slug,
-                                                event
-                                                  .target
-                                                  .value
+                                                val
                                               )
                                             }
-                                          >
-                                            <option value="">
-                                              Select
-                                              participant
-                                              count
-                                            </option>
-
-                                            {Array.from(
+                                            options={[
                                               {
-                                                length:
-                                                  range.max -
-                                                  range.min +
-                                                  1,
+                                                value: "",
+                                                label: "Select participant count",
                                               },
-                                              (
-                                                _,
-                                                index
-                                              ) => {
-                                                const size =
-                                                  range.min +
-                                                  index;
-
-                                                return (
-                                                  <option
-                                                    key={
-                                                      size
-                                                    }
-                                                    value={
-                                                      size
-                                                    }
-                                                  >
-                                                    {
-                                                      size
-                                                    }{" "}
-                                                    {size ===
-                                                    1
-                                                      ? "Participant"
-                                                      : "Participants"}
-                                                  </option>
-                                                );
-                                              }
-                                            )}
-                                          </select>
+                                              ...Array.from(
+                                                {
+                                                  length:
+                                                    range.max -
+                                                    range.min +
+                                                    1,
+                                                },
+                                                (
+                                                  _,
+                                                  index
+                                                ) => {
+                                                  const size =
+                                                    range.min +
+                                                    index;
+                                                  return {
+                                                    value: String(size),
+                                                    label: `${size} ${size === 1 ? "Participant" : "Participants"}`,
+                                                  };
+                                                }
+                                              ),
+                                            ]}
+                                            placeholder="Select participant count"
+                                          />
                                         </Field>
 
                                         <div className="event-participant-info">
@@ -2878,48 +2909,25 @@ transaction.
                                                       ]
                                                     }
                                                   >
-                                                    <select
+                                                    <CustomSelect
                                                       value={
                                                         member.year
                                                       }
                                                       onChange={(
-                                                        event
+                                                        val
                                                       ) =>
                                                         updateEventMember(
                                                           eventItem.slug,
                                                           index,
                                                           "year",
-                                                          event
-                                                            .target
-                                                            .value
+                                                          val
                                                         )
                                                       }
-                                                    >
-                                                      <option value="">
-                                                        Select
-                                                        year
-                                                      </option>
-
-                                                      <option value="1st Year">
-                                                        1st
-                                                        Year
-                                                      </option>
-
-                                                      <option value="2nd Year">
-                                                        2nd
-                                                        Year
-                                                      </option>
-
-                                                      <option value="3rd Year">
-                                                        3rd
-                                                        Year
-                                                      </option>
-
-                                                      <option value="4th Year">
-                                                        4th
-                                                        Year
-                                                      </option>
-                                                    </select>
+                                                      options={
+                                                        YEAR_OPTIONS
+                                                      }
+                                                      placeholder="Select year"
+                                                    />
                                                   </Field>
                                                 </div>
                                               </div>
@@ -3124,10 +3132,7 @@ transaction.
                           0
                       }
                     >
-                      Continue{" "}
-                      <span>
-                        →
-                      </span>
+                      Continue
                     </button>
                   </div>
                 </section>
@@ -3138,7 +3143,7 @@ transaction.
               ================================================= */}
 
               {step === 3 && (
-                <section className="register-card">
+                <section className="reg-card">
                   <div className="card-heading">
                     <span className="card-number">
                       03
@@ -3157,7 +3162,7 @@ transaction.
 
                   <p className="card-description">
                     Complete the payment
-                    using Google Pay.
+                    using your default UPI app.
                   </p>
 
                   {selectedEvents.length >
@@ -3296,8 +3301,8 @@ transaction.
                             <strong>
                               Complete the
                               required
-                              payment using
-                              Google Pay.
+                              payment using default
+                              your UPI app 
                             </strong>
                           </li>
 
@@ -3353,6 +3358,30 @@ transaction.
                         </ol>
                       </div>
 
+                      <div className="upi-pay-section">
+                        <a
+                          href={getUniversalUpiLink(totalFee, paymentNote)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="upi-pay-banner"
+                        >
+                          <img src="/Upi logos/upi-payment-icon.svg" alt="UPI" className="upi-banner-logo" />
+                          <span className="upi-banner-text">PAY NOW</span>
+                          <span className="upi-banner-arrow">→</span>
+                        </a>
+                        <p className="upi-banner-subtitle">Opens your default UPI app with ₹{totalFee} pre-filled</p>
+                        <div className="upi-app-logos">
+                          <img src="/Upi logos/google-pay-icon.svg" alt="GPay" className="upi-app-logo" />
+                          <img src="/Upi logos/phonepe-icon.svg" alt="PhonePe" className="upi-app-logo" />
+                          <img src="/Upi logos/bhim-app-icon.svg" alt="BHIM" className="upi-app-logo" />
+                          <img src="/Upi logos/navi-team.png" alt="Navi" className="upi-app-logo" />
+                        </div>
+                      </div>
+
+                      <div className="payment-or-divider">
+                        <span>OR</span>
+                      </div>
+
                       <div className="payment-layout">
                         <div className="qr-card">
                           <span className="payment-label">
@@ -3388,6 +3417,8 @@ transaction.
                             Google Pay
                           </strong>
                         </div>
+
+                        <div className="payment-or-inline">OR</div>
 
                         <div className="gpay-card">
                           <span className="payment-label">
@@ -3545,12 +3576,6 @@ at{" "}
                       {submitting
                         ? "Submitting..."
                         : "Register for the Event"}
-
-                      {!submitting && (
-                        <span>
-                          ✓
-                        </span>
-                      )}
                     </button>
                   </div>
                 </section>
@@ -3559,6 +3584,18 @@ at{" "}
           </div>
         </section>
       </main>
+
+      {timingConflict && (
+        <div
+          className="tc-toast"
+          onClick={() => setTimingConflict(null)}
+        >
+          <span className="tc-toast-icon">⚠</span>
+          <span className="tc-toast-text">
+            You have selected events with the same timing!
+          </span>
+        </div>
+      )}
 
       <style>
         {registerStyles}
@@ -3673,6 +3710,10 @@ function EventCategory({
                 </p>
               )}
 
+              <p className="event-time-badge">
+                {getEventTime(event)}
+              </p>
+
               <div className="event-option-bottom">
                 <strong>
                   {fee > 0
@@ -3697,6 +3738,120 @@ function EventCategory({
 }
 
 /* =========================================================
+   CUSTOM SELECT
+========================================================= */
+
+function CustomSelect({
+  value,
+  onChange,
+  options,
+  placeholder,
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const dropRef = useRef(null);
+  const [dropPos, setDropPos] = useState({
+    top: 0,
+    left: 0,
+    width: 0,
+  });
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (
+        ref.current &&
+        !ref.current.contains(e.target) &&
+        dropRef.current &&
+        !dropRef.current.contains(e.target)
+      ) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () =>
+      document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  useEffect(() => {
+    if (open && ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setDropPos({
+        top: rect.bottom + window.scrollY + 4,
+        left: rect.left,
+        width: rect.width,
+      });
+    }
+  }, [open]);
+
+  const selected = options.find(
+    (o) => String(o.value) === String(value)
+  );
+
+  return (
+    <div className="cs-wrap" ref={ref}>
+      <button
+        type="button"
+        className={`cs-trigger${open ? " cs-open" : ""}`}
+        onClick={() => setOpen(!open)}
+      >
+        <span
+          className={
+            selected
+              ? ""
+              : "cs-placeholder"
+          }
+        >
+          {selected
+            ? selected.label
+            : placeholder}
+        </span>
+        <span
+          className={`cs-arrow${open ? " cs-arrow-open" : ""}`}
+        >
+          ▾
+        </span>
+      </button>
+      {open &&
+        createPortal(
+          <ul
+            ref={dropRef}
+            className="cs-dropdown"
+            style={{
+              position: "absolute",
+              top: dropPos.top,
+              left: dropPos.left,
+              width: dropPos.width,
+              background: "#ffffff",
+              zIndex: 9999,
+            }}
+          >
+            {options.map((opt) => (
+              <li key={opt.value}>
+                <button
+                  type="button"
+                  className={`cs-option${
+                    String(opt.value) ===
+                    String(value)
+                      ? " cs-selected"
+                      : ""
+                  }`}
+                  onClick={() => {
+                    onChange(opt.value);
+                    setOpen(false);
+                  }}
+                >
+                  {opt.label}
+                </button>
+              </li>
+            ))}
+          </ul>,
+          document.body
+        )}
+    </div>
+  );
+}
+
+/* =========================================================
    STEP
 ========================================================= */
 
@@ -3708,7 +3863,7 @@ function Step({
 }) {
   return (
     <div
-      className={`register-step ${
+      className={`reg-step ${
         active
           ? "active"
           : ""
@@ -3792,68 +3947,137 @@ function scrollToError() {
 }
 
 const registerStyles = `
-  .register-page {
-    min-height: 100vh;
+  /* ═══════════════════════════════════════════════════════════════
+     WEB-SLINGER MODERN — Register page
+     Flat-Brutalist / Neo-Comic design system
+     Off-white surface · 2px black borders · sharp corners ·
+     hard offset shadows · Anton / Hanken Grotesk / JetBrains Mono
+     8px grid · 12-col desktop (64px margin) · 4-col mobile (16px)
+  ═══════════════════════════════════════════════════════════════ */
+
+  .reg-page {
     width: 100%;
-    background:
-      radial-gradient(
-        circle at 20% 10%,
-        rgba(220, 0, 0, 0.08),
-        transparent 32%
-      ),
-      radial-gradient(
-        circle at 85% 35%,
-        rgba(220, 0, 0, 0.05),
-        transparent 30%
-      ),
-      #050505;
-    color: #ffffff;
+    background: #f5f5f5;
+    color: #1a1a1a;
     overflow-x: hidden;
+    font-family: 'Hanken Grotesk', sans-serif;
   }
 
-  .register-main {
-    width: 100%;
-    padding: 4rem 1rem 5rem;
+  /* ═══ HERO ═══ */
+
+  .reg-hero {
+    position: relative;
+    padding: 5rem 0 4.5rem;
+    background: #f9f9f9;
+    overflow: hidden;
+    border-bottom: 2px solid #1a1a1a;
   }
 
-  .register-shell {
-    width: 100%;
-    max-width: 1050px;
-    margin: 0 auto;
+  .reg-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(26,26,26,0.05) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(-45deg, rgba(26,26,26,0.05) 0 1px, transparent 1px 28px);
+    pointer-events: none;
   }
 
-  .register-heading {
+  .reg-hero-copy {
     text-align: center;
-    margin-bottom: 2.5rem;
+    position: relative;
+    z-index: 1;
   }
 
-  .register-eyebrow {
-    margin: 0 0 0.7rem;
-    color: #dc0000;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.7rem;
+  .reg-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0 0 0.6rem;
+    padding: 0.4rem 0.85rem;
+    background: #1a1a1a;
+    color: #ffffff;
+    font-family: 'JetBrains Mono', monospace;
     font-weight: 700;
+    font-size: 11px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
   }
 
-  .register-heading h1 {
+  .reg-kicker-dot {
+    width: 8px;
+    height: 8px;
+    background: #dc0000;
+    display: inline-block;
+  }
+
+  .reg-hero-title {
     margin: 0;
     font-family: 'Anton', sans-serif;
-    font-size: clamp(2rem, 6vw, 3.8rem);
     font-weight: 400;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font-size: clamp(2rem, 6vw, 3.5rem);
     line-height: 1;
+    letter-spacing: 0.04em;
+    color: #0d0d0d;
+    text-transform: uppercase;
   }
 
-  .register-heading > p:last-child {
-    margin: 0.9rem 0 0;
-    color: rgba(255,255,255,0.62);
-    font-size: 0.95rem;
+  .reg-hero-subtitle {
+    margin: 0.8rem 0 0;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 1.05rem;
+    color: #3a3a3a;
   }
 
-  .register-steps {
+  /* ═══ SPIDER WEBS ═══ */
+
+  .reg-hero-web {
+    position: absolute;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .reg-hero-web--tl {
+    top: -60px;
+    left: 16px;
+    width: 260px;
+    height: 260px;
+    opacity: 0.5;
+  }
+
+  .reg-hero-web--br {
+    bottom: 0;
+    right: 0;
+    width: 180px;
+    height: 180px;
+    transform: rotate(180deg);
+    opacity: 0.35;
+  }
+
+  .reg-hero .reg-shell,
+  .reg-main .reg-shell {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ═══ MAIN ═══ */
+
+  .reg-main {
+    width: 100%;
+    padding: 3rem 0 5rem;
+  }
+
+  .reg-shell {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding-inline: 16px;
+    box-sizing: border-box;
+  }
+
+  /* ═══ STEP INDICATOR ═══ */
+
+  .reg-steps {
     width: 100%;
     display: flex;
     align-items: flex-start;
@@ -3862,7 +4086,7 @@ const registerStyles = `
     max-width: 800px;
   }
 
-  .register-step {
+  .reg-step {
     flex: 0 0 auto;
     display: flex;
     flex-direction: column;
@@ -3874,75 +4098,93 @@ const registerStyles = `
   .step-circle {
     width: 46px;
     height: 46px;
-    border: 1px solid rgba(255,255,255,0.22);
-    border-radius: 50%;
+    border: 1px solid rgba(220, 0, 0, 0.3);
+    border-radius: 10px;
     display: grid;
     place-items: center;
-    color: rgba(255,255,255,0.45);
-    background: #090909;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 700;
+    color: #dc0000;
+    background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
+    font-family: 'Anton', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(220, 0, 0, 0.15);
   }
 
-  .register-step span:last-child {
-    color: rgba(255,255,255,0.42);
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.58rem;
-    letter-spacing: 0.08em;
+  .reg-step span:last-child {
+    color: #6a6a6a;
+    font-family: 'Anton', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     text-align: center;
   }
 
-  .register-step.active .step-circle {
-    border-color: #dc0000;
-    background: #dc0000;
-    color: #ffffff;
-    box-shadow:
-      0 0 0 5px rgba(220,0,0,0.08),
-      0 0 25px rgba(220,0,0,0.25);
+  .reg-step.active .step-circle {
+    border-color: rgba(220, 0, 0, 0.5);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 0 0 3px rgba(220, 0, 0, 0.2), inset 0 1px 0 rgba(220, 0, 0, 0.15);
   }
 
-  .register-step.active span:last-child {
-    color: #ffffff;
+  .reg-step.active span:last-child {
+    color: #dc0000;
+    font-weight: 400;
   }
 
-  .register-step.completed .step-circle {
-    border-color: #dc0000;
-    color: #ffffff;
+  .reg-step.completed .step-circle {
+    border-color: rgba(220, 0, 0, 0.5);
+    color: #dc0000;
   }
 
-  .register-step.completed span:last-child {
-    color: rgba(255,255,255,0.8);
+  .reg-step.completed span:last-child {
+    color: #3a3a3a;
   }
 
   .step-line {
     flex: 1;
-    height: 1px;
+    height: 2px;
     max-width: 150px;
     margin: 23px 0 0;
-    background: rgba(255,255,255,0.12);
+    background: #d0d0d0;
   }
 
   .step-line.completed {
     background: #dc0000;
   }
 
-  .register-card {
+  /* ═══ CARD ═══ */
+
+  .reg-card {
+    position: relative;
     width: 100%;
     box-sizing: border-box;
-    border: 1px solid rgba(220,0,0,0.3);
-    border-radius: 18px;
+    border: 1px solid rgba(220, 0, 0, 0.35);
+    border-radius: 16px;
     padding: clamp(1.2rem, 4vw, 2.5rem);
-    background:
-      linear-gradient(
-        145deg,
-        rgba(255,255,255,0.045),
-        rgba(255,255,255,0.015)
-      );
-    box-shadow:
-      0 25px 70px rgba(0,0,0,0.4),
-      inset 0 1px 0 rgba(255,255,255,0.05);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .reg-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 16px 16px 0 0;
+    background: linear-gradient(90deg, transparent, rgba(220, 0, 0, 0.5), transparent);
+  }
+
+  .reg-card > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .reg-card:hover,
+  .reg-card:focus-within {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
   .card-heading {
@@ -3953,25 +4195,28 @@ const registerStyles = `
   }
 
   .card-number {
-    width: 42px;
+    width: 60px;
     height: 42px;
     flex: 0 0 auto;
     display: grid;
     place-items: center;
-    border: 1px solid rgba(220,0,0,0.5);
-    color: #dc0000;
-    border-radius: 50%;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.65rem;
-    font-weight: 700;
+    border: 1px solid rgba(220, 0, 0, 0.3);
+    color: white;
+    background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
+    border-radius: 10px;
+    font-family: 'Anton', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(220, 0, 0, 0.15);
   }
 
   .card-heading p {
     margin: 0 0 0.15rem;
     color: #dc0000;
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.55rem;
     letter-spacing: 0.15em;
+    text-transform: uppercase;
   }
 
   .card-heading h2 {
@@ -3979,17 +4224,22 @@ const registerStyles = `
     font-family: 'Anton', sans-serif;
     font-size: clamp(1.4rem, 4vw, 2rem);
     font-weight: 400;
-    letter-spacing: 0.04em;
+    line-height: 1.05;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
+    color: #1a1a1a;
   }
 
   .card-description {
     margin: 0 0 1.7rem;
     max-width: 720px;
-    color: rgba(255,255,255,0.6);
+    color: #3a3a3a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.9rem;
     line-height: 1.7;
   }
+
+  /* ═══ FIELDS ═══ */
 
   .field-grid {
     display: grid;
@@ -4005,8 +4255,8 @@ const registerStyles = `
   }
 
   .field-label {
-    color: rgba(255,255,255,0.82);
-    font-family: 'Orbitron', sans-serif;
+    color: #1a1a1a;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.62rem;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -4024,38 +4274,161 @@ const registerStyles = `
     min-width: 0;
     min-height: 46px;
     box-sizing: border-box;
-    border: 1px solid rgba(255,255,255,0.13);
+    border: 1px solid rgba(220, 0, 0, 0.25);
     border-radius: 8px;
     outline: none;
     padding: 0.85rem 0.9rem;
-    background: rgba(0,0,0,0.38);
-    color: #ffffff;
-    font-family: inherit;
+    background: rgba(255, 255, 255, 0.8);
+    color: #1a1a1a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.88rem;
     transition: 0.2s ease;
   }
 
+  .register-field select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 2.5rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236a6a6a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.9rem center;
+    background-size: 12px;
+    cursor: pointer;
+  }
+
   .register-field input:focus,
   .register-field select:focus {
-    border-color: rgba(220,0,0,0.75);
-    box-shadow:
-      0 0 0 3px rgba(220,0,0,0.08);
+    border-color: #dc0000;
+    box-shadow: 0 0 0 3px rgba(220, 0, 0, 0.1);
   }
 
   .register-field input::placeholder {
-    color: rgba(255,255,255,0.3);
+    color: #999999;
   }
 
   .register-field select option {
-    background: #090909;
-    color: #ffffff;
+    background: #ffffff;
+    color: #1a1a1a;
   }
 
   .field-error {
-    color: #ff5b5b;
+    color: #dc0000;
     font-size: 0.7rem;
     line-height: 1.4;
+    font-weight: 700;
   }
+
+  /* ═══ CUSTOM SELECT ═══ */
+
+  .cs-wrap {
+    position: relative;
+    z-index: 50;
+  }
+
+  .cs-trigger {
+    width: 100%;
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    box-sizing: border-box;
+    border: 1px solid rgba(220, 0, 0, 0.25);
+    border-radius: 8px;
+    padding: 0.85rem 2.5rem 0.85rem 0.9rem;
+    background: #ffffff;
+    color: #1a1a1a;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 0.88rem;
+    cursor: pointer;
+    text-align: left;
+    transition: 0.2s ease;
+  }
+
+  .cs-trigger:hover {
+    border-color: rgba(220, 0, 0, 0.45);
+  }
+
+  .cs-trigger.cs-open {
+    border-color: #dc0000;
+    box-shadow: 0 0 0 3px rgba(220, 0, 0, 0.1);
+  }
+
+  .cs-placeholder {
+    color: #999999;
+  }
+
+  .cs-arrow {
+    position: absolute;
+    right: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    color: #6a6a6a;
+    transition: transform 0.2s ease;
+    pointer-events: none;
+  }
+
+  .cs-arrow-open {
+    transform: translateY(-50%) rotate(180deg);
+  }
+
+  .cs-dropdown {
+    list-style: none;
+    margin: 0;
+    padding: 4px;
+    border: 1px solid rgba(220, 0, 0, 0.35);
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .cs-dropdown li + li {
+    margin-top: 2px;
+  }
+
+  .cs-option {
+    width: 100%;
+    display: block;
+    padding: 0.55rem 0.85rem;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #1a1a1a;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 0.88rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .cs-option:hover {
+    background: rgba(220, 0, 0, 0.06);
+  }
+
+  .cs-option.cs-selected {
+    background: rgba(220, 0, 0, 0.1);
+    color: #dc0000;
+    font-weight: 700;
+  }
+
+  .cs-dropdown::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .cs-dropdown::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .cs-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(220, 0, 0, 0.2);
+    border-radius: 3px;
+  }
+
+  /* ═══ EVENT SELECTION ═══ */
 
   .event-selection {
     margin-top: 0.5rem;
@@ -4070,8 +4443,8 @@ const registerStyles = `
   }
 
   .event-selection-title > span {
-    color: rgba(255,255,255,0.8);
-    font-family: 'Orbitron', sans-serif;
+    color: #1a1a1a;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.62rem;
     font-weight: 700;
     letter-spacing: 0.1em;
@@ -4087,8 +4460,8 @@ const registerStyles = `
 
   .event-category-heading h3 {
     margin: 0;
-    color: #ffffff;
-    font-family: 'Orbitron', sans-serif;
+    color: #1a1a1a;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.72rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -4101,8 +4474,10 @@ const registerStyles = `
   .event-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0,1fr));
-    gap: 0.9rem;
+    gap: 24px;
   }
+
+  /* ═══ EVENT OPTION CARDS ═══ */
 
   .event-option {
     position: relative;
@@ -4110,33 +4485,36 @@ const registerStyles = `
     min-width: 0;
     box-sizing: border-box;
     padding: 1rem;
-    border: 1px solid rgba(255,255,255,0.11);
-    border-radius: 12px;
-    background: rgba(4,8,20,0.72);
-    color: #ffffff;
+    border: 1px solid rgba(220, 0, 0, 0.35);
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
+    color: #1a1a1a;
     text-align: left;
     cursor: pointer;
-    transition:
-      border-color 0.2s ease,
-      background 0.2s ease,
-      transform 0.2s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    overflow: hidden;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .event-option::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(220, 0, 0, 0.5), transparent);
   }
 
   .event-option:hover {
-    border-color: rgba(220,0,0,0.5);
-    transform: translateY(-2px);
+    border-color: rgba(220, 0, 0, 0.6);
+    transform: translateY(-3px);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
   .event-option.selected {
     border-color: #dc0000;
-    background:
-      linear-gradient(
-        135deg,
-        rgba(220,0,0,0.11),
-        rgba(220,0,0,0.025)
-      );
-    box-shadow:
-      0 0 0 1px rgba(220,0,0,0.15);
+    box-shadow: 0 10px 30px rgba(220, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
   .event-option-top {
@@ -4152,6 +4530,8 @@ const registerStyles = `
     font-size: 1.05rem;
     font-weight: 400;
     letter-spacing: 0.02em;
+    color: #1a1a1a;
+    text-transform: uppercase;
   }
 
   .event-radio {
@@ -4161,27 +4541,44 @@ const registerStyles = `
     display: grid;
     place-items: center;
     box-sizing: border-box;
-    border: 2px solid rgba(255,255,255,0.22);
+    border: 2px solid rgba(220, 0, 0, 0.35);
     border-radius: 50%;
-    color: #ffffff;
+    color: #1a1a1a;
     font-size: 0.7rem;
     font-weight: 800;
+    background: #ffffff;
   }
 
   .event-radio.checked {
     border-color: #dc0000;
     background: #dc0000;
+    color: #ffffff;
   }
 
   .event-description {
     margin: 0.6rem 0 0;
-    color: rgba(255,255,255,0.48);
+    color: #6a6a6a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.72rem;
     line-height: 1.45;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+
+  .event-time-badge {
+    margin: 0.5rem 0 0;
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border: 1px solid rgba(220, 0, 0, 0.25);
+    border-radius: 6px;
+    background: rgba(220, 0, 0, 0.04);
+    color: #dc0000;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
   }
 
   .event-option-bottom {
@@ -4191,18 +4588,22 @@ const registerStyles = `
     gap: 0.7rem;
     margin-top: 0.85rem;
     padding-top: 0.7rem;
-    border-top: 1px solid rgba(255,255,255,0.08);
+    border-top: 1px solid rgba(220, 0, 0, 0.15);
   }
 
   .event-option-bottom strong {
-    color: #f0a000;
+    color: #dc0000;
+    font-family: 'Anton', sans-serif;
     font-size: 0.9rem;
   }
 
   .event-option-bottom span {
-    color: #00b889;
+    color: #3a3a3a;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.68rem;
   }
+
+  /* ═══ SELECTED EVENT ═══ */
 
   .selected-event-card {
     display: flex;
@@ -4211,9 +4612,10 @@ const registerStyles = `
     gap: 1rem;
     margin: 1rem 0 1.3rem;
     padding: 1rem;
-    border: 1px solid rgba(220,0,0,0.28);
-    border-radius: 12px;
-    background: rgba(220,0,0,0.04);
+    border: 1px solid rgba(220, 0, 0, 0.35);
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
   .selected-event-card span,
@@ -4222,8 +4624,8 @@ const registerStyles = `
   .payment-summary span {
     display: block;
     margin-bottom: 0.35rem;
-    color: rgba(255,255,255,0.45);
-    font-family: 'Orbitron', sans-serif;
+    color: #6a6a6a;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.52rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -4231,11 +4633,12 @@ const registerStyles = `
 
   .selected-event-card h3 {
     margin: 0;
-    color: #ffffff;
+    color: #1a1a1a;
     font-family: 'Anton', sans-serif;
     font-size: 1.3rem;
     font-weight: 400;
     letter-spacing: 0.03em;
+    text-transform: uppercase;
   }
 
   .selected-event-card p {
@@ -4247,13 +4650,14 @@ const registerStyles = `
   .event-rule-badge {
     flex: 0 0 auto;
     padding: 0.75rem 0.9rem;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
+    border: 1px solid rgba(220, 0, 0, 0.25);
+    border-radius: 10px;
     text-align: right;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.45));
   }
 
   .event-rule-badge strong {
-    color: #ffffff;
+    color: #1a1a1a;
     font-size: 0.8rem;
   }
 
@@ -4267,14 +4671,15 @@ const registerStyles = `
   .event-participant-info {
     margin-top: 1.55rem;
     padding: 0.85rem;
-    border-left: 2px solid #dc0000;
-    background: rgba(255,255,255,0.025);
+    border-left: 3px solid #dc0000;
+    border-radius: 0 8px 8px 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.4));
   }
 
   .event-participant-info strong {
     display: block;
-    color: #ffffff;
-    font-family: 'Orbitron', sans-serif;
+    color: #1a1a1a;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.63rem;
     letter-spacing: 0.05em;
   }
@@ -4282,10 +4687,12 @@ const registerStyles = `
   .event-participant-info span {
     display: block;
     margin-top: 0.35rem;
-    color: rgba(255,255,255,0.52);
+    color: #6a6a6a;
     font-size: 0.73rem;
     line-height: 1.5;
   }
+
+  /* ═══ SELECTED EVENT DETAILS ═══ */
 
   .selected-event-details-list {
     display: grid;
@@ -4295,9 +4702,10 @@ const registerStyles = `
 
   .selected-event-detail-card {
     padding: 1rem;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(220, 0, 0, 0.35);
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
   .selected-event-detail-header {
@@ -4307,7 +4715,7 @@ const registerStyles = `
     gap: 1rem;
     margin-bottom: 1rem;
     padding-bottom: 0.85rem;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 2px solid #1a1a1a;
   }
 
   .selected-event-detail-header > div:first-child {
@@ -4318,30 +4726,34 @@ const registerStyles = `
     display: block;
     margin-bottom: 0.25rem;
     color: #dc0000;
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.52rem;
     letter-spacing: 0.12em;
+    font-weight: 700;
   }
 
   .selected-event-detail-header h4 {
     margin: 0;
-    color: #ffffff;
+    color: #1a1a1a;
     font-family: 'Anton', sans-serif;
     font-size: 1.25rem;
     font-weight: 400;
     letter-spacing: 0.02em;
+    text-transform: uppercase;
   }
 
   .selected-event-detail-schedule {
     margin: 0.3rem 0 0;
-    color: rgba(255,255,255,0.55);
+    color: #6a6a6a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.68rem;
     line-height: 1.45;
   }
 
   .selected-event-fee {
     flex: 0 0 auto;
-    color: #f0a000;
+    color: #dc0000;
+    font-family: 'Anton', sans-serif;
     font-size: 0.8rem;
     font-weight: 700;
     text-align: right;
@@ -4350,16 +4762,18 @@ const registerStyles = `
   .selected-event-fee small {
     display: block;
     margin-bottom: 0.2rem;
-    color: rgba(255,255,255,0.42);
-    font-family: 'Orbitron', sans-serif;
+    color: #6a6a6a;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.48rem;
     letter-spacing: 0.08em;
   }
 
+  /* ═══ TEAM MEMBERS ═══ */
+
   .event-members-section {
     margin-top: 1rem;
     padding-top: 1rem;
-    border-top: 1px solid rgba(255,255,255,0.07);
+    border-top: 2px solid #1a1a1a;
   }
 
   .team-name-field {
@@ -4376,37 +4790,43 @@ const registerStyles = `
 
   .event-members-heading h3 {
     margin: 0.25rem 0 0;
-    color: #ffffff;
+    color: #1a1a1a;
     font-family: 'Anton', sans-serif;
     font-size: 1.15rem;
     font-weight: 400;
     letter-spacing: 0.02em;
+    text-transform: uppercase;
   }
 
   .event-members-heading strong {
-    color: rgba(255,255,255,0.55);
+    color: #6a6a6a;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.68rem;
   }
 
   .event-member-card {
     margin-top: 0.75rem;
     padding: 0.9rem;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 9px;
-    background: rgba(0,0,0,0.18);
+    border: 1px solid rgba(220, 0, 0, 0.25);
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.45));
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.7);
   }
 
   .member-number {
     margin-bottom: 0.8rem;
-    color: rgba(255,255,255,0.5);
-    font-family: 'Orbitron', sans-serif;
+    color: #6a6a6a;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.55rem;
     letter-spacing: 0.12em;
+    font-weight: 700;
   }
 
   .event-member-card .register-field {
     margin-bottom: 0.8rem;
   }
+
+  /* ═══ FEE SUMMARY ═══ */
 
   .fee-summary {
     display: flex;
@@ -4414,12 +4834,12 @@ const registerStyles = `
     gap: 1rem;
     margin-top: 1rem;
     padding: 1rem;
-    border-top: 1px solid rgba(255,255,255,0.08);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    border-top: 2px solid #1a1a1a;
+    border-bottom: 2px solid #1a1a1a;
   }
 
   .fee-summary strong {
-    color: #ffffff;
+    color: #1a1a1a;
     font-size: 0.9rem;
   }
 
@@ -4434,50 +4854,182 @@ const registerStyles = `
     font-weight: 400;
   }
 
+  /* ═══ PAYMENT SUMMARY ═══ */
+
   .payment-summary {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1px;
+    gap: 0;
     margin-bottom: 1.4rem;
     overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.09);
-    border-radius: 10px;
-    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(220, 0, 0, 0.35);
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
   }
 
   .payment-summary > div {
     padding: 1rem;
-    background: rgba(0,0,0,0.25);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.4));
+    border-right: 1px solid rgba(220, 0, 0, 0.15);
+  }
+
+  .payment-summary > div:last-child {
+    border-right: 0;
   }
 
   .payment-summary strong {
-    color: #ffffff;
+    color: #1a1a1a;
     font-size: 0.85rem;
   }
 
+  /* ═══ PAYMENT LAYOUT ═══ */
+
+  /* ═══ UPI PAY BANNER ═══ */
+
+  .upi-pay-section {
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .upi-pay-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    width: 100%;
+    padding: 0.85rem 1.2rem;
+    border: 1px solid rgba(220, 0, 0, 0.3);
+    border-radius: 12px;
+    background: #ffffff;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .upi-pay-banner:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(220, 0, 0, 0.12);
+    border-color: #dc0000;
+  }
+
+  .upi-banner-logo {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  .upi-banner-text {
+    color: #1a1a1a;
+    font-family: 'Anton', sans-serif;
+    font-size: 1.05rem;
+    letter-spacing: 0.06em;
+  }
+
+  .upi-banner-arrow {
+    color: #dc0000;
+    font-size: 1.1rem;
+    font-weight: 700;
+    transition: transform 0.2s ease;
+  }
+
+  .upi-pay-banner:hover .upi-banner-arrow {
+    transform: translateX(3px);
+  }
+
+  .upi-banner-subtitle {
+    margin: 0.5rem 0 0;
+    color: #6a6a6a;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+
+  .upi-app-logos {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 0.6rem;
+  }
+
+  .upi-app-logo {
+    height: 20px;
+    width: auto;
+    object-fit: contain;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+  }
+
+  .upi-app-logo:hover {
+    opacity: 0.9;
+  }
+
+  .upi-note {
+    margin: 0.8rem 0 0;
+    color: #6a6a6a;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  /* ═══ OR DIVIDERS ═══ */
+
+  .payment-or-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1rem 0;
+  }
+
+  .payment-or-divider span {
+    padding: 0.3rem 1rem;
+    background: transparent;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #6a6a6a;
+    letter-spacing: 0.15em;
+  }
+
   .payment-layout {
+    position: relative;
     display: grid;
-    grid-template-columns: 0.85fr 1.15fr;
+    grid-template-columns: 1fr auto 1fr;
     gap: 1rem;
     margin-bottom: 1rem;
+  }
+
+  .payment-or-inline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #6a6a6a;
+    letter-spacing: 0.1em;
   }
 
   .qr-card,
   .gpay-card {
     min-width: 0;
     padding: 1.2rem;
-    border: 1px solid rgba(255,255,255,0.09);
-    border-radius: 12px;
-    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(220, 0, 0, 0.35);
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
   .payment-label {
     display: block;
     margin-bottom: 1rem;
     color: #dc0000;
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.58rem;
     letter-spacing: 0.13em;
+    font-weight: 700;
   }
 
   .qr-card {
@@ -4495,6 +5047,7 @@ const registerStyles = `
     place-items: center;
     padding: 0.65rem;
     box-sizing: border-box;
+    border: 1px solid rgba(220, 0, 0, 0.3);
     border-radius: 10px;
     background: #ffffff;
     margin-bottom: 0.9rem;
@@ -4504,12 +5057,12 @@ const registerStyles = `
     width: 100%;
     height: 100%;
     object-fit: contain;
-    border-radius: 5px;
   }
 
   .qr-missing-text {
     display: none;
-    color: #111111;
+    color: #1a1a1a;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.8rem;
     font-weight: 700;
     text-align: center;
@@ -4520,9 +5073,10 @@ const registerStyles = `
   }
 
   .qr-card > strong {
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.7rem;
     letter-spacing: 0.08em;
+    color: #1a1a1a;
   }
 
   .gpay-card h3 {
@@ -4531,17 +5085,19 @@ const registerStyles = `
     font-size: 1.5rem;
     font-weight: 400;
     letter-spacing: 0.03em;
+    color: #1a1a1a;
+    text-transform: uppercase;
   }
 
   .gpay-number {
     width: 100%;
     box-sizing: border-box;
     padding: 0.9rem;
-    border: 1px solid rgba(220,0,0,0.35);
-    border-radius: 8px;
-    background: rgba(220,0,0,0.05);
-    color: #ffffff;
-    font-family: 'Orbitron', sans-serif;
+    border: 1px solid rgba(220, 0, 0, 0.35);
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 240, 240, 0.5));
+    color: #1a1a1a;
+    font-family: 'JetBrains Mono', monospace;
     font-size: clamp(0.8rem, 2vw, 1rem);
     font-weight: 700;
     letter-spacing: 0.05em;
@@ -4550,27 +5106,30 @@ const registerStyles = `
 
   .gpay-card > p {
     margin: 0.8rem 0;
-    color: rgba(255,255,255,0.55);
+    color: #6a6a6a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.8rem;
     line-height: 1.6;
   }
 
   .payment-important {
     padding: 0.8rem;
-    border-left: 2px solid #dc0000;
-    background: rgba(220,0,0,0.05);
+    border-left: 3px solid #dc0000;
+    border-radius: 0 8px 8px 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 240, 240, 0.4));
   }
 
   .payment-important strong {
     color: #dc0000;
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.58rem;
     letter-spacing: 0.1em;
   }
 
   .payment-important p {
     margin: 0.35rem 0 0;
-    color: rgba(255,255,255,0.65);
+    color: #3a3a3a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.75rem;
     line-height: 1.5;
   }
@@ -4578,22 +5137,24 @@ const registerStyles = `
   .payment-instructions {
     margin: 1rem 0;
     padding: 1rem;
-    border: 1px solid rgba(220,0,0,0.25);
-    border-radius: 10px;
-    background: rgba(220,0,0,0.035);
+    border: 1px solid rgba(220, 0, 0, 0.25);
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.45));
   }
 
   .payment-instructions > span {
     color: #dc0000;
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.58rem;
     letter-spacing: 0.12em;
+    font-weight: 700;
   }
 
   .payment-instructions ol {
     margin: 0.8rem 0 0;
     padding-left: 1.2rem;
-    color: rgba(255,255,255,0.68);
+    color: #3a3a3a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.8rem;
     line-height: 1.8;
   }
@@ -4601,14 +5162,17 @@ const registerStyles = `
   .abbas-payment-contact {
     margin-top: 0.6rem;
     padding: 0.7rem 0.8rem;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 6px;
-    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(220, 0, 0, 0.2);
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.4));
   }
 
   .abbas-payment-contact strong {
-    color: #ffffff;
+    color: #1a1a1a;
+    font-size: 0.67rem;
   }
+
+  /* ═══ PAYMENT CHECKBOX ═══ */
 
   .payment-checkbox {
     display: flex;
@@ -4616,18 +5180,17 @@ const registerStyles = `
     gap: 0.8rem;
     margin-top: 0.8rem;
     padding: 1rem;
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 10px;
+    border: 1px solid rgba(220, 0, 0, 0.35);
+    border-radius: 12px;
     cursor: pointer;
-    background: rgba(255,255,255,0.025);
-    transition:
-      border-color 0.2s ease,
-      background 0.2s ease;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
   .payment-checkbox:hover {
-    border-color: rgba(220,0,0,0.5);
-    background: rgba(220,0,0,0.035);
+    border-color: rgba(220, 0, 0, 0.6);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
   .payment-checkbox input {
@@ -4647,7 +5210,8 @@ const registerStyles = `
   }
 
   .checkbox-text {
-    color: rgba(255,255,255,0.75);
+    color: #3a3a3a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.8rem;
     line-height: 1.55;
     cursor: pointer;
@@ -4660,76 +5224,94 @@ const registerStyles = `
   .final-warning {
     margin-top: 1rem;
     padding: 1rem;
-    border: 1px solid rgba(255,185,0,0.2);
-    border-radius: 10px;
-    background: rgba(255,185,0,0.035);
+    border: 1px solid rgba(240, 160, 0, 0.35);
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 240, 220, 0.5));
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
   }
 
   .final-warning strong {
-    color: #ffffff;
+    color: #1a1a1a;
     font-size: 0.8rem;
   }
 
   .final-warning p {
     margin: 0.35rem 0 0;
-    color: rgba(255,255,255,0.58);
+    color: #3a3a3a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.75rem;
     line-height: 1.6;
   }
 
   .free-event-box {
     padding: 1rem;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 10px;
-    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(220, 0, 0, 0.25);
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.45));
   }
 
   .free-event-box strong {
-    color: #ffffff;
+    color: #1a1a1a;
   }
 
   .free-event-box p {
     margin: 0.35rem 0 0;
-    color: rgba(255,255,255,0.55);
+    color: #6a6a6a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.8rem;
   }
 
   .register-loading {
     padding: 1.5rem;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 10px;
-    color: rgba(255,255,255,0.55);
+    border: 1px solid rgba(220, 0, 0, 0.2);
+    border-radius: 12px;
+    color: #6a6a6a;
     text-align: center;
+    font-family: 'Hanken Grotesk', sans-serif;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.4));
   }
 
   .register-error-box,
   .submit-error {
     margin-bottom: 1rem;
     padding: 1rem;
-    border: 1px solid rgba(220,0,0,0.35);
-    border-radius: 10px;
-    background: rgba(220,0,0,0.06);
+    border: 1px solid rgba(220, 0, 0, 0.4);
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 235, 235, 0.7), rgba(255, 220, 220, 0.5));
   }
 
   .register-error-box strong,
   .submit-error {
-    color: #ff5b5b;
+    color: #dc0000;
   }
 
   .register-error-box p {
     margin: 0.35rem 0;
-    color: rgba(255,255,255,0.6);
+    color: #3a3a3a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.8rem;
   }
 
   .register-error-box button {
-    border: 0;
+    border: 2px solid #0d0d0d;
     padding: 0.5rem 0.8rem;
-    border-radius: 6px;
+    border-radius: 999px;
     background: #dc0000;
     color: #ffffff;
     cursor: pointer;
+    font-family: 'Anton', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: 0.2s ease;
   }
+
+  .register-error-box button:hover {
+    background: #0d0d0d;
+  }
+
+  /* ═══ BUTTONS ═══ */
 
   .step-actions {
     display: flex;
@@ -4738,38 +5320,51 @@ const registerStyles = `
     gap: 1rem;
     margin-top: 1.5rem;
     padding-top: 1.3rem;
-    border-top: 1px solid rgba(255,255,255,0.08);
+    border-top: 2px solid #1a1a1a;
   }
 
   .register-primary-btn,
   .register-secondary-btn {
-    min-height: 46px;
-    padding: 0.75rem 1.25rem;
-    border-radius: 8px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
+    min-height: 50px;
+    padding: 0.95rem 1.9rem;
+    border: 2px solid #0d0d0d;
+    border-radius: 999px;
+    font-family: 'Anton', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     cursor: pointer;
-    transition: 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
   }
 
   .register-primary-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.65rem;
-    border: 1px solid #dc0000;
+    gap: 0.5rem;
     background: #dc0000;
     color: #ffffff;
+    box-shadow: 0 8px 22px rgba(220, 0, 0, 0.35);
   }
 
-  .register-primary-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    background: #f00000;
-    box-shadow:
-      0 12px 28px rgba(220,0,0,0.22);
+  .register-primary-btn::after {
+      content: "→";
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 1rem;
+    transition: transform 0.2s ease;
+  }
+
+  .register-primary-btn:hover:not(:disabled)::after,
+  .register-primary-btn:focus-visible::after {
+    transform: translateX(4px);
+  }
+
+  .register-primary-btn:hover:not(:disabled),
+  .register-primary-btn:focus-visible:not(:disabled) {
+    transform: translateY(-3px);
+    background: #0d0d0d;
+    color: #ffffff;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
   }
 
   .register-primary-btn:disabled {
@@ -4778,19 +5373,24 @@ const registerStyles = `
   }
 
   .register-secondary-btn {
-    border: 1px solid rgba(255,255,255,0.2);
     background: transparent;
-    color: rgba(255,255,255,0.75);
+    color: #0d0d0d;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
   }
 
-  .register-secondary-btn:hover:not(:disabled) {
-    border-color: rgba(255,255,255,0.45);
+  .register-secondary-btn:hover:not(:disabled),
+  .register-secondary-btn:focus-visible:not(:disabled) {
+    transform: translateY(-3px);
+    background: #0d0d0d;
     color: #ffffff;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3);
   }
 
   .register-submit {
     min-width: 230px;
   }
+
+  /* ═══ SUCCESS ═══ */
 
   .register-success-section {
     min-height: 100vh;
@@ -4798,6 +5398,7 @@ const registerStyles = `
     place-items: center;
     box-sizing: border-box;
     padding: 2rem 1rem;
+    background: #f5f5f5;
   }
 
   .register-success-card {
@@ -4805,10 +5406,27 @@ const registerStyles = `
     max-width: 560px;
     box-sizing: border-box;
     padding: clamp(1.4rem, 5vw, 2.5rem);
-    border: 1px solid rgba(220,0,0,0.35);
-    border-radius: 18px;
-    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(220, 0, 0, 0.35);
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
     text-align: center;
+    overflow: hidden;
+  }
+
+  .register-success-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(220, 0, 0, 0.5), transparent);
+  }
+
+  .register-success-card > * {
+    position: relative;
+    z-index: 1;
   }
 
   .success-icon {
@@ -4817,11 +5435,13 @@ const registerStyles = `
     margin: 0 auto 1rem;
     display: grid;
     place-items: center;
-    border-radius: 50%;
-    background: #dc0000;
+    border-radius: 12px;
+    border: 1px solid rgba(220, 0, 0, 0.35);
+    background: linear-gradient(135deg, rgba(220, 0, 0, 0.85), rgba(220, 0, 0, 1));
     color: #ffffff;
     font-size: 1.5rem;
     font-weight: 800;
+    box-shadow: 0 4px 12px rgba(220, 0, 0, 0.25);
   }
 
   .register-success-card h1 {
@@ -4830,19 +5450,21 @@ const registerStyles = `
     font-size: clamp(2rem, 7vw, 3rem);
     font-weight: 400;
     text-transform: uppercase;
+    color: #1a1a1a;
   }
 
   .success-intro {
     margin: 0.7rem 0 1.5rem;
-    color: rgba(255,255,255,0.6);
+    color: #6a6a6a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.85rem;
   }
 
   .success-details {
     display: grid;
     gap: 0;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 10px;
+    border: 1px solid rgba(220, 0, 0, 0.3);
+    border-radius: 12px;
     overflow: hidden;
     text-align: left;
   }
@@ -4852,7 +5474,8 @@ const registerStyles = `
     justify-content: space-between;
     gap: 1rem;
     padding: 0.85rem 1rem;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid rgba(220, 0, 0, 0.15);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.4));
   }
 
   .success-details > div:last-child {
@@ -4860,12 +5483,13 @@ const registerStyles = `
   }
 
   .success-details span {
-    color: rgba(255,255,255,0.45);
+    color: #6a6a6a;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.72rem;
   }
 
   .success-details strong {
-    color: #ffffff;
+    color: #1a1a1a;
     font-size: 0.78rem;
     text-align: right;
     overflow-wrap: anywhere;
@@ -4874,21 +5498,22 @@ const registerStyles = `
   .success-warning {
     margin-top: 1rem;
     padding: 1rem;
-    border: 1px solid rgba(255,185,0,0.22);
-    border-radius: 10px;
-    background: rgba(255,185,0,0.04);
+    border: 1px solid rgba(240, 160, 0, 0.35);
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 240, 220, 0.5));
     text-align: left;
   }
 
   .success-warning strong {
-    color: #ffffff;
+    color: #1a1a1a;
     font-size: 0.8rem;
   }
 
   .success-warning p,
   .success-warning ol {
     margin: 0.4rem 0 0;
-    color: rgba(255,255,255,0.58);
+    color: #3a3a3a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.75rem;
     line-height: 1.6;
   }
@@ -4899,40 +5524,45 @@ const registerStyles = `
 
   .success-note {
     margin: 1rem 0 0;
-    color: rgba(255,255,255,0.4);
+    color: #999999;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.7rem;
   }
+
+  /* ═══ MISC ═══ */
 
   .event-selection-note {
     margin: -0.2rem 0 1rem;
     padding: 1rem 1.1rem;
-    border-left: 4px solid #f0a000;
-    border-radius: 6px;
-    background: rgba(240,160,0,0.14);
-    color: #ffffff;
+    border-left: 3px solid #f0a000;
+    border-radius: 0 8px 8px 0;
+    background: linear-gradient(135deg, rgba(255, 245, 220, 0.6), rgba(255, 240, 200, 0.4));
+    color: #1a1a1a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.82rem;
     font-weight: 700;
     line-height: 1.6;
-    box-shadow: 0 0 18px rgba(240,160,0,0.06);
   }
 
   .event-selection-note strong {
-    color: #ffffff;
+    color: #1a1a1a;
   }
 
   .selected-events-count {
     color: #dc0000;
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.58rem;
     letter-spacing: 0.08em;
+    font-weight: 700;
   }
 
   .selected-events-preview {
     margin-top: 1.25rem;
     padding: 1rem;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    background: rgba(255,255,255,0.018);
+    border: 1px solid rgba(220, 0, 0, 0.35);
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
   .selected-events-preview-header {
@@ -4945,9 +5575,10 @@ const registerStyles = `
 
   .selected-events-preview-header span {
     color: #dc0000;
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.58rem;
     letter-spacing: 0.12em;
+    font-weight: 700;
   }
 
   .event-review-list {
@@ -4961,7 +5592,7 @@ const registerStyles = `
     gap: 0.75rem;
     align-items: center;
     padding: 0.75rem 0;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 2px solid #1a1a1a;
   }
 
   .event-review-item:last-child {
@@ -4969,21 +5600,23 @@ const registerStyles = `
   }
 
   .event-review-name {
-    color: #ffffff;
-    font-family: 'Orbitron', sans-serif;
+    color: #1a1a1a;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.65rem;
     font-weight: 700;
   }
 
   .event-review-meta {
-    color: rgba(255,255,255,0.5);
+    color: #6a6a6a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.68rem;
     line-height: 1.45;
   }
 
   .event-review-participants {
     margin-top: 0.18rem;
-    color: rgba(255,255,255,0.62);
+    color: #3a3a3a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.65rem;
   }
 
@@ -4995,7 +5628,8 @@ const registerStyles = `
   }
 
   .event-review-fee {
-    color: #f0a000;
+    color: #dc0000;
+    font-family: 'Anton', sans-serif;
     font-size: 0.78rem;
     font-weight: 700;
     text-align: right;
@@ -5007,12 +5641,12 @@ const registerStyles = `
     gap: 1rem;
     margin-top: 0.75rem;
     padding-top: 0.8rem;
-    border-top: 1px solid rgba(255,255,255,0.1);
+    border-top: 2px solid #1a1a1a;
   }
 
   .review-total span {
-    color: rgba(255,255,255,0.5);
-    font-family: 'Orbitron', sans-serif;
+    color: #6a6a6a;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 0.58rem;
     letter-spacing: 0.1em;
   }
@@ -5030,9 +5664,9 @@ const registerStyles = `
     gap: 0.7rem;
     margin-top: 0.25rem;
     padding: 0.85rem 0.9rem;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 9px;
-    background: rgba(255,255,255,0.018);
+    border: 1px solid rgba(220, 0, 0, 0.25);
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.45));
     cursor: pointer;
   }
 
@@ -5048,14 +5682,15 @@ const registerStyles = `
   .remember-details-text {
     display: grid;
     gap: 0.18rem;
-    color: rgba(255,255,255,0.7);
+    color: #3a3a3a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.76rem;
     line-height: 1.45;
     cursor: pointer;
   }
 
   .remember-details-text strong {
-    color: #ffffff;
+    color: #1a1a1a;
     font-size: 0.75rem;
   }
 
@@ -5067,38 +5702,40 @@ const registerStyles = `
 
   .success-event-item {
     padding: 0.7rem 0.8rem;
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid rgba(220, 0, 0, 0.2);
     border-radius: 8px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.4));
   }
 
   .success-event-item strong {
     display: block;
-    color: #ffffff;
+    color: #1a1a1a;
     font-size: 0.78rem;
   }
 
   .success-event-item span {
     display: block;
     margin-top: 0.2rem;
-    color: rgba(255,255,255,0.45);
+    color: #6a6a6a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.68rem;
   }
 
   .bottom-timing-note {
     margin-top: 1.2rem;
     padding: 1rem 1.1rem;
-    border-left: 4px solid #f0a000;
-    border-radius: 6px;
-    background: rgba(240,160,0,0.14);
-    color: #ffffff;
+    border-left: 3px solid #f0a000;
+    border-radius: 0 8px 8px 0;
+    background: linear-gradient(135deg, rgba(255, 245, 220, 0.6), rgba(255, 240, 200, 0.4));
+    color: #1a1a1a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.82rem;
     font-weight: 700;
     line-height: 1.6;
-    box-shadow: 0 0 18px rgba(240,160,0,0.06);
   }
 
   .bottom-timing-note strong {
-    color: #ffffff;
+    color: #1a1a1a;
   }
 
   .multi-payment-events {
@@ -5109,26 +5746,89 @@ const registerStyles = `
 
   .multi-payment-event {
     padding: 0.75rem;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 8px;
-    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(220, 0, 0, 0.2);
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.4));
   }
 
   .multi-payment-event strong {
     display: block;
-    color: #ffffff;
+    color: #1a1a1a;
     font-size: 0.78rem;
   }
 
   .multi-payment-event span {
     display: block;
     margin-top: 0.25rem;
-    color: rgba(255,255,255,0.5);
+    color: #6a6a6a;
+    font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.68rem;
   }
 
+  /* ═══ TIMING CONFLICT TOAST ═══ */
+
+  .tc-toast {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 480px;
+    width: calc(100% - 2rem);
+    padding: 0.7rem 1rem;
+    border-left: 3px solid #dc0000;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    animation: tc-slide-in 0.3s ease;
+  }
+
+  .tc-toast-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .tc-toast-text {
+    color: #dc0000;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    font-weight: 600;
+  }
+
+  @keyframes tc-slide-in {
+    from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  @media (min-width: 600px) {
+    .reg-shell {
+      padding-inline: 32px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .reg-shell {
+      padding-inline: 64px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .reg-hero {
+      padding: 4rem 0 3rem;
+    }
+  }
+
   @media (max-width: 768px) {
-    .register-main {
+    .reg-hero {
+      padding: 3.5rem 0 2.5rem;
+    }
+
+    .reg-main {
       padding-top: 2.5rem;
     }
 
@@ -5164,35 +5864,35 @@ const registerStyles = `
     .register-submit {
       min-width: 0;
     }
+
+    .reg-hero-web {
+      display: none;
+    }
   }
 
   @media (max-width: 560px) {
-    .register-main {
+    .reg-main {
       padding:
         2rem
-        0.75rem
+        0
         3rem;
     }
 
-    .register-heading {
-      margin-bottom: 1.8rem;
-    }
-
-    .register-steps {
+    .reg-steps {
       margin-bottom: 1.5rem;
     }
 
-    .register-step {
+    .reg-step {
       min-width: 72px;
     }
 
-    .step-circle {
+    .reg-step .step-circle {
       width: 38px;
       height: 38px;
-      font-size: 0.58rem;
+      font-size: 1rem;
     }
 
-    .register-step span:last-child {
+    .reg-step span:last-child {
       font-size: 0.48rem;
     }
 
@@ -5200,8 +5900,7 @@ const registerStyles = `
       margin-top: 19px;
     }
 
-    .register-card {
-      border-radius: 12px;
+    .reg-card {
       padding: 1rem;
     }
 
@@ -5210,9 +5909,9 @@ const registerStyles = `
     }
 
     .card-number {
-      width: 34px;
+      width: 45px;
       height: 34px;
-      font-size: 0.55rem;
+      font-size: 1rem;
     }
 
     .card-description {
@@ -5299,25 +5998,41 @@ const registerStyles = `
     }
   }
 
+  @media (max-width: 430px) {
+    .reg-hero {
+      padding: 2.75rem 0 2rem;
+    }
+  }
+
   @media (max-width: 360px) {
-    .register-main {
-      padding-inline: 0.55rem;
+    .reg-main {
+      padding-inline: 0;
     }
 
-    .register-card {
+    .reg-card {
       padding: 0.85rem;
     }
 
-    .register-step {
+    .reg-step {
       min-width: 60px;
     }
 
-    .register-step span:last-child {
+    .reg-step span:last-child {
       font-size: 0.43rem;
     }
 
     .step-line {
       max-width: 45px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reg-card,
+    .event-option,
+    .payment-checkbox,
+    .register-primary-btn,
+    .register-secondary-btn {
+      transition: none;
     }
   }
 `;
