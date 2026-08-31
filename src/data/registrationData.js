@@ -126,6 +126,7 @@ production deployment.
 */
 
 export const paymentData = {
+  upiId: "mohammedabbas2729-1@okhdfcbank",
   gpayNumber: "+919486976316",
 
   qrImage: "/gpay-qr.jpeg",
