@@ -7,34 +7,40 @@ REVIBE '26 - REGISTRATION SERVICE
 
 REGISTRATION FLOW
 
-Student
-  ↓
-Registers for event(s)
-  ↓
-Pays via Google Pay
-  ↓
-Sends payment screenshot to Coordinator (Abbas)
-  ↓
-Registration created as PENDING
-  ↓
-Coordinator manually checks:
-  • Screenshot
-  • Actual GPay transaction
-  • Payer name
-  • Transaction ID
-  • Amount
-  ↓
-Later:
-Coordinator marks payment as VERIFIED / PAID
-  ↓
-Official confirmation email can be sent
+Register.jsx
+    ↓
+submitRegistration()
+    ↓
+participants
+    ↓
+registrations
+    ↓
+registration_events
+    ↓
+registration_members
+    ↓
+payments
+    ↓
+overall  ← CONSOLIDATED RECORD
 
-IMPORTANT:
-- No event coordinator is involved in payment submission.
-- Payment screenshot is shared directly with the payment coordinator.
-- This service does NOT upload/store the screenshot.
-- The checkbox only records that the participant says
-  the screenshot was sent.
+IMPORTANT
+---------
+The "overall" table stores ONE complete registration.
+
+It contains:
+
+- Registration details
+- Team name
+- Primary / team lead details
+- Selected event details
+- Complete team member details
+- Total amount
+- Payment details
+
+The relational tables remain the source structure.
+The "overall" table is the consolidated snapshot used
+for admin/coordinator/certificate workflows.
+
 =========================================================
 */
 
@@ -50,8 +56,7 @@ const PAYMENT_PENDING_STATUS = "pending";
 
 const PAYMENT_VERIFIED_STATUS = "verified";
 
-const REGISTRATION_PENDING_STATUS =
-  "pending_payment";
+const REGISTRATION_PENDING_STATUS = "pending_payment";
 
 /*
 =========================================================
@@ -63,25 +68,18 @@ function generateUUID() {
   if (
     typeof globalThis !== "undefined" &&
     globalThis.crypto &&
-    typeof globalThis.crypto.getRandomValues ===
-      "function"
+    typeof globalThis.crypto.getRandomValues === "function"
   ) {
     const bytes = new Uint8Array(16);
 
     globalThis.crypto.getRandomValues(bytes);
 
     // UUID v4
-    bytes[6] =
-      (bytes[6] & 0x0f) | 0x40;
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
 
-    bytes[8] =
-      (bytes[8] & 0x3f) | 0x80;
-
-    const hex = Array.from(bytes).map(
-      (byte) =>
-        byte
-          .toString(16)
-          .padStart(2, "0")
+    const hex = Array.from(bytes).map((byte) =>
+      byte.toString(16).padStart(2, "0")
     );
 
     return (
@@ -96,8 +94,7 @@ function generateUUID() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
     /[xy]/g,
     (character) => {
-      const random =
-        Math.floor(Math.random() * 16);
+      const random = Math.floor(Math.random() * 16);
 
       const value =
         character === "x"
@@ -116,11 +113,9 @@ REGISTRATION NUMBER
 */
 
 function generateRegistrationNumber() {
-  const randomNumber =
-    Math.floor(
-      100000 +
-        Math.random() * 900000
-    );
+  const randomNumber = Math.floor(
+    100000 + Math.random() * 900000
+  );
 
   return `REVIBE26-${randomNumber}`;
 }
@@ -141,14 +136,11 @@ function normalizeSelectedEvents({
   ) {
     return selectedEvents
       .map((event) => {
-        if (
-          typeof event ===
-          "string"
-        ) {
+        if (typeof event === "string") {
           return {
             id: event,
-            maxParticipants: null,
             slug: null,
+            maxParticipants: null,
           };
         }
 
@@ -158,9 +150,7 @@ function normalizeSelectedEvents({
             event?.eventId ||
             null,
 
-          slug:
-            event?.slug ||
-            null,
+          slug: event?.slug || null,
 
           maxParticipants:
             event?.maxParticipants ??
@@ -169,9 +159,7 @@ function normalizeSelectedEvents({
             null,
         };
       })
-      .filter(
-        (event) => event.id
-      );
+      .filter((event) => event.id);
   }
 
   if (
@@ -188,6 +176,106 @@ function normalizeSelectedEvents({
   }
 
   return [];
+}
+
+/*
+=========================================================
+RESOLVE EVENT DETAILS
+=========================================================
+
+Register.jsx may only send event IDs.
+
+We therefore fetch the actual event information from
+Supabase so that "overall.selected_events" contains:
+
+- event_id
+- event name
+- slug
+- category
+- fee
+- max participants
+=========================================================
+*/
+
+async function resolveSelectedEvents(
+  normalizedEvents
+) {
+  if (!normalizedEvents.length) {
+    return [];
+  }
+
+  const eventIds = normalizedEvents
+    .map((event) => event.id)
+    .filter(Boolean);
+
+  const { data, error } = await supabase
+    .from("events")
+    .select(
+      `
+        id,
+        name,
+        slug,
+        category,
+        fee,
+        max_participants,
+        status,
+        registration_status
+      `
+    )
+    .in("id", eventIds);
+
+  if (error) {
+    throw new Error(
+      `Failed to load selected event details: ${error.message}`
+    );
+  }
+
+  const eventMap = new Map(
+    (data || []).map((event) => [
+      String(event.id),
+      event,
+    ])
+  );
+
+  return normalizedEvents.map((selectedEvent) => {
+    const eventRecord = eventMap.get(
+      String(selectedEvent.id)
+    );
+
+    if (!eventRecord) {
+      throw new Error(
+        `Selected event could not be found in the database: ${selectedEvent.id}`
+      );
+    }
+
+    return {
+      id: eventRecord.id,
+
+      slug:
+        eventRecord.slug ||
+        selectedEvent.slug ||
+        null,
+
+      name: eventRecord.name || null,
+
+      category:
+        eventRecord.category || null,
+
+      fee:
+        eventRecord.fee ?? null,
+
+      maxParticipants:
+        eventRecord.max_participants ??
+        selectedEvent.maxParticipants ??
+        null,
+
+      status:
+        eventRecord.status || null,
+
+      registrationStatus:
+        eventRecord.registration_status || null,
+    };
+  });
 }
 
 /*
@@ -240,33 +328,25 @@ async function insertParticipant({
     );
   }
 
-  const participantId =
-    generateUUID();
+  const participantId = generateUUID();
 
-  const { error } =
-    await supabase
-      .from("participants")
-      .insert({
-        id: participantId,
+  const { error } = await supabase
+    .from("participants")
+    .insert({
+      id: participantId,
 
-        full_name:
-          fullName.trim(),
+      full_name: fullName.trim(),
 
-        email:
-          email.trim().toLowerCase(),
+      email: email.trim().toLowerCase(),
 
-        phone:
-          phone.trim(),
+      phone: phone.trim(),
 
-        college_name:
-          college.trim(),
+      college_name: college.trim(),
 
-        department:
-          department.trim(),
+      department: department.trim(),
 
-        year:
-          year.trim(),
-      });
+      year: year.trim(),
+    });
 
   if (error) {
     throw new Error(
@@ -299,35 +379,33 @@ async function insertRegistrationWithRetry(
     const registrationNumber =
       generateRegistrationNumber();
 
-    const registrationId =
-      generateUUID();
+    const registrationId = generateUUID();
 
     const normalizedTeamName =
       registrationType === "team"
         ? teamName?.trim() || null
         : null;
 
-    const { error } =
-      await supabase
-        .from("registrations")
-        .insert({
-          id: registrationId,
+    const { error } = await supabase
+      .from("registrations")
+      .insert({
+        id: registrationId,
 
-          primary_participant_id:
-            primaryParticipantId,
+        primary_participant_id:
+          primaryParticipantId,
 
-          registration_number:
-            registrationNumber,
+        registration_number:
+          registrationNumber,
 
-          registration_type:
-            registrationType,
+        registration_type:
+          registrationType,
 
-          team_name:
-            normalizedTeamName,
+        team_name:
+          normalizedTeamName,
 
-          status:
-            REGISTRATION_PENDING_STATUS,
-        });
+        status:
+          REGISTRATION_PENDING_STATUS,
+      });
 
     if (!error) {
       return {
@@ -340,8 +418,7 @@ async function insertRegistrationWithRetry(
 
     if (
       error.code !== "23505" ||
-      attempt ===
-        attempts - 1
+      attempt === attempts - 1
     ) {
       throw new Error(
         `Failed to create registration: ${error.message}`
@@ -367,19 +444,15 @@ async function insertRegistrationEvent({
   const registrationEventId =
     generateUUID();
 
-  const { error } =
-    await supabase
-      .from("registration_events")
-      .insert({
-        id:
-          registrationEventId,
+  const { error } = await supabase
+    .from("registration_events")
+    .insert({
+      id: registrationEventId,
 
-        registration_id:
-          registrationId,
+      registration_id: registrationId,
 
-        event_id:
-          eventId,
-      });
+      event_id: eventId,
+    });
 
   if (error) {
     throw new Error(
@@ -402,23 +475,20 @@ async function insertRegistrationMember({
   participantId,
   role,
 }) {
-  const { error } =
-    await supabase
-      .from("registration_members")
-      .insert({
-        id: generateUUID(),
+  const { error } = await supabase
+    .from("registration_members")
+    .insert({
+      id: generateUUID(),
 
-        registration_id:
-          registrationId,
+      registration_id: registrationId,
 
-        registration_event_id:
-          registrationEventId,
+      registration_event_id:
+        registrationEventId,
 
-        participant_id:
-          participantId,
+      participant_id: participantId,
 
-        role,
-      });
+      role,
+    });
 
   if (error) {
     throw new Error(
@@ -439,25 +509,19 @@ async function insertPayment({
   paymentMethod,
   screenshotShared,
 }) {
-  const numericAmount =
-    Number(amount) || 0;
+  const numericAmount = Number(amount) || 0;
 
-  const paymentRequired =
-    numericAmount > 0;
+  const paymentRequired = numericAmount > 0;
 
-  const paymentStatus =
-    paymentRequired
-      ? PAYMENT_PENDING_STATUS
-      : PAYMENT_VERIFIED_STATUS;
+  const paymentStatus = paymentRequired
+    ? PAYMENT_PENDING_STATUS
+    : PAYMENT_VERIFIED_STATUS;
 
   let notes;
 
   if (!paymentRequired) {
-    notes =
-      "No payment required.";
-  } else if (
-    screenshotShared
-  ) {
+    notes = "No payment required.";
+  } else if (screenshotShared) {
     notes =
       "Participant confirmed that the successful payment screenshot was shared directly with the payment coordinator on WhatsApp. Payment is pending manual verification.";
   } else {
@@ -465,40 +529,36 @@ async function insertPayment({
       "Payment record created. Payment screenshot confirmation was not provided.";
   }
 
-  const { error } =
-    await supabase
-      .from("payments")
-      .insert({
-        id: generateUUID(),
+  const paidAt = paymentRequired
+    ? new Date().toISOString()
+    : null;
 
-        registration_id:
-          registrationId,
+  const resolvedPaymentMethod = paymentRequired
+    ? paymentMethod?.trim() || PAYMENT_METHOD
+    : null;
 
-        amount:
-          numericAmount,
+  const { error } = await supabase
+    .from("payments")
+    .insert({
+      id: generateUUID(),
 
-        status:
-          paymentStatus,
+      registration_id: registrationId,
 
-        transaction_reference:
-          null,
+      amount: numericAmount,
 
-        payment_method:
-          paymentRequired
-            ? paymentMethod?.trim() ||
-              PAYMENT_METHOD
-            : null,
+      status: paymentStatus,
 
-        paid_at:
-          paymentRequired
-            ? new Date().toISOString()
-            : null,
+      transaction_reference: null,
 
-        verified_at:
-          null,
+      payment_method:
+        resolvedPaymentMethod,
 
-        notes,
-      });
+      paid_at: paidAt,
+
+      verified_at: null,
+
+      notes,
+    });
 
   if (error) {
     throw new Error(
@@ -507,8 +567,16 @@ async function insertPayment({
   }
 
   return {
-    status:
-      paymentStatus,
+    status: paymentStatus,
+
+    amount: numericAmount,
+
+    paymentMethod:
+      resolvedPaymentMethod,
+
+    paidAt,
+
+    notes,
   };
 }
 
@@ -522,49 +590,37 @@ function validateParticipant(
   participant,
   label = "Participant"
 ) {
-  if (
-    !participant?.fullName?.trim()
-  ) {
+  if (!participant?.fullName?.trim()) {
     throw new Error(
       `${label}: full name is required.`
     );
   }
 
-  if (
-    !participant?.email?.trim()
-  ) {
+  if (!participant?.email?.trim()) {
     throw new Error(
       `${label}: email is required.`
     );
   }
 
-  if (
-    !participant?.phone?.trim()
-  ) {
+  if (!participant?.phone?.trim()) {
     throw new Error(
       `${label}: mobile number is required.`
     );
   }
 
-  if (
-    !participant?.college?.trim()
-  ) {
+  if (!participant?.college?.trim()) {
     throw new Error(
       `${label}: college name is required.`
     );
   }
 
-  if (
-    !participant?.department?.trim()
-  ) {
+  if (!participant?.department?.trim()) {
     throw new Error(
       `${label}: department is required.`
     );
   }
 
-  if (
-    !participant?.year?.trim()
-  ) {
+  if (!participant?.year?.trim()) {
     throw new Error(
       `${label}: year of study is required.`
     );
@@ -580,21 +636,14 @@ DUPLICATE EMAIL VALIDATION
 function validateEventDuplicateEmails(
   participants
 ) {
-  const emails =
-    participants
-      .map(
-        (participant) =>
-          participant?.email
-      )
-      .filter(Boolean)
-      .map((email) =>
-        email
-          .trim()
-          .toLowerCase()
-      );
+  const emails = participants
+    .map((participant) => participant?.email)
+    .filter(Boolean)
+    .map((email) =>
+      email.trim().toLowerCase()
+    );
 
-  const uniqueEmails =
-    new Set(emails);
+  const uniqueEmails = new Set(emails);
 
   if (
     uniqueEmails.size !==
@@ -616,31 +665,23 @@ function getEventDetails({
   eventRegistrations,
   event,
 }) {
-  if (
-    !eventRegistrations
-  ) {
+  if (!eventRegistrations) {
     return null;
   }
 
   /*
    * ARRAY FORMAT
    */
-  if (
-    Array.isArray(
-      eventRegistrations
-    )
-  ) {
+
+  if (Array.isArray(eventRegistrations)) {
     return (
       eventRegistrations.find(
         (item) =>
-          item?.eventId ===
-            event.id ||
-          item?.id ===
-            event.id ||
+          item?.eventId === event.id ||
+          item?.id === event.id ||
           (
             event.slug &&
-            item?.slug ===
-              event.slug
+            item?.slug === event.slug
           )
       ) || null
     );
@@ -649,53 +690,393 @@ function getEventDetails({
   /*
    * OBJECT FORMAT
    */
+
   if (
-    typeof eventRegistrations ===
-      "object" &&
-    !Array.isArray(
-      eventRegistrations
-    )
+    typeof eventRegistrations === "object" &&
+    !Array.isArray(eventRegistrations)
   ) {
     if (
       event.slug &&
-      eventRegistrations[
-        event.slug
-      ]
+      eventRegistrations[event.slug]
     ) {
-      return (
-        eventRegistrations[
-          event.slug
-        ]
-      );
+      return eventRegistrations[event.slug];
     }
 
-    const matchingKey =
-      Object.keys(
-        eventRegistrations
-      ).find((key) => {
-        const item =
-          eventRegistrations[
-            key
-          ];
+    const matchingKey = Object.keys(
+      eventRegistrations
+    ).find((key) => {
+      const item =
+        eventRegistrations[key];
 
-        return (
-          item?.eventId ===
-            event.id ||
-          item?.id ===
-            event.id
-        );
-      });
+      return (
+        item?.eventId === event.id ||
+        item?.id === event.id
+      );
+    });
 
     if (matchingKey) {
-      return (
-        eventRegistrations[
-          matchingKey
-        ]
-      );
+      return eventRegistrations[
+        matchingKey
+      ];
     }
   }
 
   return null;
+}
+
+/*
+=========================================================
+NORMALIZE PARTICIPANT
+=========================================================
+*/
+
+function normalizeParticipant(
+  participant
+) {
+  return {
+    fullName:
+      participant?.fullName ??
+      participant?.name ??
+      "",
+
+    email:
+      participant?.email ??
+      "",
+
+    phone:
+      participant?.phone ??
+      "",
+
+    college:
+      participant?.college ??
+      participant?.collegeName ??
+      "",
+
+    department:
+      participant?.department ??
+      "",
+
+    year:
+      participant?.year ??
+      "",
+  };
+}
+
+/*
+=========================================================
+CREATE CONSOLIDATED OVERALL RECORD
+=========================================================
+
+ONE REGISTRATION = ONE ROW IN overall.
+
+For TEAM:
+
+full_name
+    ↓
+TEAM LEAD
+
+team_members
+    ↓
+ALL TEAM MEMBERS INCLUDING LEAD
+
+selected_events
+    ↓
+EACH EVENT + PARTICIPANTS
+
+For INDIVIDUAL:
+
+full_name
+    ↓
+PARTICIPANT
+
+team_members
+    ↓
+SINGLE PARTICIPANT
+=========================================================
+*/
+
+async function insertOverallRecord({
+  registration,
+  registrationType,
+  teamName,
+  primary,
+  eventParticipantGroups,
+  amount,
+  paymentResult,
+}) {
+  /*
+  ========================================================
+  SELECTED EVENTS
+  ========================================================
+  */
+
+  const overallSelectedEvents =
+    eventParticipantGroups.map(
+      (event) => ({
+        event_id:
+          event.eventId,
+
+        slug:
+          event.slug,
+
+        name:
+          event.name,
+
+        category:
+          event.category,
+
+        fee:
+          event.fee,
+
+        participant_count:
+          event.participants.length,
+
+        participants:
+          event.participants.map(
+            (participant, index) => ({
+              full_name:
+                participant.fullName,
+
+              email:
+                participant.email
+                  .trim()
+                  .toLowerCase(),
+
+              phone:
+                participant.phone,
+
+              college_name:
+                participant.college,
+
+              department:
+                participant.department,
+
+              year:
+                participant.year,
+
+              role:
+                index === 0
+                  ? "leader"
+                  : "member",
+            })
+          ),
+      })
+    );
+
+  /*
+  ========================================================
+  ALL TEAM MEMBERS
+  ========================================================
+
+  One participant should appear only once here even if
+  they participate in multiple selected events.
+
+  Email is used as the temporary unique identifier.
+  ========================================================
+  */
+
+  const memberMap = new Map();
+
+  eventParticipantGroups.forEach(
+    (event) => {
+      event.participants.forEach(
+        (participant, index) => {
+          const normalizedEmail =
+            participant.email
+              .trim()
+              .toLowerCase();
+
+          if (
+            !memberMap.has(
+              normalizedEmail
+            )
+          ) {
+            memberMap.set(
+              normalizedEmail,
+              {
+                full_name:
+                  participant.fullName,
+
+                email:
+                  normalizedEmail,
+
+                phone:
+                  participant.phone,
+
+                college_name:
+                  participant.college,
+
+                department:
+                  participant.department,
+
+                year:
+                  participant.year,
+
+                role:
+                  index === 0
+                    ? "leader"
+                    : "member",
+              }
+            );
+          }
+        }
+      );
+    }
+  );
+
+  const overallTeamMembers =
+    Array.from(
+      memberMap.values()
+    );
+
+  /*
+  ========================================================
+  MAKE SURE PRIMARY PARTICIPANT IS PRESENT
+  ========================================================
+  */
+
+  const primaryEmail =
+    primary.email
+      .trim()
+      .toLowerCase();
+
+  if (
+    !memberMap.has(primaryEmail)
+  ) {
+    overallTeamMembers.unshift({
+      full_name:
+        primary.fullName,
+
+      email:
+        primaryEmail,
+
+      phone:
+        primary.phone,
+
+      college_name:
+        primary.college,
+
+      department:
+        primary.department,
+
+      year:
+        primary.year,
+
+      role: "leader",
+    });
+  } else {
+    /*
+     * Ensure primary is marked as leader.
+     */
+
+    const primaryMember =
+      memberMap.get(
+        primaryEmail
+      );
+
+    primaryMember.role =
+      "leader";
+  }
+
+  /*
+  ========================================================
+  PRIMARY PARTICIPANT
+  ========================================================
+  */
+
+  const normalizedAmount =
+    Number(amount) || 0;
+
+  /*
+  ========================================================
+  INSERT ONE ROW INTO overall
+  ========================================================
+  */
+
+  const { error } =
+    await supabase
+      .from("overall")
+      .insert({
+        registration_number:
+          registration.registration_number,
+
+        registration_type:
+          registrationType,
+
+        team_name:
+          teamName?.trim() || null,
+
+        registration_status:
+          REGISTRATION_PENDING_STATUS,
+
+        /*
+         * For TEAM:
+         * this is the TEAM LEAD.
+         *
+         * For INDIVIDUAL:
+         * this is the participant.
+         */
+
+        full_name:
+          primary.fullName.trim(),
+
+        email:
+          primary.email
+            .trim()
+            .toLowerCase(),
+
+        phone:
+          primary.phone.trim(),
+
+        college_name:
+          primary.college.trim(),
+
+        department:
+          primary.department.trim(),
+
+        year:
+          primary.year.trim(),
+
+        selected_events:
+          overallSelectedEvents,
+
+        /*
+         * Complete team/member list.
+         */
+
+        team_members:
+          overallTeamMembers,
+
+        total_amount:
+          normalizedAmount,
+
+        payment_status:
+          paymentResult.status,
+
+        payment_method:
+          paymentResult.paymentMethod,
+
+        transaction_reference:
+          null,
+
+        payment_screenshot_url:
+          null,
+
+        paid_at:
+          paymentResult.paidAt,
+
+        verified_at:
+          null,
+
+        payment_notes:
+          paymentResult.notes,
+      });
+
+  if (error) {
+    throw new Error(
+      `Failed to save consolidated overall record: ${error.message}`
+    );
+  }
 }
 
 /*
@@ -723,7 +1104,7 @@ export async function submitRegistration({
 }) {
   /*
   ========================================================
-  NORMALIZE EVENTS
+  1. NORMALIZE EVENTS
   ========================================================
   */
 
@@ -745,7 +1126,18 @@ export async function submitRegistration({
 
   /*
   ========================================================
-  PRIMARY VALIDATION
+  2. RESOLVE ACTUAL EVENT DETAILS
+  ========================================================
+  */
+
+  const resolvedEvents =
+    await resolveSelectedEvents(
+      normalizedEvents
+    );
+
+  /*
+  ========================================================
+  3. PRIMARY VALIDATION
   ========================================================
   */
 
@@ -757,7 +1149,7 @@ export async function submitRegistration({
 
   /*
   ========================================================
-  REGISTRATION TYPE VALIDATION
+  4. REGISTRATION TYPE VALIDATION
   ========================================================
   */
 
@@ -774,7 +1166,7 @@ export async function submitRegistration({
 
   /*
   ========================================================
-  TEAM NAME VALIDATION
+  5. TEAM NAME VALIDATION
   ========================================================
   */
 
@@ -805,7 +1197,7 @@ export async function submitRegistration({
 
   /*
   ========================================================
-  SOLO REGISTRATION TEAM NAME
+  6. SOLO REGISTRATION TEAM NAME
   ========================================================
   */
 
@@ -818,12 +1210,12 @@ export async function submitRegistration({
 
   /*
   ========================================================
-  BUILD EVENT PARTICIPANT GROUPS
+  7. BUILD EVENT PARTICIPANT GROUPS
   ========================================================
   */
 
   const eventParticipantGroups =
-    normalizedEvents.map(
+    resolvedEvents.map(
       (event) => {
         const details =
           getEventDetails({
@@ -844,10 +1236,10 @@ export async function submitRegistration({
             : [];
 
         /*
-         * Backward compatibility with
-         * older submitRegistration()
-         * calls using global members.
+         * Backward compatibility:
+         * if Register.jsx sends global members.
          */
+
         if (
           eventMembers.length ===
             0 &&
@@ -859,78 +1251,29 @@ export async function submitRegistration({
         }
 
         /*
-         * Normalize every participant.
-         *
-         * IMPORTANT:
-         * Register.jsx already sends the primary
-         * participant inside eventMembers.
-         *
-         * The previous code used:
-         *
-         * member !== primary
-         *
-         * which compares object references.
-         *
-         * Because Register.jsx can create a different
-         * object containing the same primary participant,
-         * the primary could be added twice.
-         *
-         * We now compare normalized email addresses
-         * instead.
+         * Normalize primary.
          */
 
-        const normalizedPrimary = {
-          fullName:
-            primary.fullName,
+        const normalizedPrimary =
+          normalizeParticipant(
+            primary
+          );
 
-          email:
-            primary.email,
-
-          phone:
-            primary.phone,
-
-          college:
-            primary.college,
-
-          department:
-            primary.department,
-
-          year:
-            primary.year,
-        };
+        /*
+         * Normalize event members.
+         */
 
         const normalizedEventMembers =
           eventMembers
             .filter(Boolean)
             .map(
-              (member) => ({
-                fullName:
-                  member.fullName ??
-                  member.name ??
-                  "",
-
-                email:
-                  member.email ??
-                  "",
-
-                phone:
-                  member.phone ??
-                  "",
-
-                college:
-                  member.college ??
-                  member.collegeName ??
-                  "",
-
-                department:
-                  member.department ??
-                  "",
-
-                year:
-                  member.year ??
-                  "",
-              })
+              normalizeParticipant
             );
+
+        /*
+         * Check whether primary is
+         * already included.
+         */
 
         const primaryEmail =
           primary.email
@@ -947,11 +1290,10 @@ export async function submitRegistration({
           );
 
         /*
-         * If the primary participant is already
-         * included, don't add them again.
-         *
-         * Otherwise prepend the primary.
+         * Build complete event
+         * participant list.
          */
+
         const participants =
           hasPrimaryAlready
             ? normalizedEventMembers
@@ -967,6 +1309,15 @@ export async function submitRegistration({
           slug:
             event.slug,
 
+          name:
+            event.name,
+
+          category:
+            event.category,
+
+          fee:
+            event.fee,
+
           maxParticipants:
             event.maxParticipants,
 
@@ -977,7 +1328,7 @@ export async function submitRegistration({
 
   /*
   ========================================================
-  EVENT-SPECIFIC VALIDATION
+  8. EVENT-SPECIFIC VALIDATION
   ========================================================
   */
 
@@ -991,6 +1342,7 @@ export async function submitRegistration({
     /*
      * Minimum one participant.
      */
+
     if (
       participants.length <
       1
@@ -1003,9 +1355,10 @@ export async function submitRegistration({
     /*
      * Maximum participant count.
      */
+
     if (
       event.maxParticipants !=
-        null
+      null
     ) {
       const maxParticipants =
         Number(
@@ -1026,9 +1379,9 @@ export async function submitRegistration({
     }
 
     /*
-     * Same email cannot appear twice
-     * inside one event.
+     * Duplicate email validation.
      */
+
     validateEventDuplicateEmails(
       participants
     );
@@ -1036,6 +1389,7 @@ export async function submitRegistration({
     /*
      * Validate every participant.
      */
+
     participants.forEach(
       (
         participant,
@@ -1054,7 +1408,7 @@ export async function submitRegistration({
 
   /*
   ========================================================
-  PARTICIPANT CACHE
+  9. PARTICIPANT CACHE
   ========================================================
   */
 
@@ -1062,101 +1416,71 @@ export async function submitRegistration({
     new Map();
 
   async function getOrCreateParticipant(
-    participant
+  participant
+) {
+  const normalizedEmail =
+    participant.email
+      .trim()
+      .toLowerCase();
+
+  /*
+   * Already processed during
+   * this registration.
+   */
+
+  if (
+    participantCache.has(
+      normalizedEmail
+    )
   ) {
-    const normalizedEmail =
-      participant.email
-        .trim()
-        .toLowerCase();
-
-    /*
-     * Already processed during
-     * this registration.
-     */
-    if (
-      participantCache.has(
-        normalizedEmail
-      )
-    ) {
-      return participantCache.get(
-        normalizedEmail
-      );
-    }
-
-    /*
-     * Try to find an existing
-     * participant by email.
-     */
-    const {
-      data: existingParticipant,
-      error: existingParticipantError,
-    } = await supabase
-      .from("participants")
-      .select("id")
-      .eq(
-        "email",
-        normalizedEmail
-      )
-      .maybeSingle();
-
-    if (
-      existingParticipantError
-    ) {
-      throw new Error(
-        `Failed to check existing participant: ${existingParticipantError.message}`
-      );
-    }
-
-    if (
-      existingParticipant?.id
-    ) {
-      participantCache.set(
-        normalizedEmail,
-
-        existingParticipant.id
-      );
-
-      return (
-        existingParticipant.id
-      );
-    }
-
-    /*
-     * Create a new participant.
-     */
-    const participantId =
-      await insertParticipant({
-        fullName:
-          participant.fullName,
-
-        email:
-          participant.email,
-
-        phone:
-          participant.phone,
-
-        college:
-          participant.college,
-
-        department:
-          participant.department,
-
-        year:
-          participant.year,
-      });
-
-    participantCache.set(
-      normalizedEmail,
-
-      participantId
+    return participantCache.get(
+      normalizedEmail
     );
-
-    return participantId;
   }
 
   /*
+   * IMPORTANT
+   * ----------
+   * Do NOT SELECT from participants here.
+   *
+   * Public registration should not need
+   * permission to read existing participant
+   * records.
+   */
+
+  const participantId =
+    await insertParticipant({
+      fullName:
+        participant.fullName,
+
+      email:
+        participant.email,
+
+      phone:
+        participant.phone,
+
+      college:
+        participant.college,
+
+      department:
+        participant.department,
+
+      year:
+        participant.year,
+    });
+
+  participantCache.set(
+    normalizedEmail,
+
+    participantId
+  );
+
+  return participantId;
+}
+
+  /*
   ========================================================
-  CREATE PRIMARY PARTICIPANT
+  10. CREATE PRIMARY PARTICIPANT
   ========================================================
   */
 
@@ -1167,7 +1491,7 @@ export async function submitRegistration({
 
   /*
   ========================================================
-  CREATE ONE REGISTRATION
+  11. CREATE ONE REGISTRATION
   ========================================================
   */
 
@@ -1182,7 +1506,7 @@ export async function submitRegistration({
 
   /*
   ========================================================
-  CREATE REGISTRATION EVENTS
+  12. CREATE REGISTRATION EVENTS
   ========================================================
   */
 
@@ -1196,6 +1520,7 @@ export async function submitRegistration({
     /*
      * Create registration_events.
      */
+
     const registrationEventId =
       await insertRegistrationEvent({
         registrationId:
@@ -1213,6 +1538,7 @@ export async function submitRegistration({
      * Add every participant
      * to this event.
      */
+
     for (
       let index = 0;
       index <
@@ -1247,7 +1573,7 @@ export async function submitRegistration({
 
   /*
   ========================================================
-  CREATE ONE COMBINED PAYMENT
+  13. CREATE ONE COMBINED PAYMENT
   ========================================================
   */
 
@@ -1271,7 +1597,30 @@ export async function submitRegistration({
 
   /*
   ========================================================
-  RETURN RESULT
+  14. CREATE CONSOLIDATED OVERALL RECORD
+  ========================================================
+  */
+
+  await insertOverallRecord({
+    registration,
+
+    registrationType,
+
+    teamName,
+
+    primary,
+
+    eventParticipantGroups,
+
+    amount:
+      payment?.amount,
+
+    paymentResult,
+  });
+
+  /*
+  ========================================================
+  15. RETURN RESULT
   ========================================================
   */
 
@@ -1289,7 +1638,7 @@ export async function submitRegistration({
       REGISTRATION_PENDING_STATUS,
 
     selectedEventIds:
-      normalizedEvents.map(
+      resolvedEvents.map(
         (event) =>
           event.id
       ),

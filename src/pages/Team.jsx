@@ -35,7 +35,7 @@ const teams = [
     members: [
       { name: "Mohammed Aasif", dept: "IV Year CSE", role: "Administrator", lead: true, showRole: true, photo: "https://res.cloudinary.com/devn2ez7p/image/upload/v1782652275/prof_link_pic_3_2.jpg_w85kkn.jpg" },
       { name: "Mohammed Zahangir", dept: "III Year AI-DS", role: "Administrator", lead: true, showRole: true, photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788023717/Zahangir_jdjb0o.jpg" },
-      { name: "Abdul Gaffoor Asjad", dept: "IV Year CSE", photo: "https://res.cloudinary.com/dbqjkjl0c/image/upload/v1739474332/Abdul_Gaffoor_Asjad_d9uolc.jpg" },
+      { name: "Abdul Gaffoor Asjad", dept: "IV Year CSE", photo: "https://res.cloudinary.com/dbqjkjl0c/image/upload/v1788234780/asjad1_jjx2hk.jpg" },
       { name: "Mohammed Yasar M", dept: "III Year AI-DS", role: "Session Incharge", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/f_auto,q_auto/Screenshot_2026-03-31_163341_uwuv0c" },
       { name: "Rila Fathima S.K", dept: "II Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935200/Rila_Fathima_bmcgac.png" },
       { name: "A Muhammad Saad", dept: "II Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935198/A_Muhammad_Saad_dqvnob.jpg" },
