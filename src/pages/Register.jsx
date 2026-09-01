@@ -24,6 +24,10 @@ import {
   getFeeLabel,
 } from "../data/registrationData";
 
+import RegistrationCard from "../components/registration/RegistrationCard";
+import { toPng } from "html-to-image";
+import { saveAs } from "file-saver";
+
 const DRAFT_KEY = "revibe26_registration_draft_v3";
 const LEGACY_DRAFT_KEY = "revibe26_registration_draft_v2";
 
@@ -245,6 +249,8 @@ export default function Register() {
 
   const [submitted, setSubmitted] = useState(false);
   const [registrationNumbers, setRegistrationNumbers] = useState([]);
+
+  const cardRef = useRef(null);
 
   /* =========================================================
      LOAD SAVED DETAILS
@@ -589,6 +595,22 @@ export default function Register() {
     if (teamName) return `REVIBE 26 - ${teamName}`;
     return `REVIBE 26 - ${form.name || "Registration"}`;
   }, [teamName, form.name]);
+
+  const handleDownloadCard = async () => {
+    if (!cardRef.current) return;
+    try {
+      const dataUrl = await toPng(cardRef.current, {
+        cacheBust: true,
+        pixelRatio: 2,
+      });
+      const label = hasTeamEvent
+        ? teamName || "team"
+        : form.name || "solo";
+      saveAs(dataUrl, `revibe26-${label}.png`);
+    } catch (err) {
+      console.error("Card download failed:", err);
+    }
+  };
 
   /* =========================================================
      GENERIC UPDATE
@@ -1912,6 +1934,42 @@ export default function Register() {
               </div>
 
               {/* =================================================
+                  REGISTRATION CARD
+              ================================================= */}
+
+              <div className="reg-card-section">
+                <p className="reg-card-section-title">
+                  Your Registration Card
+                </p>
+
+                <div className="reg-card-wrapper">
+                  <RegistrationCard
+                    ref={cardRef}
+                    name={form.name}
+                    teamName={teamName}
+                    type={hasTeamEvent ? "team" : "solo"}
+                    events={selectedEvents.map((ev) => {
+                      const details =
+                        form.eventRegistrations[ev.slug] ||
+                        emptyEventRegistration();
+                      return {
+                        name: ev.name,
+                        teamSize: details.teamSize,
+                      };
+                    })}
+                  />
+                </div>
+
+                <button
+                  className="reg-card-download-btn"
+                  onClick={handleDownloadCard}
+                  type="button"
+                >
+                  ↓ Download Card
+                </button>
+              </div>
+
+              {/* =================================================
                   PAYMENT PENDING
               ================================================= */}
 
@@ -1949,10 +2007,7 @@ transaction.
                     <li>
                       After successful
                       verification,
-                      you will receive
-                      the official
-                      confirmation
-                      email.
+                      you will be added to the respective whatsapp groups for your events.
                     </li>
                   </ol>
                 </div>
@@ -3523,9 +3578,7 @@ at{" "}
                           successfully
                           verified, your
                           registration will be
-                          confirmed and you will
-                          receive the official
-                          confirmation email.
+                          confirmed and you will be added to the respective whatsapp groups.
                         </p>
                       </div>
                     </>
@@ -6034,5 +6087,121 @@ const registerStyles = `
     .register-secondary-btn {
       transition: none;
     }
+  }
+
+  /* ═══ REGISTRATION CARD ═══ */
+
+  .reg-card-section {
+    margin-top: 2rem;
+    text-align: center;
+  }
+
+  .reg-card-section-title {
+    margin: 0 0 1rem;
+    font-family: 'Anton', sans-serif;
+    font-size: 1.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #1a1a1a;
+  }
+
+  .reg-card-wrapper {
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  .reg-card-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1545 / 1999;
+    overflow: hidden;
+    border: 2px solid #1a1a1a;
+    background: #111;
+  }
+
+  .reg-card-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .reg-card-name-overlay {
+    position: absolute;
+    top: 61.7%;
+    left: 36%;
+    width: 59%;
+    height: 7.5%;
+    display: flex;
+    align-items: center;
+    padding: 0 2%;
+    color: #ffffff;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: clamp(0.65rem, 3vw, 1.35rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    line-height: 1.15;
+    overflow: hidden;
+    word-break: break-word;
+    -webkit-line-clamp: 2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+  }
+
+  .reg-card-events-overlay {
+    position: absolute;
+    top: 74%;
+    left: 33%;
+    width: 59%;
+    height: 10%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0;
+    padding: 0 2%;
+    color: #ffffff;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-weight: 700;
+    line-height: 1.25;
+    overflow: hidden;
+    word-break: break-word;
+  }
+
+  .reg-card-event-line {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .reg-card-download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.7rem 1.6rem;
+    background: #dc0000;
+    color: #ffffff;
+    font-family: 'Anton', sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 2px solid #1a1a1a;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    box-shadow: 3px 3px 0 #1a1a1a;
+  }
+
+  .reg-card-download-btn:hover {
+    background: #b00000;
+  }
+
+  .reg-card-download-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 #1a1a1a;
   }
 `;
