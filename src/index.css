@@ -20,13 +20,25 @@
   --shadow: rgba(220, 0, 0, 0.25);
 }
 
+/* =========================================================
+   GLOBAL BOX SIZING
+   ========================================================= */
+
 * {
   box-sizing: border-box;
 }
 
+/* =========================================================
+   HTML
+   ========================================================= */
+
 html {
   scroll-behavior: smooth;
 }
+
+/* =========================================================
+   BODY
+   ========================================================= */
 
 body {
   margin: 0;
@@ -37,10 +49,18 @@ body {
   overflow-x: hidden;
 }
 
+/* =========================================================
+   IMAGES
+   ========================================================= */
+
 img {
   display: block;
   max-width: 100%;
 }
+
+/* =========================================================
+   FORM ELEMENTS
+   ========================================================= */
 
 button,
 input,
@@ -49,34 +69,95 @@ textarea {
   font: inherit;
 }
 
+/* =========================================================
+   LINKS / BUTTONS
+   ========================================================= */
+
 button,
 a {
   transition: all 0.2s ease;
 }
+
+/* =========================================================
+   SVG / IMAGE ALIGNMENT
+   ========================================================= */
 
 img,
 svg {
   vertical-align: middle;
 }
 
+/* =========================================================
+   ROOT
+   ========================================================= */
+
 #root {
   min-height: 100vh;
 }
 
+/* =========================================================
+   APPLICATION SHELL
+   ========================================================= */
+
 .app-shell {
   min-height: 100vh;
+
   background:
-    radial-gradient(circle at top center, rgba(220, 0, 0, 0.08), transparent 28%),
-    linear-gradient(180deg, #050505 0%, #0b0b0b 100%);
+    radial-gradient(
+      circle at top center,
+      rgba(220, 0, 0, 0.08),
+      transparent 28%
+    ),
+    linear-gradient(
+      180deg,
+      #050505 0%,
+      #0b0b0b 100%
+    );
+
   color: var(--white);
 }
+
+/* =========================================================
+   APPLICATION MAIN
+   ========================================================= */
 
 .app-main {
   width: 100%;
   overflow-x: hidden;
 }
 
+/* =========================================================
+   TEXT SELECTION
+   ========================================================= */
+
 ::selection {
   background: rgba(220, 0, 0, 0.5);
   color: var(--white);
 }
+
+/* =========================================================
+   TAILWIND CSS
+   =========================================================
+
+   Tailwind utilities are enabled for pages such as:
+
+   /admin
+   /coordinator
+
+   IMPORTANT:
+   Preflight is disabled in tailwind.config.js.
+
+   Therefore Tailwind will NOT globally reset:
+   - headings
+   - buttons
+   - inputs
+   - tables
+   - lists
+   - other existing website styles
+
+   This keeps the existing REVIBE pages safe.
+   ========================================================= */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

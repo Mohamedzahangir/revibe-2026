@@ -1,14 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import logoWhite from "../assets/logos/logo-white.png";
-
-// TEMP: hardcoded credential for previewing the dashboard layout only.
-// Remove this once real Supabase Auth is wired in.
-const TEMP_CREDENTIALS = {
-  email: "coordinator@revibe.com",
-  password: "coordinator123",
-};
+import logoWhite from "../assets/logos/preview.png";
+import { supabase } from "../services/supabase";
 
 function IconShield() {
   return (
@@ -19,44 +13,8 @@ function IconShield() {
         strokeWidth="1.6"
         strokeLinejoin="round"
       />
-      <path d="M9 12.2l2 2 4-4.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function IconMail() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="3" y="5" width="18" height="14" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M4 6.5 12 13l8-6.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function IconLock() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="5" y="10.5" width="14" height="9.5" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function IconEye({ open }) {
-  return open ? (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path
-        d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      <circle cx="12" cy="12" r="2.7" stroke="currentColor" strokeWidth="1.6" />
-    </svg>
-  ) : (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M3.5 3.5l17 17M9.9 9.9a2.7 2.7 0 0 0 3.9 3.9M6.6 6.7C4.3 8.2 2.5 12 2.5 12s3.5 6.5 9.5 6.5c1.7 0 3.2-.5 4.5-1.2M11 5.6c.3 0 .6-.06 1-.06 6 0 9.5 6.5 9.5 6.5s-.7 1.3-2 2.7"
+        d="M9 12.2l2 2 4-4.2"
         stroke="currentColor"
         strokeWidth="1.6"
         strokeLinecap="round"
@@ -66,10 +24,134 @@ function IconEye({ open }) {
   );
 }
 
+function IconMail() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect
+        x="3"
+        y="5"
+        width="18"
+        height="14"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M4 7l8 6 8-6"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function IconLock() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect
+        x="5"
+        y="10"
+        width="14"
+        height="10"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M8 10V7.5a4 4 0 0 1 8 0V10"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function IconEye({ open }) {
+  if (open) {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path
+          d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+        />
+        <circle
+          cx="12"
+          cy="12"
+          r="2.7"
+          stroke="currentColor"
+          strokeWidth="1.6"
+        />
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M3.5 3.5l17 17"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <path
+        d="M6.6 6.7C4.3 8.2 2.5 12 2.5 12s3.5 6.5 9.5 6.5c1.7 0 3.2-.5 4.5-1.2"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+      <path
+        d="M11 5.6c.3 0 .6-.1 1-.1 6 0 9.5 6.5 9.5 6.5s-.7 1.3-2 2.7"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 function IconArrow() {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M5 12h13"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="m13 6 6 6-6 6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function IconCalendar() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect
+        x="3.5"
+        y="5"
+        width="17"
+        height="16"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M7.5 3.5v3M16.5 3.5v3M3.5 9h17"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -81,473 +163,1094 @@ export default function Login() {
     identifier: "",
     password: "",
   });
+
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setFormValues((prev) => ({ ...prev, [name]: value }));
-    setError("");
+
+    setFormValues((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
+
+    if (error) {
+      setError("");
+    }
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // TEMP: layout-preview-only auth check. Replace with real Supabase
-    // Auth call once services/auth.js is wired up.
-    const matchesTemp =
-      formValues.identifier.trim().toLowerCase() === TEMP_CREDENTIALS.email &&
-      formValues.password === TEMP_CREDENTIALS.password;
-
-    if (!matchesTemp) {
-      setError("Invalid credentials. (Preview mode: use the temp login below.)");
+    if (loading) {
       return;
     }
 
-    navigate("/coordinator", {
-      state: { department: "CSE", section: "A" },
-    });
+    const email = formValues.identifier.trim().toLowerCase();
+    const password = formValues.password;
+
+    if (!email || !password) {
+      setError("Please enter your email address and password.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      // =====================================================
+      // 1. SUPABASE AUTHENTICATION
+      // =====================================================
+
+      const {
+        data: authData,
+        error: authError,
+      } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (authError) {
+        throw authError;
+      }
+
+      const user = authData?.user;
+
+      if (!user) {
+        throw new Error("Authentication failed. No user was returned.");
+      }
+
+      // =====================================================
+      // 2. LOAD APPLICATION PROFILE
+      // =====================================================
+
+      const {
+        data: profile,
+        error: profileError,
+      } = await supabase
+        .from("profiles")
+        .select("id, full_name, role, department")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (profileError) {
+        console.error("Profile lookup error:", profileError);
+
+        await supabase.auth.signOut();
+
+        throw new Error(
+          `Unable to load your profile: ${profileError.message}`
+        );
+      }
+
+      if (!profile) {
+        await supabase.auth.signOut();
+
+        throw new Error(
+          "Your account is authenticated, but no profile was found. Please contact the administrator."
+        );
+      }
+
+      // =====================================================
+      // 3. ADMIN LOGIN
+      // =====================================================
+
+      if (profile.role === "admin") {
+        navigate("/admin", {
+          replace: true,
+          state: {
+            userId: user.id,
+            role: "admin",
+            profile,
+          },
+        });
+
+        return;
+      }
+
+      // =====================================================
+      // 4. COORDINATOR LOGIN
+      // =====================================================
+
+      if (profile.role === "coordinator") {
+        /*
+         * Find the event assigned to this coordinator.
+         *
+         * event_staff:
+         *   event_id
+         *   profile_id
+         *   role
+         *
+         * events:
+         *   id
+         *   name
+         *   slug
+         */
+
+        const {
+          data: staffAssignment,
+          error: assignmentError,
+        } = await supabase
+          .from("event_staff")
+          .select(
+            `
+              event_id,
+              role,
+              events (
+                id,
+                name,
+                slug
+              )
+            `
+          )
+          .eq("profile_id", user.id)
+          .eq("role", "coordinator")
+          .maybeSingle();
+
+        if (assignmentError) {
+          console.error(
+            "Coordinator assignment lookup error:",
+            assignmentError
+          );
+
+          await supabase.auth.signOut();
+
+          throw new Error(
+            `Unable to load your event assignment: ${assignmentError.message}`
+          );
+        }
+
+        if (!staffAssignment) {
+          await supabase.auth.signOut();
+
+          throw new Error(
+            "Your coordinator account is valid, but no event has been assigned to it yet. Please contact the administrator."
+          );
+        }
+
+        const assignedEvent = staffAssignment.events;
+
+        navigate("/coordinator", {
+          replace: true,
+          state: {
+            userId: user.id,
+            role: "coordinator",
+            profile,
+            assignment: staffAssignment,
+            assignedEvent,
+          },
+        });
+
+        return;
+      }
+
+      // =====================================================
+      // 5. UNKNOWN / UNAUTHORIZED ROLE
+      // =====================================================
+
+      await supabase.auth.signOut();
+
+      throw new Error(
+        "Your account does not have an authorized administrator or coordinator role."
+      );
+    } catch (loginError) {
+      console.error("Login error:", loginError);
+
+      const message = String(loginError?.message || "");
+      const lowerMessage = message.toLowerCase();
+
+      if (
+        lowerMessage.includes("invalid login credentials") ||
+        lowerMessage.includes("invalid credentials")
+      ) {
+        setError("Invalid email or password.");
+      } else if (
+        lowerMessage.includes("email not confirmed")
+      ) {
+        setError(
+          "Please confirm this email address in Supabase Authentication."
+        );
+      } else if (
+        lowerMessage.includes("too many requests")
+      ) {
+        setError(
+          "Too many login attempts. Please wait a moment and try again."
+        );
+      } else {
+        setError(
+          message || "Unable to login. Please try again."
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <>
-      <main className="theme-page auth-page">
-        <section className="content-panel">
-          <div className="page-shell auth-shell">
-            <div className="auth-header">
-              <p className="auth-title">Welcome Back</p>
-              <p className="auth-subtitle">
-                Sign in to access the REVIBE '26 dashboard.
-              </p>
+      <main className="login-page">
+        {/* Decorative background elements */}
+        <div className="login-web web-left" />
+        <div className="login-web web-right" />
+
+        <section className="login-container">
+          {/* Top heading */}
+          <div className="login-heading">
+            <div className="event-chip">
+              <IconShield />
+              <span>Restricted Access</span>
             </div>
 
-            <div className="auth-card">
-              <span className="auth-badge">
-                <IconShield />
-                Restricted Access
-              </span>
+            <h1>Welcome Back</h1>
 
+            <p>
+              Sign in to access the REVIBE &apos;26 dashboard.
+            </p>
+          </div>
+
+          {/* Login card */}
+          <div className="login-card">
+            <div className="card-accent" />
+
+            <div className="logo-container">
               <img
                 src={logoWhite}
-                alt="Student Guidance Cell logo"
-                className="auth-logo"
+                alt="Student Guidance Cell"
+                className="login-logo"
               />
+            </div>
 
-              <h1 className="auth-card-title">Coordinator &amp; Admin Portal</h1>
-              <p className="auth-card-subtitle">
-                Sign in using your assigned coordinator or administrator account.
-              </p>
+            <h2>Coordinator &amp; Admin Portal</h2>
 
-              <form className="auth-form" onSubmit={handleSubmit}>
-                <label>
-                  <span>Email Address</span>
-                  <span className="auth-input-wrap">
-                    <span className="auth-input-icon" aria-hidden="true">
-                      <IconMail />
-                    </span>
-                    <input
-                      type="text"
-                      name="identifier"
-                      value={formValues.identifier}
-                      onChange={handleChange}
-                      placeholder="Enter your email"
-                      autoComplete="username"
-                    />
-                  </span>
+            <p className="card-description">
+              Sign in using your assigned coordinator or
+              administrator account.
+            </p>
+
+            <div className="security-line">
+              <span className="security-dot" />
+              <span>SECURE AUTHENTICATION</span>
+            </div>
+
+            <form
+              className="login-form"
+              onSubmit={handleSubmit}
+            >
+              {/* Email */}
+              <div className="form-group">
+                <label htmlFor="identifier">
+                  Email Address
                 </label>
 
-                <label>
-                  <span>Password</span>
-                  <span className="auth-input-wrap">
-                    <span className="auth-input-icon" aria-hidden="true">
-                      <IconLock />
-                    </span>
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      value={formValues.password}
-                      onChange={handleChange}
-                      placeholder="Enter your password"
-                      autoComplete="current-password"
-                    />
-                    <button
-                      type="button"
-                      className="auth-input-toggle"
-                      onClick={() => setShowPassword((prev) => !prev)}
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
-                      <IconEye open={showPassword} />
-                    </button>
+                <div className="input-wrapper">
+                  <span className="input-icon">
+                    <IconMail />
                   </span>
+
+                  <input
+                    id="identifier"
+                    type="email"
+                    name="identifier"
+                    value={formValues.identifier}
+                    onChange={handleChange}
+                    placeholder="Enter your email"
+                    autoComplete="username"
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div className="form-group">
+                <label htmlFor="password">
+                  Password
                 </label>
 
-                {error && <p className="auth-error">{error}</p>}
+                <div className="input-wrapper">
+                  <span className="input-icon">
+                    <IconLock />
+                  </span>
 
-                <div className="auth-actions">
-                  <button type="submit" className="primary-btn">
-                    Login
-                    <IconArrow />
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formValues.password}
+                    onChange={handleChange}
+                    placeholder="Enter your password"
+                    autoComplete="current-password"
+                    disabled={loading}
+                  />
+
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() =>
+                      setShowPassword(
+                        (previous) => !previous
+                      )
+                    }
+                    aria-label={
+                      showPassword
+                        ? "Hide password"
+                        : "Show password"
+                    }
+                    disabled={loading}
+                  >
+                    <IconEye open={showPassword} />
                   </button>
                 </div>
-              </form>
+              </div>
 
-              <p className="auth-note">
-                This portal is intended exclusively for{" "}
-                <strong>authorized workshop coordinators and administrators</strong>.
-              </p>
+              {/* Error */}
+              {error && (
+                <div className="login-error">
+                  <span className="error-mark">!</span>
+                  <span>{error}</span>
+                </div>
+              )}
 
-              <p className="auth-temp-hint">
-                Preview login — email: <code>{TEMP_CREDENTIALS.email}</code>,
-                password: <code>{TEMP_CREDENTIALS.password}</code>
-              </p>
+              {/* Login button */}
+              <button
+                type="submit"
+                className="login-button"
+                disabled={loading}
+              >
+                <span>
+                  {loading ? "Signing In..." : "Login"}
+                </span>
+
+                {!loading && <IconArrow />}
+
+                {loading && (
+                  <span className="loading-spinner" />
+                )}
+              </button>
+            </form>
+
+            {/* Portal information */}
+            <div className="portal-info">
+              <div className="info-icon">
+                <IconCalendar />
+              </div>
+
+              <div>
+                <strong>REVIBE &apos;26</strong>
+                <span>
+                  National Level Symposium
+                </span>
+              </div>
+            </div>
+
+            <div className="login-footer">
+              This portal is exclusively for authorized
+              <strong>
+                {" "}
+                coordinators and administrators
+              </strong>
+              .
             </div>
           </div>
+
+          <p className="copyright">
+            Student Guidance Cell • REVIBE &apos;26
+          </p>
         </section>
       </main>
 
       <style>{`
-        /* =========================================================
-           PAGE / PANEL SHELL (self-contained for Login.jsx)
-        ========================================================= */
-
-        .theme-page {
+        .login-page {
+          min-height: 100vh;
           width: 100%;
-          background: var(--bg);
-          color: var(--white);
-          overflow-x: hidden;
+          position: relative;
+          overflow: hidden;
+
+          background:
+            radial-gradient(
+              circle at 15% 15%,
+              rgba(229, 57, 53, 0.07),
+              transparent 28%
+            ),
+            radial-gradient(
+              circle at 85% 80%,
+              rgba(229, 57, 53, 0.05),
+              transparent 30%
+            ),
+            #ffffff;
+
+          color: #171717;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          padding: 4rem 1.25rem;
+          box-sizing: border-box;
         }
 
-        .content-panel {
+        .login-container {
           width: 100%;
-          padding: 4rem 1.5rem;
-        }
+          max-width: 480px;
 
-        .page-shell {
-          width: 100%;
-          max-width: 1100px;
-          margin: 0 auto;
-        }
+          position: relative;
+          z-index: 2;
 
-        /* =========================================================
-           HEADER
-        ========================================================= */
-
-        .auth-shell {
           display: flex;
           flex-direction: column;
           align-items: center;
         }
 
-        .auth-header {
-          text-align: center;
-          margin-bottom: 2rem;
-        }
+        /* =====================================================
+           DECORATIVE WEB ELEMENTS
+           ===================================================== */
 
-        .auth-title {
-          margin: 0 0 0.4rem;
-          font-family: 'Bangers', cursive;
-          font-size: clamp(1.9rem, 4vw, 2.75rem);
-          letter-spacing: 0.03em;
-          color: var(--white);
-          text-shadow: 0 0 18px var(--shadow);
-        }
-
-        .auth-subtitle {
-          margin: 0;
-          color: var(--soft-white);
-          font-size: 0.95rem;
-        }
-
-        /* =========================================================
-           AUTH CARD
-        ========================================================= */
-
-        .auth-card {
-          width: min(440px, 100%);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          text-align: center;
-          border: 1px solid rgba(220, 0, 0, 0.4);
-          background: rgba(255, 255, 255, 0.015);
-          padding: 2rem 1.75rem;
-          position: relative;
-        }
-
-        .auth-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.4rem;
-          padding: 0.35rem 0.85rem;
-          border: 1px solid rgba(255, 191, 0, 0.5);
-          background: rgba(255, 191, 0, 0.08);
-          color: var(--gold);
-          font-family: 'Orbitron', sans-serif;
-          font-size: 0.62rem;
-          letter-spacing: 0.16em;
-          text-transform: uppercase;
-          margin-bottom: 1.25rem;
-        }
-
-        .auth-badge svg {
-          width: 13px;
-          height: 13px;
-        }
-
-        .auth-logo {
-          width: 64px;
-          height: 64px;
-          object-fit: contain;
-          border-radius: 50%;
-          margin-bottom: 1rem;
-          box-shadow: 0 0 22px var(--shadow);
-        }
-
-        .auth-card-title {
-          margin: 0 0 0.5rem;
-          font-family: 'Orbitron', sans-serif;
-          font-size: 1.15rem;
-          font-weight: 800;
-          letter-spacing: 0.04em;
-          color: var(--white);
-        }
-
-        .auth-card-subtitle {
-          margin: 0 0 1.75rem;
-          color: var(--soft-white);
-          font-size: 0.88rem;
-          line-height: 1.6;
-          max-width: 340px;
-        }
-
-        /* =========================================================
-           FORM
-        ========================================================= */
-
-        .auth-form {
-          width: 100%;
-          display: grid;
-          gap: 1rem;
-          text-align: left;
-        }
-
-        .auth-form label {
-          display: grid;
-          gap: 0.45rem;
-          color: var(--soft-white);
-          font-family: 'Orbitron', sans-serif;
-          font-size: 0.68rem;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-        }
-
-        .auth-input-wrap {
-          position: relative;
-          display: flex;
-          align-items: center;
-        }
-
-        .auth-input-icon {
+        .login-web {
           position: absolute;
-          left: 0.85rem;
-          display: inline-flex;
-          width: 17px;
-          height: 17px;
-          color: var(--red);
+          width: 250px;
+          height: 250px;
+          opacity: 0.13;
           pointer-events: none;
         }
 
-        .auth-input-icon svg {
+        .web-left {
+          top: -100px;
+          left: -100px;
+
+          border-radius: 50%;
+          border: 2px solid #d6d6d6;
+
+          box-shadow:
+            25px 25px 0 -23px #d6d6d6,
+            50px 50px 0 -48px #d6d6d6,
+            75px 75px 0 -73px #d6d6d6,
+            100px 100px 0 -98px #d6d6d6;
+        }
+
+        .web-right {
+          bottom: -100px;
+          right: -100px;
+
+          border-radius: 50%;
+          border: 2px solid #d6d6d6;
+
+          box-shadow:
+            -25px -25px 0 -23px #d6d6d6,
+            -50px -50px 0 -48px #d6d6d6,
+            -75px -75px 0 -73px #d6d6d6,
+            -100px -100px 0 -98px #d6d6d6;
+        }
+
+        /* =====================================================
+           HEADING
+           ===================================================== */
+
+        .login-heading {
+          text-align: center;
+          margin-bottom: 1.5rem;
+        }
+
+        .event-chip {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.45rem;
+
+          padding: 0.4rem 0.8rem;
+
+          border: 1px solid #e2b900;
+          background: #fffdf2;
+
+          color: #987900;
+
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.62rem;
+          font-weight: 700;
+
+          letter-spacing: 0.13em;
+          text-transform: uppercase;
+
+          margin-bottom: 1rem;
+        }
+
+        .event-chip svg {
+          width: 14px;
+          height: 14px;
+        }
+
+        .login-heading h1 {
+          margin: 0;
+
+          font-family: 'Bangers', cursive;
+          font-size: clamp(2.5rem, 7vw, 3.6rem);
+          font-weight: 400;
+
+          line-height: 1;
+
+          letter-spacing: 0.025em;
+
+          color: #111111;
+        }
+
+        .login-heading p {
+          margin: 0.7rem 0 0;
+
+          color: #666666;
+
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.9rem;
+
+          line-height: 1.6;
+        }
+
+        /* =====================================================
+           CARD
+           ===================================================== */
+
+        .login-card {
+          width: 100%;
+          position: relative;
+
+          box-sizing: border-box;
+
+          background: #ffffff;
+
+          border: 1px solid #eeeeee;
+
+          padding: 2rem;
+
+          box-shadow:
+            0 15px 45px rgba(0, 0, 0, 0.08),
+            0 3px 12px rgba(220, 0, 0, 0.04);
+        }
+
+        .card-accent {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+
+          height: 3px;
+
+          background: linear-gradient(
+            90deg,
+            #e60000,
+            #ff4020,
+            #e60000
+          );
+        }
+
+        .logo-container {
+          display: flex;
+          justify-content: center;
+
+          margin-bottom: 1rem;
+        }
+
+        .login-logo {
+          width: 68px;
+          height: 68px;
+
+          object-fit: contain;
+
+          border-radius: 50%;
+
+          /*
+           * Keeps the SGC logo visible even if the supplied
+           * logo asset contains white areas.
+           */
+          background: #ffffff;
+
+          filter: drop-shadow(
+            0 5px 12px rgba(0, 0, 0, 0.1)
+          );
+        }
+
+        .login-card h2 {
+          margin: 0;
+
+          text-align: center;
+
+          color: #161616;
+
+          font-family: 'Orbitron', sans-serif;
+          font-size: 1.08rem;
+          font-weight: 800;
+
+          letter-spacing: 0.025em;
+        }
+
+        .card-description {
+          max-width: 350px;
+
+          margin: 0.55rem auto 1.15rem;
+
+          text-align: center;
+
+          color: #707070;
+
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.83rem;
+
+          line-height: 1.6;
+        }
+
+        /* =====================================================
+           SECURITY LINE
+           ===================================================== */
+
+        .security-line {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.45rem;
+
+          margin-bottom: 1.35rem;
+
+          color: #999999;
+
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.55rem;
+          font-weight: 700;
+
+          letter-spacing: 0.14em;
+        }
+
+        .security-dot {
+          width: 6px;
+          height: 6px;
+
+          border-radius: 50%;
+
+          background: #e60000;
+
+          box-shadow:
+            0 0 0 3px rgba(230, 0, 0, 0.08);
+        }
+
+        /* =====================================================
+           FORM
+           ===================================================== */
+
+        .login-form {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.45rem;
+        }
+
+        .form-group label {
+          color: #292929;
+
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.64rem;
+          font-weight: 700;
+
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        }
+
+        .input-wrapper {
+          position: relative;
+
+          display: flex;
+          align-items: center;
+        }
+
+        .input-icon {
+          position: absolute;
+          left: 0.9rem;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          width: 17px;
+          height: 17px;
+
+          color: #e60000;
+
+          pointer-events: none;
+
+          z-index: 1;
+        }
+
+        .input-icon svg {
           width: 100%;
           height: 100%;
         }
 
-        .auth-form input {
+        .form-group input {
           width: 100%;
-          min-height: 46px;
-          border: 1px solid rgba(220, 0, 0, 0.35);
-          background: rgba(0, 0, 0, 0.25);
-          color: var(--white);
-          padding: 0.8rem 2.6rem;
-          transition: border-color 0.2s ease;
+          height: 48px;
+
+          box-sizing: border-box;
+
+          border: 1px solid #dddddd;
+
+          background: #fafafa;
+
+          color: #191919;
+
+          padding: 0 2.8rem;
+
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.84rem;
+
+          transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease,
+            background 0.2s ease;
         }
 
-        .auth-form input:focus-visible {
+        .form-group input::placeholder {
+          color: #aaaaaa;
+        }
+
+        .form-group input:hover {
+          border-color: #cccccc;
+        }
+
+        .form-group input:focus {
           outline: none;
-          border-color: rgba(220, 0, 0, 0.85);
+
+          background: #ffffff;
+
+          border-color: #e60000;
+
+          box-shadow:
+            0 0 0 3px rgba(230, 0, 0, 0.07);
         }
 
-        .auth-form input::placeholder {
-          color: rgba(255, 255, 255, 0.45);
+        .form-group input:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
         }
 
-        .auth-input-toggle {
+        .password-toggle {
           position: absolute;
-          right: 0.7rem;
-          display: inline-flex;
+          right: 0.65rem;
+
+          width: 30px;
+          height: 30px;
+
+          display: flex;
           align-items: center;
           justify-content: center;
-          width: 26px;
-          height: 26px;
-          border: none;
+
+          border: 0;
           background: transparent;
-          color: var(--muted);
-          cursor: pointer;
+
+          color: #999999;
+
           padding: 0;
+
+          cursor: pointer;
+
+          transition: color 0.2s ease;
         }
 
-        .auth-input-toggle:hover,
-        .auth-input-toggle:focus-visible {
-          color: var(--red);
+        .password-toggle:hover,
+        .password-toggle:focus-visible {
+          color: #e60000;
         }
 
-        .auth-input-toggle svg {
+        .password-toggle:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .password-toggle svg {
           width: 18px;
           height: 18px;
         }
 
-        /* =========================================================
+        /* =====================================================
            ERROR
-        ========================================================= */
+           ===================================================== */
 
-        .auth-error {
-          margin: 0;
-          padding: 0.6rem 0.75rem;
-          border: 1px solid rgba(220, 0, 0, 0.5);
-          background: rgba(220, 0, 0, 0.08);
-          color: #ff9b9b;
-          font-size: 0.82rem;
-        }
-
-        /* =========================================================
-           ACTIONS / BUTTONS
-        ========================================================= */
-
-        .auth-actions {
+        .login-error {
           display: flex;
-          margin-top: 0.5rem;
-        }
+          align-items: flex-start;
+          gap: 0.6rem;
 
-        .auth-actions .primary-btn {
-          width: 100%;
-        }
+          padding: 0.75rem 0.85rem;
 
-        .primary-btn {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.5rem;
-          min-height: 46px;
-          padding: 0.8rem 1.25rem;
-          border: 1px solid transparent;
-          font-family: 'Orbitron', sans-serif;
-          font-size: 0.72rem;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-          text-decoration: none;
-          cursor: pointer;
-          transition: transform 0.2s ease;
-          background: linear-gradient(90deg, var(--red), #ff4d1a);
-          color: var(--white);
-          box-shadow: 0 0 18px rgba(220, 0, 0, 0.3);
-        }
+          border: 1px solid #f0aaaa;
 
-        .primary-btn svg {
-          width: 15px;
-          height: 15px;
-        }
+          background: #fff5f5;
 
-        .primary-btn:hover,
-        .primary-btn:focus-visible {
-          transform: translateY(-1px);
-        }
+          color: #c40000;
 
-        .auth-note {
-          margin: 1.5rem 0 0;
-          color: var(--muted);
-          line-height: 1.6;
-          font-size: 0.82rem;
-        }
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.76rem;
 
-        .auth-note strong {
-          color: var(--soft-white);
-        }
-
-        .auth-temp-hint {
-          margin: 0.75rem 0 0;
-          padding: 0.5rem 0.65rem;
-          border: 1px dashed rgba(255, 191, 0, 0.4);
-          color: var(--gold);
-          font-size: 0.75rem;
           line-height: 1.5;
         }
 
-        .auth-temp-hint code {
-          color: var(--white);
+        .error-mark {
+          flex: 0 0 auto;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          width: 17px;
+          height: 17px;
+
+          border-radius: 50%;
+
+          background: #e60000;
+
+          color: #ffffff;
+
+          font-family: Arial, sans-serif;
+          font-size: 0.68rem;
+          font-weight: 700;
         }
 
-        /* =========================================================
-           RESPONSIVE — 1024px and below
-        ========================================================= */
+        /* =====================================================
+           LOGIN BUTTON
+           ===================================================== */
 
-        @media (max-width: 1024px) {
-          .content-panel {
-            padding: 3.25rem 1.25rem;
+        .login-button {
+          width: 100%;
+          min-height: 49px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.55rem;
+
+          margin-top: 0.35rem;
+
+          border: 0;
+
+          background: linear-gradient(
+            90deg,
+            #e60000,
+            #ff351c
+          );
+
+          color: #ffffff;
+
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.72rem;
+          font-weight: 800;
+
+          letter-spacing: 0.13em;
+          text-transform: uppercase;
+
+          cursor: pointer;
+
+          box-shadow:
+            0 8px 20px rgba(230, 0, 0, 0.2);
+
+          transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease,
+            opacity 0.2s ease;
+        }
+
+        .login-button:hover:not(:disabled) {
+          transform: translateY(-2px);
+
+          box-shadow:
+            0 11px 25px rgba(230, 0, 0, 0.27);
+        }
+
+        .login-button:active:not(:disabled) {
+          transform: translateY(0);
+        }
+
+        .login-button:disabled {
+          opacity: 0.65;
+          cursor: not-allowed;
+        }
+
+        .login-button svg {
+          width: 16px;
+          height: 16px;
+        }
+
+        .loading-spinner {
+          width: 15px;
+          height: 15px;
+
+          border: 2px solid rgba(255, 255, 255, 0.35);
+          border-top-color: #ffffff;
+
+          border-radius: 50%;
+
+          animation: login-spin 0.7s linear infinite;
+        }
+
+        @keyframes login-spin {
+          to {
+            transform: rotate(360deg);
           }
         }
 
-        /* =========================================================
-           RESPONSIVE — 768px and below (tablet)
-        ========================================================= */
+        /* =====================================================
+           PORTAL INFO
+           ===================================================== */
 
-        @media (max-width: 768px) {
-          .content-panel {
-            padding: 2.75rem 1.1rem;
+        .portal-info {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.7rem;
+
+          margin-top: 1.35rem;
+          padding-top: 1.1rem;
+
+          border-top: 1px solid #eeeeee;
+        }
+
+        .info-icon {
+          width: 30px;
+          height: 30px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          border-radius: 50%;
+
+          background: #fff1f1;
+
+          color: #e60000;
+        }
+
+        .info-icon svg {
+          width: 16px;
+          height: 16px;
+        }
+
+        .portal-info div:last-child {
+          display: flex;
+          flex-direction: column;
+          gap: 0.1rem;
+        }
+
+        .portal-info strong {
+          color: #222222;
+
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.68rem;
+
+          letter-spacing: 0.08em;
+        }
+
+        .portal-info span {
+          color: #888888;
+
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.68rem;
+        }
+
+        /* =====================================================
+           FOOTER
+           ===================================================== */
+
+        .login-footer {
+          margin-top: 1rem;
+
+          color: #999999;
+
+          text-align: center;
+
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.69rem;
+
+          line-height: 1.5;
+        }
+
+        .login-footer strong {
+          color: #666666;
+        }
+
+        .copyright {
+          margin: 1.2rem 0 0;
+
+          color: #b0b0b0;
+
+          font-family: 'Orbitron', sans-serif;
+          font-size: 0.55rem;
+
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+
+          text-align: center;
+        }
+
+        /* =====================================================
+           RESPONSIVE
+           ===================================================== */
+
+        @media (max-width: 600px) {
+          .login-page {
+            padding: 2.5rem 1rem;
           }
 
-          .auth-title {
-            font-size: clamp(1.6rem, 5vw, 2.1rem);
+          .login-card {
+            padding: 1.6rem 1.25rem;
+          }
+
+          .login-heading {
+            margin-bottom: 1.2rem;
+          }
+
+          .login-heading h1 {
+            font-size: 2.7rem;
+          }
+
+          .login-heading p {
+            font-size: 0.82rem;
+          }
+
+          .login-web {
+            opacity: 0.08;
           }
         }
 
-        /* =========================================================
-           RESPONSIVE — 430px and below (phones)
-        ========================================================= */
-
-        @media (max-width: 430px) {
-          .content-panel {
-            padding: 2.25rem 0.9rem;
+        @media (max-width: 380px) {
+          .login-page {
+            padding: 2rem 0.75rem;
           }
 
-          .auth-card {
-            padding: 1.5rem 1.15rem;
+          .login-card {
+            padding: 1.4rem 1rem;
           }
 
-          .auth-badge {
-            font-size: 0.6rem;
-            letter-spacing: 0.1em;
-          }
-        }
-
-        /* =========================================================
-           RESPONSIVE — 320px (smallest supported)
-        ========================================================= */
-
-        @media (max-width: 320px) {
-          .auth-card {
-            padding: 1.25rem 1rem;
+          .login-heading h1 {
+            font-size: 2.35rem;
           }
 
-          .auth-form input {
-            min-height: 42px;
-            padding: 0.7rem 2.4rem;
+          .event-chip {
+            font-size: 0.55rem;
+          }
+
+          .login-card h2 {
+            font-size: 0.95rem;
           }
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .primary-btn,
-          .auth-input-toggle {
+          .login-button,
+          .form-group input,
+          .password-toggle {
             transition: none;
+          }
+
+          .loading-spinner {
+            animation: none;
           }
         }
       `}</style>
