@@ -6155,20 +6155,20 @@ const registerStyles = `
   .reg-card-events-overlay {
     position: absolute;
     top: 74%;
-    left: 33%;
+    left: 37%;
+    right:60%;
     width: 59%;
     height: 10%;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 0;
+    align-items: center;
     padding: 0 2%;
     color: #ffffff;
     font-family: 'Hanken Grotesk', sans-serif;
     font-weight: 700;
-    line-height: 1.25;
+    line-height: 1.3;
     overflow: hidden;
     word-break: break-word;
+    white-space: normal;
   }
 
   .reg-card-event-line {

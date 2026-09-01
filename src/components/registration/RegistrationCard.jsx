@@ -4,9 +4,9 @@ const SOLO_BG = "/Reg cards/regcardName.png";
 const TEAM_BG = "/Reg cards/regcardTeamname.png";
 
 function getEventsFontSize(count) {
-  if (count <= 2) return "clamp(0.55rem, 2.2vw, 1rem)";
-  if (count <= 3) return "clamp(0.48rem, 1.9vw, 0.88rem)";
-  if (count <= 4) return "clamp(0.4rem, 1.6vw, 0.72rem)";
+  if (count <= 5) return "clamp(0.55rem, 2.2vw, 1rem)";
+  if (count <= 6) return "clamp(0.48rem, 1.9vw, 0.88rem)";
+  if (count <= 7) return "clamp(0.4rem, 1.6vw, 0.72rem)";
   return "clamp(0.32rem, 1.3vw, 0.58rem)";
 }
 
@@ -36,14 +36,12 @@ const RegistrationCard = forwardRef(function RegistrationCard(
         className="reg-card-events-overlay"
         style={{ fontSize: getEventsFontSize(eventCount) }}
       >
-        {(events || []).map((e, i) => {
-          const count = Number(e.teamSize) || 1;
-          return (
-            <div key={i} className="reg-card-event-line">
-              {e.name} ({count})
-            </div>
-          );
-        })}
+        {(events || [])
+          .map((e) => {
+            const count = Number(e.teamSize) || 1;
+            return `${e.name} (${count})`;
+          })
+          .join(", ")}
       </div>
     </div>
   );
