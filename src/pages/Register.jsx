@@ -27,7 +27,6 @@ import {
 
 import RegistrationCard from "../components/registration/RegistrationCard";
 import { toPng } from "html-to-image";
-import { saveAs } from "file-saver";
 
 const DRAFT_KEY = "revibe26_registration_draft_v3";
 const LEGACY_DRAFT_KEY = "revibe26_registration_draft_v2";
@@ -157,6 +156,12 @@ function getEventFee(event) {
   const item = mergeEventData(event);
   const config = getEventConfig(item.slug);
 
+  if (config.feeType === "per_team_tiered") {
+    const tiers = config.feeTiers || {};
+    const values = Object.values(tiers).filter(Boolean);
+    return values.length > 0 ? Math.min(...values) : 0;
+  }
+
   return Number(item.fee ?? config?.fee ?? 0);
 }
 
@@ -259,8 +264,9 @@ export default function Register() {
 
   const [showReveal, setShowReveal] = useState(false);
   const [revealKey, setRevealKey] = useState(0);
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
 
-  const cardRef = useRef(null);
+  const cardRefs = useRef([]);
 
   /* =========================================================
      LOAD SAVED DETAILS
@@ -606,19 +612,85 @@ export default function Register() {
     return `REVIBE 26 - ${form.name || "Registration"}`;
   }, [teamName, form.name]);
 
-  const handleDownloadCard = async () => {
-    if (!cardRef.current) return;
+  const getTeamGroups = () => {
+    const teams = {};
+    selectedEvents.forEach((eventItem) => {
+      const details = form.eventRegistrations[eventItem.slug] || emptyEventRegistration();
+      const participantCount = Number(details.teamSize) || 0;
+      const isTeam = participantCount > 1;
+      const teamKey = isTeam
+        ? (details.teamName || `team-${eventItem.slug}`)
+        : "__solo__";
+      if (!teams[teamKey]) {
+        teams[teamKey] = {
+          teamName: isTeam ? details.teamName : null,
+          isTeam,
+        };
+      }
+      teams[teamKey].events = teams[teamKey].events || [];
+      teams[teamKey].events.push({ eventItem, details });
+    });
+    return Object.values(teams);
+  };
+
+  const handleDownloadCard = async (index) => {
+    const el = cardRefs.current[index];
+    if (!el) return;
     try {
-      const dataUrl = await toPng(cardRef.current, {
+      const dataUrl = await toPng(el, {
         cacheBust: true,
         pixelRatio: 2,
       });
-      const label = hasTeamEvent
-        ? teamName || "team"
+      const group = getTeamGroups()[index];
+      const label = group?.isTeam
+        ? group.teamName || "team"
         : form.name || "solo";
-      saveAs(dataUrl, `revibe26-${label}.png`);
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = `revibe26-${label}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (err) {
       console.error("Card download failed:", err);
+    }
+  };
+
+  const handleShareCard = async (index) => {
+    const el = cardRefs.current[index];
+    if (!el) return;
+    try {
+      const dataUrl = await toPng(el, {
+        cacheBust: true,
+        pixelRatio: 2,
+      });
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const group = getTeamGroups()[index];
+      const label = group?.isTeam
+        ? group.teamName || "team"
+        : form.name || "solo";
+      const file = new File([blob], `revibe26-${label}.png`, {
+        type: "image/png",
+        lastModified: Date.now(),
+      });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "",
+        });
+      } else {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `revibe26-${label}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (err) {
+      if (err.name !== "AbortError") {
+        console.error("Card share failed:", err);
+      }
     }
   };
 
@@ -716,6 +788,13 @@ export default function Register() {
           ] ||
           emptyEventRegistration();
 
+        const config = getEventConfig(slug);
+        const min = Number(config?.minTeamSize) || 1;
+
+        const needsMinAdjust =
+          !previous.eventRegistrations[slug] &&
+          Number(restoredDetails.teamSize) < min;
+
         return {
           ...previous,
 
@@ -727,8 +806,9 @@ export default function Register() {
           eventRegistrations: {
             ...previous.eventRegistrations,
 
-            [slug]:
-              restoredDetails,
+            [slug]: needsMinAdjust
+              ? { ...restoredDetails, teamSize: String(min) }
+              : restoredDetails,
           },
 
           paymentScreenshotShared:
@@ -1833,6 +1913,8 @@ export default function Register() {
                 successfully.
               </p>
 
+              <div className="success-two-col">
+                <div className="success-two-col-left">
               <div className="selected-events-preview">
                 <div className="selected-events-preview-header">
                   <span>REGISTRATION SUMMARY</span>
@@ -1845,23 +1927,10 @@ export default function Register() {
                     <strong>{hasTeamEvent ? "TEAM" : "SOLO"}</strong>
                   </div>
 
-                  {hasTeamEvent ? (
-                    <>
-                      <div>
-                        <span>Team Name</span>
-                        <strong>{teamName || "—"}</strong>
-                      </div>
-                      <div>
-                        <span>Lead Name</span>
-                        <strong>{form.name}</strong>
-                      </div>
-                    </>
-                  ) : (
-                    <div>
-                      <span>Participant Name</span>
-                      <strong>{form.name}</strong>
-                    </div>
-                  )}
+                  <div>
+                    <span>{hasTeamEvent ? "Lead Name" : "Participant Name"}</span>
+                    <strong>{form.name}</strong>
+                  </div>
 
                   {registrationNumbers.length > 0 && (
                     <div>
@@ -1896,6 +1965,13 @@ export default function Register() {
                           {participantCount > 1 && details.teamName && (
                             <div className="event-review-team-name">Team: {details.teamName}</div>
                           )}
+                          {participantCount > 1 && details.members?.length > 0 && (
+                            <div className="event-review-members">
+                              {details.members.map((m, i) => m.name ? (
+                                <span key={i}>Member {i + 2}: {m.name}</span>
+                              ) : null)}
+                            </div>
+                          )}
                         </div>
                         <div />
                         <div className="event-review-fee">₹{eventFee}</div>
@@ -1909,46 +1985,117 @@ export default function Register() {
                   <strong>₹{totalFee}</strong>
                 </div>
               </div>
-
-              {/* =================================================
-                  REGISTRATION CARD
-              ================================================= */}
-
-              <div className="reg-card-section">
-                <p className="reg-card-section-title">
-                  Your Registration Card
-                </p>
-
-                <div className="reg-card-wrapper">
-                  <RegistrationCard
-                    ref={cardRef}
-                    name={form.name}
-                    teamName={teamName}
-                    type={hasTeamEvent ? "team" : "solo"}
-                    events={selectedEvents.map((ev) => {
-                      const details =
-                        form.eventRegistrations[ev.slug] ||
-                        emptyEventRegistration();
-                      return {
-                        name: ev.name,
-                        teamSize: details.teamSize,
-                      };
-                    })}
-                  />
                 </div>
 
-                <button
-                  className="reg-card-download-btn"
-                  onClick={handleDownloadCard}
-                  type="button"
-                >
-                  ↓ Download Card
-                </button>
-              </div>
-
+                <div className="success-two-col-right">
               {/* =================================================
-                  PAYMENT PENDING
+                  REGISTRATION CARDS
               ================================================= */}
+
+              {(() => {
+                const teamGroups = getTeamGroups();
+
+                return (
+                  <div className="reg-card-section">
+                    <p className="reg-card-section-title">
+                      Your Registration Card{teamGroups.length > 1 ? "s" : ""}
+                    </p>
+
+                    {teamGroups.length > 1 && (
+                      <div className="reg-card-carousel">
+                        <button
+                          className="reg-card-nav-btn reg-card-nav-prev"
+                          onClick={() => setActiveCardIndex((p) => p > 0 ? p - 1 : teamGroups.length - 1)}
+                          type="button"
+                          aria-label="Previous card"
+                        >
+                          ‹
+                        </button>
+
+                        <div className="reg-card-carousel-inner">
+                          <div className="reg-card-wrapper" key={activeCardIndex}>
+                            <RegistrationCard
+                              ref={(el) => { cardRefs.current[activeCardIndex] = el; }}
+                              name={form.name}
+                              teamName={teamGroups[activeCardIndex].teamName}
+                              type={teamGroups[activeCardIndex].isTeam ? "team" : "solo"}
+                              events={teamGroups[activeCardIndex].events.map(({ eventItem: ev, details: d }) => ({
+                                name: ev.name,
+                                teamSize: d.teamSize,
+                              }))}
+                            />
+                          </div>
+                        </div>
+
+                        <button
+                          className="reg-card-nav-btn reg-card-nav-next"
+                          onClick={() => setActiveCardIndex((p) => p < teamGroups.length - 1 ? p + 1 : 0)}
+                          type="button"
+                          aria-label="Next card"
+                        >
+                          ›
+                        </button>
+                      </div>
+                    )}
+
+                    {teamGroups.length > 1 && (
+                      <div className="reg-card-dots">
+                        {teamGroups.map((_, i) => (
+                          <button
+                            key={i}
+                            className={`reg-card-dot ${i === activeCardIndex ? "reg-card-dot-active" : ""}`}
+                            onClick={() => setActiveCardIndex(i)}
+                            type="button"
+                            aria-label={`Go to card ${i + 1}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    {teamGroups.length === 1 && (
+                      <div className="reg-card-wrapper">
+                        <RegistrationCard
+                          ref={(el) => { cardRefs.current[0] = el; }}
+                          name={form.name}
+                          teamName={teamGroups[0].teamName}
+                          type={teamGroups[0].isTeam ? "team" : "solo"}
+                          events={teamGroups[0].events.map(({ eventItem: ev, details: d }) => ({
+                            name: ev.name,
+                            teamSize: d.teamSize,
+                          }))}
+                        />
+                      </div>
+                    )}
+
+                    <div className="reg-card-actions">
+                      <button
+                        className="reg-card-download-btn"
+                        onClick={() => handleDownloadCard(activeCardIndex)}
+                        type="button"
+                      >
+                        ↓ Download
+                      </button>
+
+                      {typeof navigator !== "undefined" && navigator.share && (
+                        <button
+                          className="reg-card-share-btn"
+                          onClick={() => handleShareCard(activeCardIndex)}
+                          type="button"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                            <circle cx="12" cy="12" r="4"/>
+                            <circle cx="18" cy="6" r="1.5" fill="currentColor" stroke="none"/>
+                          </svg>
+                          Share to Story
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+                </div>
+              </div>
 
               {totalFee > 0 && (
                 <div className="success-warning">
@@ -1959,32 +2106,19 @@ export default function Register() {
 
                   <ol>
                     <li>
-                      Your payment
-                      details have
-                      been submitted.
+                      Your payment details have been submitted.
                     </li>
 
                     <li>
-                      Our coordinator will verify
-your screenshot
-against the actual
-Google Pay
-transaction.
+                      Our coordinator will verify your screenshot against the actual Google Pay transaction.
                     </li>
 
                     <li>
-                      Your registration
-                      will be confirmed
-                      only after the
-                      payment is
-                      successfully
-                      verified.
+                      Your registration will be confirmed only after the payment is successfully verified.
                     </li>
 
                     <li>
-                      After successful
-                      verification,
-                      you will be added to the respective whatsapp groups for your events.
+                      After successful verification, you will be added to the respective whatsapp groups for your events.
                     </li>
                   </ol>
                 </div>
@@ -1993,14 +2127,11 @@ transaction.
               {totalFee === 0 && (
                 <div className="success-warning">
                   <strong>
-                    Registration
-                    submitted
+                    Registration submitted
                   </strong>
 
                   <p>
-                    No payment is
-                    required for these
-                    events.
+                    No payment is required for these events.
                   </p>
                 </div>
               )}
@@ -3062,7 +3193,7 @@ transaction.
                               </div>
                             </div>
 
-                            <div className="selected-events-preview">
+              <div className="selected-events-preview">
                               <div className="selected-events-preview-header">
                                 <span>
                                   REGISTRATION
@@ -3400,7 +3531,7 @@ transaction.
                           <li>
                             <strong>
                               Send the payment
-screenshot to our
+screenshot along with your regestired name  to our
 coordinator on
 WhatsApp:
                             </strong>
@@ -3742,10 +3873,10 @@ function EventCategory({
           const fee =
             getEventFee(event);
 
-          const maxTeam =
+          const range =
             getEventParticipantRange(
               event
-            ).max;
+            );
 
           return (
             <button
@@ -3803,11 +3934,9 @@ function EventCategory({
                 </strong>
 
                 <span>
-                  Max{" "}
-                  {maxTeam}{" "}
-                  {maxTeam === 1
-                    ? "participant"
-                    : "participants"}
+                  {range.min === range.max
+                    ? `Max ${range.max} ${range.max === 1 ? "participant" : "participants"}`
+                    : `${range.min}-${range.max} participants`}
                 </span>
               </div>
             </button>
@@ -5728,6 +5857,10 @@ const registerStyles = `
     text-align: left;
   }
 
+  .reg-card-wrapper + .reg-card-wrapper {
+    margin-top: 1rem;
+  }
+
   .selected-events-preview-header {
     display: flex;
     align-items: center;
@@ -5788,6 +5921,16 @@ const registerStyles = `
     color: #dc0000;
     font-size: 0.65rem;
     font-weight: 700;
+  }
+
+  .event-review-members {
+    margin-top: 0.2rem;
+    color: #6a6a6a;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 0.65rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
   }
 
   .event-review-fee {
@@ -6192,6 +6335,47 @@ const registerStyles = `
     }
   }
 
+  /* ═══ SUCCESS TWO-COLUMN LAYOUT ═══ */
+
+  .success-two-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 1.25rem;
+  }
+
+  .success-two-col-left,
+  .success-two-col-right {
+    min-width: 0;
+  }
+
+  @media (min-width: 768px) {
+    .register-success-card {
+      max-width: 1100px;
+    }
+
+    .success-two-col {
+      text-align: left;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 2rem;
+    }
+
+    .success-two-col-left {
+      flex: 1 1 55%;
+    }
+
+    .success-two-col-right {
+      flex: 1 1 40%;
+      position: sticky;
+      top: 2rem;
+    }
+
+    .success-two-col-right .reg-card-section {
+      margin-top: 0;
+    }
+  }
+
   /* ═══ REGISTRATION CARD ═══ */
 
   .reg-card-section {
@@ -6212,6 +6396,73 @@ const registerStyles = `
     max-width: 420px;
     margin: 0 auto;
     container-type: inline-size;
+  }
+
+  .reg-card-carousel {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  .reg-card-carousel-inner {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .reg-card-carousel-inner .reg-card-wrapper {
+    margin: 0;
+  }
+
+  .reg-card-nav-btn {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border: 2px solid #1a1a1a;
+    border-radius: 50%;
+    background: #fff;
+    color: #1a1a1a;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, transform 0.1s;
+    box-shadow: 2px 2px 0 #1a1a1a;
+  }
+
+  .reg-card-nav-btn:hover {
+    background: #f0f0f0;
+  }
+
+  .reg-card-nav-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 #1a1a1a;
+  }
+
+  .reg-card-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .reg-card-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid #1a1a1a;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.15s;
+  }
+
+  .reg-card-dot-active {
+    background: #dc0000;
   }
 
   .reg-card-container {
@@ -6298,28 +6549,65 @@ const registerStyles = `
   .reg-card-download-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
-    margin-top: 1rem;
-    padding: 0.7rem 1.6rem;
-    background: #dc0000;
-    color: #ffffff;
+    min-height: 50px;
+    padding: 0.95rem 1.9rem;
+    background: transparent;
+    color: #0d0d0d;
     font-family: 'Anton', sans-serif;
-    font-size: 0.95rem;
-    letter-spacing: 0.06em;
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    border: 2px solid #1a1a1a;
-    border-radius: 4px;
+    border: 2px solid #0d0d0d;
+    border-radius: 999px;
     cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
-    box-shadow: 3px 3px 0 #1a1a1a;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
   }
 
   .reg-card-download-btn:hover {
-    background: #b00000;
+    transform: translateY(-3px);
+    background: #0d0d0d;
+    color: #ffffff;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3);
   }
 
-  .reg-card-download-btn:active {
-    transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0 #1a1a1a;
+  .reg-card-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .reg-card-share-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 50px;
+    padding: 0.95rem 1.9rem;
+    background: #dc0000;
+    color: #ffffff;
+    font-family: 'Anton', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 2px solid #0d0d0d;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 8px 22px rgba(220, 0, 0, 0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+  }
+
+  .reg-card-share-btn:hover {
+    transform: translateY(-3px);
+    background: #0d0d0d;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  .reg-card-share-btn svg {
+    flex-shrink: 0;
   }
 `;
