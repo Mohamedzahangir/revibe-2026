@@ -796,7 +796,6 @@ export default function Register() {
         const min = Number(config?.minTeamSize) || 1;
 
         const needsMinAdjust =
-          !previous.eventRegistrations[slug] &&
           Number(restoredDetails.teamSize) < min;
 
         return {
