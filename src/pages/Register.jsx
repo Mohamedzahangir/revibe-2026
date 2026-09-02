@@ -265,6 +265,7 @@ export default function Register() {
   const [showReveal, setShowReveal] = useState(false);
   const [revealKey, setRevealKey] = useState(0);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [shareFile, setShareFile] = useState(null);
 
   const cardRefs = useRef([]);
 
@@ -656,46 +657,46 @@ export default function Register() {
     }
   };
 
-  const handleShareCard = async (index) => {
-    const el = cardRefs.current[index];
-    if (!el) return;
-    try {
-      await navigator.clipboard.writeText(
-        "Hey I registered for REVIBE '26! It's your time to register now \u{1F525} revibeofficial.in"
-      );
-      const dataUrl = await toPng(el, {
-        cacheBust: true,
-        pixelRatio: 2,
-      });
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
-      const group = getTeamGroups()[index];
-      const label = group?.isTeam
-        ? group.teamName || "team"
-        : form.name || "solo";
-      const file = new File([blob], `revibe26-${label}.png`, {
-        type: "image/png",
-        lastModified: Date.now(),
-      });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: "",
-        });
-      } else {
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `revibe26-${label}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-    } catch (err) {
-      if (err.name !== "AbortError") {
-        console.error("Card share failed:", err);
+  const handleShareCard = async () => {
+    navigator.clipboard.writeText(
+      "Hey I registered for REVIBE '26! It's your time to register now \u{1F525} revibeofficial.in"
+    ).catch(() => {});
+    if (shareFile && navigator.canShare && navigator.canShare({ files: [shareFile] })) {
+      try {
+        await navigator.share({ files: [shareFile], title: "" });
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.error("Card share failed:", err);
+        }
       }
     }
   };
+
+  useEffect(() => {
+    if (!submitted) return;
+    const el = cardRefs.current[activeCardIndex];
+    if (!el) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const dataUrl = await toPng(el, { cacheBust: true, pixelRatio: 2 });
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        if (cancelled) return;
+        const group = getTeamGroups()[activeCardIndex];
+        const label = group?.isTeam
+          ? group.teamName || "team"
+          : form.name || "solo";
+        setShareFile(new File([blob], `revibe26-${label}.png`, {
+          type: "image/png",
+          lastModified: Date.now(),
+        }));
+      } catch (err) {
+        console.error("Pre-render share card failed:", err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [submitted, activeCardIndex]);
 
   /* =========================================================
      GENERIC UPDATE
@@ -2082,7 +2083,7 @@ export default function Register() {
                       {typeof navigator !== "undefined" && navigator.share && (
                         <button
                           className="reg-card-share-btn"
-                          onClick={() => handleShareCard(activeCardIndex)}
+                          onClick={handleShareCard}
                           type="button"
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
