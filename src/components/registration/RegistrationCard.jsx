@@ -50,12 +50,11 @@ const RegistrationCard = forwardRef(function RegistrationCard(
         {isVertical
           ? (events || []).map((e, i) => {
               const count = Number(e.teamSize) || 1;
-              return <div key={i} className="reg-card-event-line">{`${e.name} (${count})`}</div>;
+              return <div key={i} className="reg-card-event-line">{e.name}</div>;
             })
           : (events || [])
               .map((e) => {
-                const count = Number(e.teamSize) || 1;
-                return `${e.name} (${count})`;
+                return e.name;
               })
               .join(", ")}
       </div>
