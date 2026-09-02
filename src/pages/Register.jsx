@@ -796,7 +796,6 @@ export default function Register() {
         const min = Number(config?.minTeamSize) || 1;
 
         const needsMinAdjust =
-          !previous.eventRegistrations[slug] &&
           Number(restoredDetails.teamSize) < min;
 
         return {
@@ -5152,8 +5151,15 @@ const registerStyles = `
   /* ═══ UPI PAY BANNER ═══ */
 
   .upi-pay-section {
+    display: none;
     margin-bottom: 1.5rem;
     text-align: center;
+  }
+
+  @media (max-width: 767px) {
+    .upi-pay-section {
+      display: block;
+    }
   }
 
   .upi-pay-banner {
@@ -5746,14 +5752,15 @@ const registerStyles = `
   .register-success-card h1 {
     margin: 0;
     font-family: 'Anton', sans-serif;
-    font-size: clamp(2rem, 7vw, 3rem);
+    font-size: clamp(1.6rem, 7vw, 3rem);
     font-weight: 400;
     text-transform: uppercase;
     color: #1a1a1a;
+    white-space: nowrap;
   }
 
   .success-intro {
-    margin: 0.7rem 0 1.5rem;
+    margin: 0 0 0.3rem;
     color: #6a6a6a;
     font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.85rem;
@@ -6349,12 +6356,16 @@ const registerStyles = `
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    margin-top: 1.25rem;
+    margin-top: 0.5rem;
   }
 
   .success-two-col-left,
   .success-two-col-right {
     min-width: 0;
+  }
+
+  .success-two-col-right {
+    order: -1;
   }
 
   @media (min-width: 768px) {
