@@ -84,8 +84,8 @@ export const registrationEvents = {
   },
 
   "ipl-auction": {
-    minTeamSize: 1,
-    maxTeamSize: 6,
+    minTeamSize: 5,
+    maxTeamSize: 5,
     fee: 200,
     feeType: "per_team",
   },
