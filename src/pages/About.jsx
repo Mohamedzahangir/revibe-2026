@@ -34,10 +34,10 @@ const sponsors = [
 ];
 
 function SponsorTier({ sponsors }) {
-  return (
-    <div className="ws-sponsors-grid">
+  const sponsorSet = (isDuplicate = false) => (
+    <div className="ws-sponsors-set" aria-hidden={isDuplicate}>
       {sponsors.map((sponsor) => (
-        <article className="ws-sponsor-card" key={sponsor.name}>
+        <article className="ws-sponsor-card" key={`${sponsor.name}-${isDuplicate}`}>
           <div className="ws-sponsor-logo" aria-label={`${sponsor.name} logo`}>
             {sponsor.logo ? (
               <img src={sponsor.logo} alt={`${sponsor.name} logo`} />
@@ -51,6 +51,15 @@ function SponsorTier({ sponsors }) {
           </div>
         </article>
       ))}
+    </div>
+  );
+
+  return (
+    <div className="ws-sponsors-grid" aria-label="Sponsors carousel">
+      <div className="ws-sponsors-track">
+        {sponsorSet()}
+        {sponsorSet(true)}
+      </div>
     </div>
   );
 }
@@ -617,14 +626,29 @@ export default function About() {
         .ws-sponsors-grid {
           position: relative;
           z-index: 2;
-          display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 24px;
+          width: 100%;
+          overflow: hidden;
           margin-top: 32px;
+        }
+
+        .ws-sponsors-track {
+          display: flex;
+          width: max-content;
+          animation: ws-sponsors-marquee 34s linear infinite;
+          will-change: transform;
+        }
+
+        .ws-sponsors-set {
+          display: flex;
+          flex: 0 0 auto;
+          gap: 24px;
+          padding-right: 24px;
         }
 
         .ws-sponsor-card {
           position: relative;
+          flex: 0 0 clamp(280px, 28vw, 360px);
+          min-width: 0;
           display: flex;
           flex-direction: column;
           gap: 14px;
@@ -701,6 +725,17 @@ export default function About() {
           font-size: 0.92rem;
           line-height: 1.5;
           color: #3a3a3a;
+          overflow-wrap: break-word;
+          word-break: normal;
+        }
+
+        @keyframes ws-sponsors-marquee {
+          from {
+            transform: translateX(0);
+          }
+          to {
+            transform: translateX(-50%);
+          }
         }
 
         /* =========================================================
@@ -717,8 +752,7 @@ export default function About() {
           }
 
           .ws-sponsors-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 20px;
+            margin-top: 28px;
           }
 
           .ws-gallery-web--center {
@@ -814,14 +848,23 @@ export default function About() {
 
         @media (max-width: 560px) {
           .ws-sponsors-grid {
-            grid-template-columns: 1fr;
+            width: calc(100% + 32px);
+            margin-left: -16px;
+            margin-right: -16px;
+          }
+
+          .ws-sponsors-track {
+            animation-duration: 42s;
+          }
+
+          .ws-sponsors-set {
             gap: 16px;
+            padding-right: 16px;
           }
 
           .ws-sponsor-card {
             padding: 16px;
-            max-width: 340px;
-            margin: 0 auto;
+            flex-basis: min(340px, calc(100vw - 48px));
           }
         }
 
@@ -830,8 +873,10 @@ export default function About() {
         ========================================================= */
 
         @media (prefers-reduced-motion: reduce) {
-          .ws-card {
+          .ws-card,
+          .ws-sponsors-track {
             transition: none;
+            animation: none;
           }
         }
       `}</style>
