@@ -32,19 +32,18 @@ function SponsorTier({ sponsors }) {
   return (
     <div className="ws-sponsors-grid">
       {sponsors.map((sponsor) => (
-        <article className="ws-card ws-gallery-card ws-sponsor-card" key={sponsor.name}>
-          <div
-            className="ws-sponsor-logo"
-            aria-label={`${sponsor.name} logo`}
-          >
+        <article className="ws-sponsor-card" key={sponsor.name}>
+          <div className="ws-sponsor-logo" aria-label={`${sponsor.name} logo`}>
             {sponsor.logo ? (
               <img src={sponsor.logo} alt={`${sponsor.name} logo`} />
             ) : (
               <span>LOGO</span>
             )}
           </div>
-          <h3 className="ws-sponsor-name">{sponsor.name}</h3>
-          <p className="ws-sponsor-blurb">{sponsor.blurb}</p>
+          <div className="ws-sponsor-info">
+            <h3 className="ws-sponsor-name">{sponsor.name}</h3>
+            <p className="ws-sponsor-blurb">{sponsor.blurb}</p>
+          </div>
         </article>
       ))}
     </div>
@@ -608,54 +607,84 @@ export default function About() {
           display: block;
         }
 
-        /* ---------- sponsors (same boxes as gallery) ---------- */
+        /* ---------- sponsors ---------- */
 
         .ws-sponsors-grid {
           position: relative;
           z-index: 2;
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 16px;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 24px;
           margin-top: 32px;
         }
 
         .ws-sponsor-card {
+          position: relative;
+          display: flex;
+          flex-direction: column;
           gap: 14px;
-          min-height: 200px;
-          padding: 16px;
+          padding: 20px;
+          border: 1px solid rgba(220, 0, 0, 0.35);
+          border-radius: 16px;
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
+          box-shadow:
+            0 10px 30px rgba(0, 0, 0, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+          overflow: hidden;
+          transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .ws-sponsor-card::after {
+          content: "";
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 3px;
+          background: linear-gradient(90deg, transparent, rgba(220, 0, 0, 0.5), transparent);
+          pointer-events: none;
+        }
+
+        .ws-sponsor-card:hover,
+        .ws-sponsor-card:focus-within {
+          transform: translateY(-3px);
+          border-color: rgba(220, 0, 0, 0.6);
+          box-shadow:
+            0 14px 34px rgba(0, 0, 0, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
         }
 
         .ws-sponsor-logo {
           display: grid;
           place-items: center;
           width: 100%;
-          min-height: 110px;
-          border: 1px dashed rgba(220, 0, 0, 0.5);
+          aspect-ratio: 16 / 10;
           border-radius: 12px;
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(220, 0, 0, 0.04));
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 0.72rem;
-          font-weight: 700;
-          letter-spacing: 0.2em;
-          color: #6a6a6a;
+          overflow: hidden;
+          background: #f2f2f2;
         }
 
         .ws-sponsor-logo img {
-          max-width: 80%;
-          max-height: 90px;
-          object-fit: contain;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .ws-sponsor-info {
+          position: relative;
+          z-index: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
         }
 
         .ws-sponsor-name {
-          position: relative;
-          z-index: 1;
           margin: 0;
           font-family: 'Anton', sans-serif;
           font-weight: 400;
-          font-size: 1.35rem;
-          line-height: 1.05;
+          font-size: 1.15rem;
+          line-height: 1.1;
           letter-spacing: 0.02em;
-          color: #1a1a1a;
+          color: #b7102a;
           text-transform: uppercase;
         }
 
@@ -683,7 +712,8 @@ export default function About() {
           }
 
           .ws-sponsors-grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
           }
 
           .ws-gallery-web--center {
@@ -729,7 +759,7 @@ export default function About() {
           }
 
           .ws-sponsors-grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 24px;
           }
 
@@ -782,10 +812,13 @@ export default function About() {
         @media (max-width: 560px) {
           .ws-sponsors-grid {
             grid-template-columns: 1fr;
+            gap: 16px;
           }
 
           .ws-sponsor-card {
-            padding: 14px;
+            padding: 16px;
+            max-width: 340px;
+            margin: 0 auto;
           }
         }
 
