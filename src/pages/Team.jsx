@@ -54,7 +54,7 @@ const teams = [
       { name: "Afra Naushine S", dept: "III Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787941446/Afra_Naushine_zpxjoc.jpg" },
       { name: "Juvariya Anjum", dept: "II Year AI-DS", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787941461/Juvariya_Anjum_zmyciw.jpg" },
       { name: "Shanmuga Priya. J", dept: "II Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935197/Shanmuga_Priya_viwfz7.png" },
-      { name: "MONIKA A", dept: "II Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935193/Monika_tb1xkl.png" },
+      { name: "MONIKA A", dept: "II Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788339119/file_00000000f830821195b202929c4576f0_-_Monika_1_ipsdid.png" },
     ],
   },
   {
@@ -77,10 +77,10 @@ const teams = [
       "The amplifiers of the web, carrying the signal of REVIBE '26 across every channel.",
     members: [
       { name: "Mohammed Abuzar", dept: "IV Year CSE", role: "Social Media Lead", lead: true, photo: "https://res.cloudinary.com/dbqjkjl0c/image/upload/v1788170104/ABUZPIC2_elgeqj.jpg" },
-      { name: "Mohammed Sufyaan", dept: "II Year IT" },
-      { name: "A MOHAMMED SAAD", dept: "II Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935198/A_Muhammad_Saad_dqvnob.jpg " },
+      { name: "Mohammed Sufyaan", dept: "II Year IT", photo:"https://res.cloudinary.com/djm8qhle1/image/upload/v1788339110/1000161921_-_Mohammed_Sufyaan_Z_lndfii.png"},
+      { name: "A Muhammed Saad", dept: "II Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935198/A_Muhammad_Saad_dqvnob.jpg " },
       { name: "Mohammed Fahad Khan FM", dept: "II Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935189/Fahad_Khan_gtft9u.png" },
-      { name: "Zainab Sayeeda MK", dept: "II Year AI-DS", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935200/Sayeeda_qq0vv6.png" },
+      { name: "S Mohammed Saad", dept: "II Year AI-DS", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935208/S_MOHAMMED_SAAD_h03juj.png" },
       { name: "Mohammed Yasar M", dept: "III Year AI-DS", role: "Session Incharge", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/f_auto,q_auto/Screenshot_2026-03-31_163341_uwuv0c" },
     ],
   },
@@ -102,7 +102,7 @@ const teams = [
     blurb:
       "Your friendly neighborhood hosts, welcoming every visitor into the web with open arms.",
     members: [
-      { name: "Abishek", dept: "IV Year IT", role: "Session Incharge", lead: true, showRole: true, photo: "/placeholder.svg?height=200&width=200" },
+      { name: "Abishek", dept: "IV Year IT", role: "Session Incharge", lead: true, showRole: true, photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788340392/WhatsApp_Image_2026-09-02_at_2.42.28_PM_lcawwi.jpg" },
       { name: "Dhurga prasad S", dept: "IV Year EEE", role: "Co-Lead", coLead: true, photo: "https://res.cloudinary.com/douhcccb7/image/upload/v1739638236/WhatsApp_Image_2025-02-15_at_9.36.39_PM_uzlpgq.jpg" },
       { name: "Mohammed Zahangir", dept: "III Year AI-DS",  role: "Administrator", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788023717/Zahangir_jdjb0o.jpg" },
     ],
@@ -134,11 +134,11 @@ const teams = [
       { name: "MOHAMMED MAAZ C", dept: "II Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935180/Maaz_Mohammed_ykuaie.jpg" },
       { name: "Zuha Fathima. Z", dept: "II Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935204/Zuha_Fathima_apwj0d.png" },
       { name: "K Mohamed Emad UR Rahman", dept: "II Year AI-ML", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935211/MD_EMAD_K_brf3yl.png" },
-      { name: "M Samyuktha", dept: "II Year AI-ML" },
+      { name: "M Samyuktha", dept: "II Year AI-ML", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788339116/Screenshot_2026-09-02-13-20-11-12_6012fa4d4ddec268fc5c7112cbb265e7_-_Murugan_r_cjsonx.jpg"},
       { name: "S. Shalini", dept: "II Year AI-ML", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935204/Shalini_mm8tyg.jpg" },
       { name: "Madiha. A", dept: "II Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935202/Madiha_r249s3.jpg" },
       { name: "Mohammed Amaan. D", dept: "II Year AI-ML", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935181/Mohammed_Amaan._D_auakrw.jpg" },
-      { name: "T. Vaishnavi", dept: "II Year AI-ML" },
+      { name: "T. Vaishnavi", dept: "II Year AI-ML", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788339117/file_0000000028088207903573f5ccd1b27f_-_Waishnavi_Thilagaraja_yf5mvp.png" },
     ],
   },
 ];

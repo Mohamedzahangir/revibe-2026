@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 
 import SpiderWeb from "../components/navigation/SpiderWeb";
+import SpiderVerseReveal from "../components/SpiderVerseReveal";
 import { supabase } from "../services/supabase";
 import { submitRegistration } from "../services/registrationService";
 import eventData from "../data/eventData";
@@ -26,7 +27,6 @@ import {
 
 import RegistrationCard from "../components/registration/RegistrationCard";
 import { toPng } from "html-to-image";
-import { saveAs } from "file-saver";
 
 const DRAFT_KEY = "revibe26_registration_draft_v3";
 const LEGACY_DRAFT_KEY = "revibe26_registration_draft_v2";
@@ -70,6 +70,12 @@ const emptyEventRegistration = () => ({
   teamName: "",
   members: [],
 });
+
+function hasMemberData(slug, eventRegistrations) {
+  const reg = eventRegistrations[slug];
+  if (!reg) return false;
+  return (reg.members || []).some((m) => m.name?.trim());
+}
 
 function getEventConfig(slug) {
   return getRegistrationConfig(slug);
@@ -149,6 +155,12 @@ function getEventVenue(event) {
 function getEventFee(event) {
   const item = mergeEventData(event);
   const config = getEventConfig(item.slug);
+
+  if (config.feeType === "per_team_tiered") {
+    const tiers = config.feeTiers || {};
+    const values = Object.values(tiers).filter(Boolean);
+    return values.length > 0 ? Math.min(...values) : 0;
+  }
 
   return Number(item.fee ?? config?.fee ?? 0);
 }
@@ -250,7 +262,12 @@ export default function Register() {
   const [submitted, setSubmitted] = useState(false);
   const [registrationNumbers, setRegistrationNumbers] = useState([]);
 
-  const cardRef = useRef(null);
+  const [showReveal, setShowReveal] = useState(false);
+  const [revealKey, setRevealKey] = useState(0);
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [shareFile, setShareFile] = useState(null);
+
+  const cardRefs = useRef([]);
 
   /* =========================================================
      LOAD SAVED DETAILS
@@ -596,21 +613,90 @@ export default function Register() {
     return `REVIBE 26 - ${form.name || "Registration"}`;
   }, [teamName, form.name]);
 
-  const handleDownloadCard = async () => {
-    if (!cardRef.current) return;
+  const getTeamGroups = () => {
+    const teams = {};
+    selectedEvents.forEach((eventItem) => {
+      const details = form.eventRegistrations[eventItem.slug] || emptyEventRegistration();
+      const participantCount = Number(details.teamSize) || 0;
+      const isTeam = participantCount > 1;
+      const teamKey = isTeam
+        ? (details.teamName || `team-${eventItem.slug}`)
+        : "__solo__";
+      if (!teams[teamKey]) {
+        teams[teamKey] = {
+          teamName: isTeam ? details.teamName : null,
+          isTeam,
+        };
+      }
+      teams[teamKey].events = teams[teamKey].events || [];
+      teams[teamKey].events.push({ eventItem, details });
+    });
+    return Object.values(teams);
+  };
+
+  const handleDownloadCard = async (index) => {
+    const el = cardRefs.current[index];
+    if (!el) return;
     try {
-      const dataUrl = await toPng(cardRef.current, {
+      const dataUrl = await toPng(el, {
         cacheBust: true,
         pixelRatio: 2,
       });
-      const label = hasTeamEvent
-        ? teamName || "team"
+      const group = getTeamGroups()[index];
+      const label = group?.isTeam
+        ? group.teamName || "team"
         : form.name || "solo";
-      saveAs(dataUrl, `revibe26-${label}.png`);
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = `revibe26-${label}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (err) {
       console.error("Card download failed:", err);
     }
   };
+
+  const handleShareCard = async () => {
+    navigator.clipboard.writeText(
+      "Hey I registered for REVIBE '26! It's your time to register now \u{1F525} revibeofficial.in"
+    ).catch(() => {});
+    if (shareFile && navigator.canShare && navigator.canShare({ files: [shareFile] })) {
+      try {
+        await navigator.share({ files: [shareFile], title: "" });
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.error("Card share failed:", err);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!submitted) return;
+    const el = cardRefs.current[activeCardIndex];
+    if (!el) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const dataUrl = await toPng(el, { cacheBust: true, pixelRatio: 2 });
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        if (cancelled) return;
+        const group = getTeamGroups()[activeCardIndex];
+        const label = group?.isTeam
+          ? group.teamName || "team"
+          : form.name || "solo";
+        setShareFile(new File([blob], `revibe26-${label}.png`, {
+          type: "image/png",
+          lastModified: Date.now(),
+        }));
+      } catch (err) {
+        console.error("Pre-render share card failed:", err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [submitted, activeCardIndex]);
 
   /* =========================================================
      GENERIC UPDATE
@@ -706,6 +792,12 @@ export default function Register() {
           ] ||
           emptyEventRegistration();
 
+        const config = getEventConfig(slug);
+        const min = Number(config?.minTeamSize) || 1;
+
+        const needsMinAdjust =
+          Number(restoredDetails.teamSize) < min;
+
         return {
           ...previous,
 
@@ -717,8 +809,9 @@ export default function Register() {
           eventRegistrations: {
             ...previous.eventRegistrations,
 
-            [slug]:
-              restoredDetails,
+            [slug]: needsMinAdjust
+              ? { ...restoredDetails, teamSize: String(min) }
+              : restoredDetails,
           },
 
           paymentScreenshotShared:
@@ -924,6 +1017,35 @@ export default function Register() {
     }));
 
     setSubmitError("");
+  }
+
+  function copyTeamFromEvent(sourceSlug, targetSlug) {
+    setForm((previous) => {
+      const source =
+        previous.eventRegistrations[sourceSlug] ||
+        emptyEventRegistration();
+      const target =
+        previous.eventRegistrations[targetSlug] ||
+        emptyEventRegistration();
+      const targetSize = Number(target.teamSize) || 1;
+
+      const members = [...(source.members || [])];
+      while (members.length < targetSize - 1)
+        members.push(emptyMember());
+      members.length = targetSize - 1;
+
+      return {
+        ...previous,
+        eventRegistrations: {
+          ...previous.eventRegistrations,
+          [targetSlug]: {
+            ...target,
+            teamName: source.teamName || "",
+            members,
+          },
+        },
+      };
+    });
   }
 
   /* =========================================================
@@ -1717,6 +1839,8 @@ export default function Register() {
       );
 
       setSubmitted(true);
+      setShowReveal(true);
+      setRevealKey((k) => k + 1);
 
       if (
         !form.rememberDetails
@@ -1756,11 +1880,25 @@ export default function Register() {
   if (submitted) {
     return (
       <main className="reg-page">
+        {showReveal && (
+          <SpiderVerseReveal
+            key={revealKey}
+            onComplete={() => setShowReveal(false)}
+          />
+        )}
+
         <section className="register-success-section">
           <div className="reg-shell">
             <div className="register-success-card">
               <div className="success-icon">
-                ✓
+                <SpiderWeb className="success-icon-web" />
+                <svg className="success-icon-svg" viewBox="0 0 50 50" aria-hidden="true">
+                  <circle className="suc-ck-ring" cx="25" cy="25" r="20"
+                    fill="#dc0000" stroke="none" />
+                  <path className="suc-ck-tick" d="M15 25 L22 32 L35 19"
+                    fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round"
+                    strokeLinejoin="round" pathLength="1" />
+                </svg>
               </div>
 
               <p className="reg-kicker">
@@ -1778,200 +1916,193 @@ export default function Register() {
                 successfully.
               </p>
 
-              <div className="success-details">
-                {/* =================================================
-                    REGISTRATION TYPE
-                ================================================= */}
-
-                <div>
-                  <span>
-                    Registration Type
-                  </span>
-
-                  <strong>
-                    {hasTeamEvent
-                      ? "TEAM"
-                      : "SOLO"}
-                  </strong>
+              <div className="success-two-col">
+                <div className="success-two-col-left">
+              <div className="selected-events-preview">
+                <div className="selected-events-preview-header">
+                  <span>REGISTRATION SUMMARY</span>
+                  <span>{selectedEvents.length} event{selectedEvents.length !== 1 ? "s" : ""}</span>
                 </div>
 
-                {/* =================================================
-                    SOLO / TEAM DETAILS
-                ================================================= */}
-
-                {hasTeamEvent ? (
-                  <>
-                    <div>
-                      <span>
-                        Team Name
-                      </span>
-
-                      <strong>
-                        {teamName ||
-                          "—"}
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span>
-                        Lead Name
-                      </span>
-
-                      <strong>
-                        {form.name}
-                      </strong>
-                    </div>
-                  </>
-                ) : (
+                <div className="success-preview-info">
                   <div>
-                    <span>
-                      Participant Name
-                    </span>
-
-                    <strong>
-                      {form.name}
-                    </strong>
+                    <span>Registration Type</span>
+                    <strong>{hasTeamEvent ? "TEAM" : "SOLO"}</strong>
                   </div>
-                )}
 
-                {/* =================================================
-                    EVENTS REGISTERED
-                ================================================= */}
+                  <div>
+                    <span>{hasTeamEvent ? "Lead Name" : "Participant Name"}</span>
+                    <strong>{form.name}</strong>
+                  </div>
 
-                <div>
-                  <span>
-                    Events Registered
-                  </span>
-
-                  <div className="success-event-list">
-                    {selectedEvents.map(
-                      (eventItem) => {
-                        const details =
-                          form
-                            .eventRegistrations[
-                            eventItem
-                              .slug
-                          ] ||
-                          emptyEventRegistration();
-
-                        return (
-                          <div
-                            className="success-event-item"
-                            key={
-                              eventItem.id ||
-                              eventItem.slug
-                            }
-                          >
-                            <strong>
-                              {
-                                eventItem.name
-                              }
-                            </strong>
-
-                            <span>
-                              {
-                                details.teamSize
-                              }{" "}
-                              participant
-                              {Number(
-                                details.teamSize
-                              ) !== 1
-                                ? "s"
-                                : ""}
-                            </span>
+                  {registrationNumbers.length > 0 && (
+                    <div>
+                      <span>Registration No.</span>
+                      <div className="success-event-list">
+                        {registrationNumbers.map((item) => (
+                          <div className="success-event-item" key={item.registrationNumber}>
+                            <strong>{item.registrationNumber}</strong>
                           </div>
-                        );
-                      }
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="event-review-list">
+                  {selectedEvents.map((eventItem) => {
+                    const details = form.eventRegistrations[eventItem.slug] || emptyEventRegistration();
+                    const participantCount = Number(details.teamSize) || 0;
+                    const eventFee = participantCount ? getTotalFee(eventItem.slug, participantCount) : 0;
+
+                    return (
+                      <div className="event-review-item" key={eventItem.id || eventItem.slug}>
+                        <div>
+                          <div className="event-review-name">{eventItem.name}</div>
+                          <div className="event-review-meta">
+                            {formatEventSchedule(eventItem)} • {getEventVenue(eventItem)}
+                          </div>
+                          <div className="event-review-participants">
+                            Participants: {participantCount || "Not selected"}
+                          </div>
+                          {participantCount > 1 && details.teamName && (
+                            <div className="event-review-team-name">Team: {details.teamName}</div>
+                          )}
+                          {participantCount > 1 && details.members?.length > 0 && (
+                            <div className="event-review-members">
+                              {details.members.map((m, i) => m.name ? (
+                                <span key={i}>Member {i + 2}: {m.name}</span>
+                              ) : null)}
+                            </div>
+                          )}
+                        </div>
+                        <div />
+                        <div className="event-review-fee">₹{eventFee}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="review-total">
+                  <span>TOTAL AMOUNT TO BE PAID</span>
+                  <strong>₹{totalFee}</strong>
+                </div>
+              </div>
+                </div>
+
+                <div className="success-two-col-right">
+              {/* =================================================
+                  REGISTRATION CARDS
+              ================================================= */}
+
+              {(() => {
+                const teamGroups = getTeamGroups();
+
+                return (
+                  <div className="reg-card-section">
+                    <p className="reg-card-section-title">
+                      Your Registration Card{teamGroups.length > 1 ? "s" : ""}
+                    </p>
+
+                    {teamGroups.length > 1 && (
+                      <div className="reg-card-carousel">
+                        <button
+                          className="reg-card-nav-btn reg-card-nav-prev"
+                          onClick={() => setActiveCardIndex((p) => p > 0 ? p - 1 : teamGroups.length - 1)}
+                          type="button"
+                          aria-label="Previous card"
+                        >
+                          ‹
+                        </button>
+
+                        <div className="reg-card-carousel-inner">
+                          <div className="reg-card-wrapper" key={activeCardIndex}>
+                            <RegistrationCard
+                              ref={(el) => { cardRefs.current[activeCardIndex] = el; }}
+                              name={form.name}
+                              teamName={teamGroups[activeCardIndex].teamName}
+                              type={teamGroups[activeCardIndex].isTeam ? "team" : "solo"}
+                              events={teamGroups[activeCardIndex].events.map(({ eventItem: ev, details: d }) => ({
+                                name: ev.name,
+                                teamSize: d.teamSize,
+                              }))}
+                            />
+                          </div>
+                        </div>
+
+                        <button
+                          className="reg-card-nav-btn reg-card-nav-next"
+                          onClick={() => setActiveCardIndex((p) => p < teamGroups.length - 1 ? p + 1 : 0)}
+                          type="button"
+                          aria-label="Next card"
+                        >
+                          ›
+                        </button>
+                      </div>
                     )}
-                  </div>
-                </div>
 
-                {/* =================================================
-                    REGISTRATION NUMBER
-                ================================================= */}
+                    {teamGroups.length > 1 && (
+                      <div className="reg-card-dots">
+                        {teamGroups.map((_, i) => (
+                          <button
+                            key={i}
+                            className={`reg-card-dot ${i === activeCardIndex ? "reg-card-dot-active" : ""}`}
+                            onClick={() => setActiveCardIndex(i)}
+                            type="button"
+                            aria-label={`Go to card ${i + 1}`}
+                          />
+                        ))}
+                      </div>
+                    )}
 
-                {registrationNumbers.length >
-                  0 && (
-                  <div>
-                    <span>
-                      Registration No.
-                    </span>
+                    {teamGroups.length === 1 && (
+                      <div className="reg-card-wrapper">
+                        <RegistrationCard
+                          ref={(el) => { cardRefs.current[0] = el; }}
+                          name={form.name}
+                          teamName={teamGroups[0].teamName}
+                          type={teamGroups[0].isTeam ? "team" : "solo"}
+                          events={teamGroups[0].events.map(({ eventItem: ev, details: d }) => ({
+                            name: ev.name,
+                            teamSize: d.teamSize,
+                          }))}
+                        />
+                      </div>
+                    )}
 
-                    <div className="success-event-list">
-                      {registrationNumbers.map(
-                        (item) => (
-                          <div
-                            className="success-event-item"
-                            key={
-                              item.registrationNumber
-                            }
-                          >
-                            <strong>
-                              {
-                                item.registrationNumber
-                              }
-                            </strong>
-                          </div>
-                        )
+                    <div className="reg-card-actions">
+                      <button
+                        className="reg-card-download-btn"
+                        onClick={() => handleDownloadCard(activeCardIndex)}
+                        type="button"
+                      >
+                        ↓ Download
+                      </button>
+
+                      {typeof navigator !== "undefined" && navigator.share && (
+                        <button
+                          className="reg-card-share-btn"
+                          onClick={handleShareCard}
+                          type="button"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                            <circle cx="12" cy="12" r="4"/>
+                            <circle cx="18" cy="6" r="1.5" fill="currentColor" stroke="none"/>
+                          </svg>
+                          Share to Story
+                        </button>
                       )}
                     </div>
+
+                    <p className="reg-card-share-hint">
+                      Caption copied! After sharing, paste it as your story caption.
+                    </p>
                   </div>
-                )}
-
-                {/* =================================================
-                    AMOUNT
-                ================================================= */}
-
-                <div>
-                  <span>
-                    Amount
-                  </span>
-
-                  <strong>
-                    ₹{totalFee}
-                  </strong>
+                );
+              })()}
                 </div>
               </div>
-
-              {/* =================================================
-                  REGISTRATION CARD
-              ================================================= */}
-
-              <div className="reg-card-section">
-                <p className="reg-card-section-title">
-                  Your Registration Card
-                </p>
-
-                <div className="reg-card-wrapper">
-                  <RegistrationCard
-                    ref={cardRef}
-                    name={form.name}
-                    teamName={teamName}
-                    type={hasTeamEvent ? "team" : "solo"}
-                    events={selectedEvents.map((ev) => {
-                      const details =
-                        form.eventRegistrations[ev.slug] ||
-                        emptyEventRegistration();
-                      return {
-                        name: ev.name,
-                        teamSize: details.teamSize,
-                      };
-                    })}
-                  />
-                </div>
-
-                <button
-                  className="reg-card-download-btn"
-                  onClick={handleDownloadCard}
-                  type="button"
-                >
-                  ↓ Download Card
-                </button>
-              </div>
-
-              {/* =================================================
-                  PAYMENT PENDING
-              ================================================= */}
 
               {totalFee > 0 && (
                 <div className="success-warning">
@@ -1982,32 +2113,19 @@ export default function Register() {
 
                   <ol>
                     <li>
-                      Your payment
-                      details have
-                      been submitted.
+                      Your payment details have been submitted.
                     </li>
 
                     <li>
-                      Our coordinator will verify
-your screenshot
-against the actual
-Google Pay
-transaction.
+                      Our coordinator will verify your screenshot against the actual Google Pay transaction.
                     </li>
 
                     <li>
-                      Your registration
-                      will be confirmed
-                      only after the
-                      payment is
-                      successfully
-                      verified.
+                      Your registration will be confirmed only after the payment is successfully verified.
                     </li>
 
                     <li>
-                      After successful
-                      verification,
-                      you will be added to the respective whatsapp groups for your events.
+                      After successful verification, you will be added to the respective whatsapp groups for your events.
                     </li>
                   </ol>
                 </div>
@@ -2016,14 +2134,11 @@ transaction.
               {totalFee === 0 && (
                 <div className="success-warning">
                   <strong>
-                    Registration
-                    submitted
+                    Registration submitted
                   </strong>
 
                   <p>
-                    No payment is
-                    required for these
-                    events.
+                    No payment is required for these events.
                   </p>
                 </div>
               )}
@@ -2770,6 +2885,57 @@ transaction.
                                             event.
                                           </p>
 
+                                          {(() => {
+                                            const otherEventsWithData =
+                                              selectedEvents.filter(
+                                                (ev) =>
+                                                  ev.slug !==
+                                                    eventItem.slug &&
+                                                  hasMemberData(
+                                                    ev.slug,
+                                                    form.eventRegistrations
+                                                  )
+                                              );
+
+                                            if (
+                                              otherEventsWithData.length === 0
+                                            )
+                                              return null;
+
+                                            return (
+                                              <div className="copy-team-banner">
+                                                <span className="copy-team-label">
+                                                  Team members
+                                                  already
+                                                  entered
+                                                  for
+                                                </span>
+
+                                                <div className="copy-team-row">
+                                                  <div className="copy-team-select-wrap">
+                                                    <CustomSelect
+                                                      value={""}
+                                                      onChange={(val) => {
+                                                        if (val)
+                                                          copyTeamFromEvent(
+                                                            val,
+                                                            eventItem.slug
+                                                          );
+                                                      }}
+                                                      options={otherEventsWithData.map(
+                                                        (ev) => ({
+                                                          value: ev.slug,
+                                                          label: ev.name,
+                                                        })
+                                                      )}
+                                                      placeholder="Select event..."
+                                                    />
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            );
+                                          })()}
+
                                           {errors[
                                             `event-${eventItem.slug}-members`
                                           ] && (
@@ -3034,7 +3200,7 @@ transaction.
                               </div>
                             </div>
 
-                            <div className="selected-events-preview">
+              <div className="selected-events-preview">
                               <div className="selected-events-preview-header">
                                 <span>
                                   REGISTRATION
@@ -3372,7 +3538,7 @@ transaction.
                           <li>
                             <strong>
                               Send the payment
-screenshot to our
+screenshot along with your regestired name  to our
 coordinator on
 WhatsApp:
                             </strong>
@@ -3714,10 +3880,10 @@ function EventCategory({
           const fee =
             getEventFee(event);
 
-          const maxTeam =
+          const range =
             getEventParticipantRange(
               event
-            ).max;
+            );
 
           return (
             <button
@@ -3775,11 +3941,9 @@ function EventCategory({
                 </strong>
 
                 <span>
-                  Max{" "}
-                  {maxTeam}{" "}
-                  {maxTeam === 1
-                    ? "participant"
-                    : "participants"}
+                  {range.min === range.max
+                    ? `Max ${range.max} ${range.max === 1 ? "participant" : "participants"}`
+                    : `${range.min}-${range.max} participants`}
                 </span>
               </div>
             </button>
@@ -4857,6 +5021,52 @@ const registerStyles = `
     font-size: 0.68rem;
   }
 
+  .members-note {
+    margin: 0.5rem 0 0.75rem;
+    color: #6a6a6a;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 0.75rem;
+  }
+
+  .copy-team-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    padding: 0.65rem 0.85rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid rgba(220, 0, 0, 0.2);
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(255, 245, 245, 0.7), rgba(255, 235, 235, 0.5));
+  }
+
+  .copy-team-label {
+    color: #6a6a6a;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+  }
+
+  .copy-team-row {
+    width: 100%;
+  }
+
+  .copy-team-select-wrap {
+    width: 100%;
+  }
+
+  .copy-team-select-wrap .cs-trigger {
+    min-height: 38px;
+    padding: 0.55rem 2.2rem 0.55rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .copy-team-select-wrap .cs-option {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.78rem;
+  }
+
   .event-member-card {
     margin-top: 0.75rem;
     padding: 0.9rem;
@@ -4941,8 +5151,15 @@ const registerStyles = `
   /* ═══ UPI PAY BANNER ═══ */
 
   .upi-pay-section {
+    display: none;
     margin-bottom: 1.5rem;
     text-align: center;
+  }
+
+  @media (max-width: 767px) {
+    .upi-pay-section {
+      display: block;
+    }
   }
 
   .upi-pay-banner {
@@ -5483,65 +5700,101 @@ const registerStyles = `
   }
 
   .success-icon {
-    width: 58px;
-    height: 58px;
+    position: relative;
+    width: 80px;
+    height: 80px;
     margin: 0 auto 1rem;
-    display: grid;
-    place-items: center;
-    border-radius: 12px;
-    border: 1px solid rgba(220, 0, 0, 0.35);
-    background: linear-gradient(135deg, rgba(220, 0, 0, 0.85), rgba(220, 0, 0, 1));
-    color: #ffffff;
-    font-size: 1.5rem;
-    font-weight: 800;
-    box-shadow: 0 4px 12px rgba(220, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .success-icon-web {
+    position: absolute;
+    width: 130px;
+    height: 130px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.14;
+    color: #b2aeae;
+  }
+
+  .success-icon-svg {
+    position: relative;
+    z-index: 1;
+    width: 64px;
+    height: 64px;
+  }
+
+  .suc-ck-ring {
+    transform-origin: center;
+    animation: sucRingPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+  }
+
+  .suc-ck-tick {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: sucDraw 0.3s ease 0.45s forwards;
+  }
+
+  @keyframes sucRingPop {
+    from { opacity: 0; transform: scale(0.3); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes sucDraw {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
   }
 
   .register-success-card h1 {
     margin: 0;
     font-family: 'Anton', sans-serif;
-    font-size: clamp(2rem, 7vw, 3rem);
+    font-size: clamp(1.6rem, 7vw, 3rem);
     font-weight: 400;
     text-transform: uppercase;
     color: #1a1a1a;
+    white-space: nowrap;
   }
 
   .success-intro {
-    margin: 0.7rem 0 1.5rem;
+    margin: 0 0 0.3rem;
     color: #6a6a6a;
     font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.85rem;
   }
 
-  .success-details {
+  .success-preview-info {
     display: grid;
     gap: 0;
-    border: 1px solid rgba(220, 0, 0, 0.3);
-    border-radius: 12px;
-    overflow: hidden;
-    text-align: left;
+    margin-bottom: 0.8rem;
+    border-bottom: 2px solid #1a1a1a;
   }
 
-  .success-details > div {
+  .success-preview-info > div {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     gap: 1rem;
-    padding: 0.85rem 1rem;
-    border-bottom: 1px solid rgba(220, 0, 0, 0.15);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.4));
+    padding: 0.65rem 0;
+    border-bottom: 1px solid rgba(220, 0, 0, 0.12);
   }
 
-  .success-details > div:last-child {
+  .success-preview-info > div:last-child {
     border-bottom: 0;
   }
 
-  .success-details span {
+  .success-preview-info span {
     color: #6a6a6a;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.72rem;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
-  .success-details strong {
+  .success-preview-info strong {
     color: #1a1a1a;
     font-size: 0.78rem;
     text-align: right;
@@ -5616,6 +5869,11 @@ const registerStyles = `
     border-radius: 16px;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    text-align: left;
+  }
+
+  .reg-card-wrapper + .reg-card-wrapper {
+    margin-top: 1rem;
   }
 
   .selected-events-preview-header {
@@ -5678,6 +5936,16 @@ const registerStyles = `
     color: #dc0000;
     font-size: 0.65rem;
     font-weight: 700;
+  }
+
+  .event-review-members {
+    margin-top: 0.2rem;
+    color: #6a6a6a;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 0.65rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
   }
 
   .event-review-fee {
@@ -5749,29 +6017,22 @@ const registerStyles = `
 
   .success-event-list {
     display: grid;
-    gap: 0.5rem;
+    gap: 0.35rem;
     text-align: left;
   }
 
   .success-event-item {
-    padding: 0.7rem 0.8rem;
+    padding: 0.4rem 0.6rem;
     border: 1px solid rgba(220, 0, 0, 0.2);
-    border-radius: 8px;
+    border-radius: 6px;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.4));
   }
 
   .success-event-item strong {
     display: block;
     color: #1a1a1a;
-    font-size: 0.78rem;
-  }
-
-  .success-event-item span {
-    display: block;
-    margin-top: 0.2rem;
-    color: #6a6a6a;
-    font-family: 'Hanken Grotesk', sans-serif;
-    font-size: 0.68rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
   }
 
   .bottom-timing-note {
@@ -6008,13 +6269,13 @@ const registerStyles = `
       padding: 0.85rem;
     }
 
-    .success-details > div {
+    .success-preview-info > div {
       align-items: flex-start;
       flex-direction: column;
       gap: 0.25rem;
     }
 
-    .success-details strong {
+    .success-preview-info strong {
       text-align: left;
     }
 
@@ -6089,6 +6350,51 @@ const registerStyles = `
     }
   }
 
+  /* ═══ SUCCESS TWO-COLUMN LAYOUT ═══ */
+
+  .success-two-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .success-two-col-left,
+  .success-two-col-right {
+    min-width: 0;
+  }
+
+  .success-two-col-right {
+    order: -1;
+  }
+
+  @media (min-width: 768px) {
+    .register-success-card {
+      max-width: 1100px;
+    }
+
+    .success-two-col {
+      text-align: left;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 2rem;
+    }
+
+    .success-two-col-left {
+      flex: 1 1 55%;
+    }
+
+    .success-two-col-right {
+      flex: 1 1 40%;
+      position: sticky;
+      top: 2rem;
+    }
+
+    .success-two-col-right .reg-card-section {
+      margin-top: 0;
+    }
+  }
+
   /* ═══ REGISTRATION CARD ═══ */
 
   .reg-card-section {
@@ -6108,6 +6414,74 @@ const registerStyles = `
   .reg-card-wrapper {
     max-width: 420px;
     margin: 0 auto;
+    container-type: inline-size;
+  }
+
+  .reg-card-carousel {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  .reg-card-carousel-inner {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .reg-card-carousel-inner .reg-card-wrapper {
+    margin: 0;
+  }
+
+  .reg-card-nav-btn {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border: 2px solid #1a1a1a;
+    border-radius: 50%;
+    background: #fff;
+    color: #1a1a1a;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, transform 0.1s;
+    box-shadow: 2px 2px 0 #1a1a1a;
+  }
+
+  .reg-card-nav-btn:hover {
+    background: #f0f0f0;
+  }
+
+  .reg-card-nav-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 #1a1a1a;
+  }
+
+  .reg-card-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .reg-card-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid #1a1a1a;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.15s;
+  }
+
+  .reg-card-dot-active {
+    background: #dc0000;
   }
 
   .reg-card-container {
@@ -6133,15 +6507,15 @@ const registerStyles = `
   .reg-card-name-overlay {
     position: absolute;
     top: 61.7%;
-    left: 36%;
-    width: 59%;
+    left: 34%;
+    width: 58%;
     height: 7.5%;
     display: flex;
     align-items: center;
     padding: 0 2%;
     color: #ffffff;
     font-family: 'Hanken Grotesk', sans-serif;
-    font-size: clamp(0.65rem, 3vw, 1.35rem);
+    font-size: clamp(0.55rem, 3.5cqw, 1.1rem);
     font-weight: 700;
     text-transform: uppercase;
     line-height: 1.15;
@@ -6155,9 +6529,8 @@ const registerStyles = `
   .reg-card-events-overlay {
     position: absolute;
     top: 74%;
-    left: 37%;
-    right:60%;
-    width: 59%;
+    left: 38%;
+    width: 55%;
     height: 10%;
     display: flex;
     align-items: center;
@@ -6171,6 +6544,21 @@ const registerStyles = `
     white-space: normal;
   }
 
+  .reg-card-events-overlay.events-vertical {
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    gap: 0;
+    line-height: 1.2;
+  }
+
+  .reg-card-events-overlay.events-vertical .reg-card-event-line {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
   .reg-card-event-line {
     white-space: nowrap;
     overflow: hidden;
@@ -6180,28 +6568,74 @@ const registerStyles = `
   .reg-card-download-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
-    margin-top: 1rem;
-    padding: 0.7rem 1.6rem;
-    background: #dc0000;
-    color: #ffffff;
+    min-height: 50px;
+    padding: 0.95rem 1.9rem;
+    background: transparent;
+    color: #0d0d0d;
     font-family: 'Anton', sans-serif;
-    font-size: 0.95rem;
-    letter-spacing: 0.06em;
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    border: 2px solid #1a1a1a;
-    border-radius: 4px;
+    border: 2px solid #0d0d0d;
+    border-radius: 999px;
     cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
-    box-shadow: 3px 3px 0 #1a1a1a;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
   }
 
   .reg-card-download-btn:hover {
-    background: #b00000;
+    transform: translateY(-3px);
+    background: #0d0d0d;
+    color: #ffffff;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3);
   }
 
-  .reg-card-download-btn:active {
-    transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0 #1a1a1a;
+  .reg-card-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .reg-card-share-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 50px;
+    padding: 0.95rem 1.9rem;
+    background: #dc0000;
+    color: #ffffff;
+    font-family: 'Anton', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 2px solid #0d0d0d;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 8px 22px rgba(220, 0, 0, 0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+  }
+
+  .reg-card-share-btn:hover {
+    transform: translateY(-3px);
+    background: #0d0d0d;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  .reg-card-share-btn svg {
+    flex-shrink: 0;
+  }
+
+  .reg-card-share-hint {
+    margin-top: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    color: #666;
+    text-align: center;
   }
 `;

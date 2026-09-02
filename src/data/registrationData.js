@@ -73,15 +73,19 @@ export const registrationEvents = {
   },
 
   "cooking-without-fire": {
-    minTeamSize: 1,
+    minTeamSize: 2,
     maxTeamSize: 3,
-    fee: 150,
-    feeType: "per_team",
+    fee: 0,
+    feeType: "per_team_tiered",
+    feeTiers: {
+      2: 100,
+      3: 150,
+    },
   },
 
   "ipl-auction": {
-    minTeamSize: 1,
-    maxTeamSize: 6,
+    minTeamSize: 5,
+    maxTeamSize: 5,
     fee: 200,
     feeType: "per_team",
   },
@@ -166,6 +170,10 @@ export function getRegistrationConfig(slug) {
 export function getTotalFee(slug, teamSize) {
   const config = getRegistrationConfig(slug);
 
+  if (config.feeType === "per_team_tiered") {
+    return config.feeTiers?.[teamSize] || 0;
+  }
+
   if (!config.fee || config.fee <= 0) {
     return 0;
   }
@@ -179,6 +187,15 @@ export function getTotalFee(slug, teamSize) {
 
 export function getFeeLabel(slug) {
   const config = getRegistrationConfig(slug);
+
+  if (config.feeType === "per_team_tiered") {
+    const tiers = config.feeTiers || {};
+    const entries = Object.entries(tiers);
+    if (entries.length > 0) {
+      return entries.map(([size, fee]) => `₹${fee} (${size})`).join(" / ");
+    }
+    return "Tiered pricing";
+  }
 
   if (!config.fee || config.fee <= 0) {
     return "Free";
