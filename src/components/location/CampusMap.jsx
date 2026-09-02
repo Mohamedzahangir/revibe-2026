@@ -7,12 +7,11 @@ const DESKTOP_MAP = "/clg map.png";
 const MOBILE_MAP = "/clg map ( mobile ).png";
 
 const LOCATIONS = [
-  { id: "main", name: "Main Block", x: 30, y: 10, desc: "Administrative hub and primary classrooms of CAHCET.", tag: "PPT:-CSE & AIDS smart room,Minni hack:-it smart room , Mehandi:-old aids classroom", color: "cyan" },
-  { id: "tech-tower", name: "Tech Tower", x: 50, y: 32, desc: "Technology and innovation center.", tag: "Coding & Debugging:-Lab3&4 , Prompt wars:-Lab1&2", color: "cyan" },
-  { id: "mech", name: "Mech Block", x: 62, y: 44, desc: "Department of Mechanical Engineering.", tag: "Art&Painting , IPL auction", color: "red" },
-  { id: "eee-mba", name: "EEE Block", x: 63, y: 57, desc: "Departments of EEE and MBA.", tag: "Connections , Games", color: "red" },
+  { id: "main", name: "Main Block", x: 30, y: 10, desc: "Administrative hub and primary classrooms of CAHCET.", tag: "Mini hack:-SGC room , Auction:-IT smart room , Shark Tank:-CSE Smartroom , Free fire:- IV CSE(A) room , art & mehandi :- Drawing room", color: "cyan" },
+  { id: "tech-tower", name: "Tech Tower", x: 50, y: 32, desc: "Technology and innovation center.", tag: "PPT:-Seminar Hall , Coding & Debugging:-Lab5&6 , Prompt wars:-Lab7&8", color: "cyan" },
+  { id: "mech", name: "Mech Block", x: 62, y: 44, desc: "Department of Mechanical Engineering.", tag: "Chess:-Mech classroom", color: "red" },
   { id: "auditorium", name: "Auditorium", x: 50, y: 82, desc: "Main auditorium for symposium events.", tag: "Innauguration Ceremony , Closing Ceremony", color: "cyan" },
-  { id: "lab", name: "MCA / PHY Lab", x: 63, y: 70, desc: "MCA seminar hall and Physics lab", tag: "Tech quiz :- MBA smeinar hall , Cooking :- Phy lab", color: "cyan" },
+  { id: "lab", name: "MCA / PHY Lab", x: 63, y: 70, desc: "MCA seminar hall and Physics lab", tag: "Tech quiz & Connections:- MCA smeinar hall , Cooking :- Phy lab", color: "cyan" },
 ];
 
 const MIN_ZOOM = 0.6;
