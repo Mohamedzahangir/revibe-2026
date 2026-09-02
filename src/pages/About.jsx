@@ -20,51 +20,22 @@ const galleryItems = [
   },
 ];
 
-const eliteSponsors = [
+const sponsors = [
   {
-    name: "Sponsor 01",
-    blurb: "Powering the headline stage of REVIBE '26 and the spotlight on every champion.",
-    logo: null,
-  },
-  {
-    name: "Sponsor 02",
-    blurb: "The engine behind the web — fuelling the experience, end to end.",
-    logo: null,
-  },
-  {
-    name: "Sponsor 03",
-    blurb: "Standing shoulder-to-shoulder with us across all thirteen battles.",
-    logo: null,
+    name: "Golden Tasty Treats",
+    blurb: "Freshly made waffles, crispy on the outside and deliciously soft inside. A perfect blend of sweet toppings, rich flavors, and irresistible goodness.",
+    logo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788365758/WhatsApp_Image_2026-09-02_at_9.24.29_PM_alxsiv.jpg",
   },
 ];
 
-const premiumSponsors = [
-  {
-    name: "Sponsor 04",
-    blurb: "Architecting the infrastructure that keeps the web alive.",
-    logo: null,
-  },
-  {
-    name: "Sponsor 05",
-    blurb: "Helping curious minds from every corner find their way to the web.",
-    logo: null,
-  },
-  {
-    name: "Sponsor 06",
-    blurb: "Carrying the story of REVIBE '26 far beyond the auditorium walls.",
-    logo: null,
-  },
-];
-
-function SponsorTier({ tier, sponsors }) {
+function SponsorTier({ sponsors }) {
   return (
     <div className="ws-sponsors-grid">
       {sponsors.map((sponsor) => (
         <article className="ws-card ws-gallery-card ws-sponsor-card" key={sponsor.name}>
-          <span className="ws-card-tag">{tier}</span>
           <div
             className="ws-sponsor-logo"
-            aria-label={`${sponsor.name} logo placeholder`}
+            aria-label={`${sponsor.name} logo`}
           >
             {sponsor.logo ? (
               <img src={sponsor.logo} alt={`${sponsor.name} logo`} />
@@ -129,38 +100,15 @@ export default function About() {
         <hr className="ws-rule" aria-hidden="true" />
 
         {/* ============================================================
-            SPONSORS — ELITE WEB ALLIES
+            SPONSORS
             ============================================================ */}
-        <section className="ws-section" aria-labelledby="elite-title">
+        <section className="ws-section" aria-labelledby="sponsors-title">
           <div className="ws-container">
             <p className="ws-label">Our Partners</p>
-            <h2 id="elite-title" className="ws-headline">
-              Elite Web Allies
+            <h2 id="sponsors-title" className="ws-headline">
+              Our Sponsors
             </h2>
-            <p className="ws-body">
-              The flagship forces powering the web — the names holding the
-              strongest strands of REVIBE '26 together.
-            </p>
-            <SponsorTier tier="Elite" sponsors={eliteSponsors} />
-          </div>
-        </section>
-
-        <hr className="ws-rule" aria-hidden="true" />
-
-        {/* ============================================================
-            SPONSORS — PREMIUM WEB ALLIES
-            ============================================================ */}
-        <section className="ws-section" aria-labelledby="premium-title">
-          <div className="ws-container">
-            <p className="ws-label">Our Partners</p>
-            <h2 id="premium-title" className="ws-headline">
-              Premium Web Allies
-            </h2>
-            <p className="ws-body">
-              The specialists and storytellers weaving the finer threads of
-              the REVIBE '26 web.
-            </p>
-            <SponsorTier tier="Premium" sponsors={premiumSponsors} />
+            <SponsorTier sponsors={sponsors} />
           </div>
         </section>
 
