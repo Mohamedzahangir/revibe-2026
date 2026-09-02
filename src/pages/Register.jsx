@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 
 import SpiderWeb from "../components/navigation/SpiderWeb";
+import SpiderVerseReveal from "../components/SpiderVerseReveal";
 import { supabase } from "../services/supabase";
 import { submitRegistration } from "../services/registrationService";
 import eventData from "../data/eventData";
@@ -70,6 +71,12 @@ const emptyEventRegistration = () => ({
   teamName: "",
   members: [],
 });
+
+function hasMemberData(slug, eventRegistrations) {
+  const reg = eventRegistrations[slug];
+  if (!reg) return false;
+  return (reg.members || []).some((m) => m.name?.trim());
+}
 
 function getEventConfig(slug) {
   return getRegistrationConfig(slug);
@@ -249,6 +256,9 @@ export default function Register() {
 
   const [submitted, setSubmitted] = useState(false);
   const [registrationNumbers, setRegistrationNumbers] = useState([]);
+
+  const [showReveal, setShowReveal] = useState(false);
+  const [revealKey, setRevealKey] = useState(0);
 
   const cardRef = useRef(null);
 
@@ -924,6 +934,35 @@ export default function Register() {
     }));
 
     setSubmitError("");
+  }
+
+  function copyTeamFromEvent(sourceSlug, targetSlug) {
+    setForm((previous) => {
+      const source =
+        previous.eventRegistrations[sourceSlug] ||
+        emptyEventRegistration();
+      const target =
+        previous.eventRegistrations[targetSlug] ||
+        emptyEventRegistration();
+      const targetSize = Number(target.teamSize) || 1;
+
+      const members = [...(source.members || [])];
+      while (members.length < targetSize - 1)
+        members.push(emptyMember());
+      members.length = targetSize - 1;
+
+      return {
+        ...previous,
+        eventRegistrations: {
+          ...previous.eventRegistrations,
+          [targetSlug]: {
+            ...target,
+            teamName: source.teamName || "",
+            members,
+          },
+        },
+      };
+    });
   }
 
   /* =========================================================
@@ -1717,6 +1756,8 @@ export default function Register() {
       );
 
       setSubmitted(true);
+      setShowReveal(true);
+      setRevealKey((k) => k + 1);
 
       if (
         !form.rememberDetails
@@ -1756,11 +1797,25 @@ export default function Register() {
   if (submitted) {
     return (
       <main className="reg-page">
+        {showReveal && (
+          <SpiderVerseReveal
+            key={revealKey}
+            onComplete={() => setShowReveal(false)}
+          />
+        )}
+
         <section className="register-success-section">
           <div className="reg-shell">
             <div className="register-success-card">
               <div className="success-icon">
-                ✓
+                <SpiderWeb className="success-icon-web" />
+                <svg className="success-icon-svg" viewBox="0 0 50 50" aria-hidden="true">
+                  <circle className="suc-ck-ring" cx="25" cy="25" r="20"
+                    fill="#dc0000" stroke="none" />
+                  <path className="suc-ck-tick" d="M15 25 L22 32 L35 19"
+                    fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round"
+                    strokeLinejoin="round" pathLength="1" />
+                </svg>
               </div>
 
               <p className="reg-kicker">
@@ -1778,158 +1833,80 @@ export default function Register() {
                 successfully.
               </p>
 
-              <div className="success-details">
-                {/* =================================================
-                    REGISTRATION TYPE
-                ================================================= */}
-
-                <div>
-                  <span>
-                    Registration Type
-                  </span>
-
-                  <strong>
-                    {hasTeamEvent
-                      ? "TEAM"
-                      : "SOLO"}
-                  </strong>
+              <div className="selected-events-preview">
+                <div className="selected-events-preview-header">
+                  <span>REGISTRATION SUMMARY</span>
+                  <span>{selectedEvents.length} event{selectedEvents.length !== 1 ? "s" : ""}</span>
                 </div>
 
-                {/* =================================================
-                    SOLO / TEAM DETAILS
-                ================================================= */}
-
-                {hasTeamEvent ? (
-                  <>
-                    <div>
-                      <span>
-                        Team Name
-                      </span>
-
-                      <strong>
-                        {teamName ||
-                          "—"}
-                      </strong>
-                    </div>
-
-                    <div>
-                      <span>
-                        Lead Name
-                      </span>
-
-                      <strong>
-                        {form.name}
-                      </strong>
-                    </div>
-                  </>
-                ) : (
+                <div className="success-preview-info">
                   <div>
-                    <span>
-                      Participant Name
-                    </span>
-
-                    <strong>
-                      {form.name}
-                    </strong>
+                    <span>Registration Type</span>
+                    <strong>{hasTeamEvent ? "TEAM" : "SOLO"}</strong>
                   </div>
-                )}
 
-                {/* =================================================
-                    EVENTS REGISTERED
-                ================================================= */}
+                  {hasTeamEvent ? (
+                    <>
+                      <div>
+                        <span>Team Name</span>
+                        <strong>{teamName || "—"}</strong>
+                      </div>
+                      <div>
+                        <span>Lead Name</span>
+                        <strong>{form.name}</strong>
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <span>Participant Name</span>
+                      <strong>{form.name}</strong>
+                    </div>
+                  )}
 
-                <div>
-                  <span>
-                    Events Registered
-                  </span>
-
-                  <div className="success-event-list">
-                    {selectedEvents.map(
-                      (eventItem) => {
-                        const details =
-                          form
-                            .eventRegistrations[
-                            eventItem
-                              .slug
-                          ] ||
-                          emptyEventRegistration();
-
-                        return (
-                          <div
-                            className="success-event-item"
-                            key={
-                              eventItem.id ||
-                              eventItem.slug
-                            }
-                          >
-                            <strong>
-                              {
-                                eventItem.name
-                              }
-                            </strong>
-
-                            <span>
-                              {
-                                details.teamSize
-                              }{" "}
-                              participant
-                              {Number(
-                                details.teamSize
-                              ) !== 1
-                                ? "s"
-                                : ""}
-                            </span>
+                  {registrationNumbers.length > 0 && (
+                    <div>
+                      <span>Registration No.</span>
+                      <div className="success-event-list">
+                        {registrationNumbers.map((item) => (
+                          <div className="success-event-item" key={item.registrationNumber}>
+                            <strong>{item.registrationNumber}</strong>
                           </div>
-                        );
-                      }
-                    )}
-                  </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* =================================================
-                    REGISTRATION NUMBER
-                ================================================= */}
+                <div className="event-review-list">
+                  {selectedEvents.map((eventItem) => {
+                    const details = form.eventRegistrations[eventItem.slug] || emptyEventRegistration();
+                    const participantCount = Number(details.teamSize) || 0;
+                    const eventFee = participantCount ? getTotalFee(eventItem.slug, participantCount) : 0;
 
-                {registrationNumbers.length >
-                  0 && (
-                  <div>
-                    <span>
-                      Registration No.
-                    </span>
-
-                    <div className="success-event-list">
-                      {registrationNumbers.map(
-                        (item) => (
-                          <div
-                            className="success-event-item"
-                            key={
-                              item.registrationNumber
-                            }
-                          >
-                            <strong>
-                              {
-                                item.registrationNumber
-                              }
-                            </strong>
+                    return (
+                      <div className="event-review-item" key={eventItem.id || eventItem.slug}>
+                        <div>
+                          <div className="event-review-name">{eventItem.name}</div>
+                          <div className="event-review-meta">
+                            {formatEventSchedule(eventItem)} • {getEventVenue(eventItem)}
                           </div>
-                        )
-                      )}
-                    </div>
-                  </div>
-                )}
+                          <div className="event-review-participants">
+                            Participants: {participantCount || "Not selected"}
+                          </div>
+                          {participantCount > 1 && details.teamName && (
+                            <div className="event-review-team-name">Team: {details.teamName}</div>
+                          )}
+                        </div>
+                        <div />
+                        <div className="event-review-fee">₹{eventFee}</div>
+                      </div>
+                    );
+                  })}
+                </div>
 
-                {/* =================================================
-                    AMOUNT
-                ================================================= */}
-
-                <div>
-                  <span>
-                    Amount
-                  </span>
-
-                  <strong>
-                    ₹{totalFee}
-                  </strong>
+                <div className="review-total">
+                  <span>TOTAL AMOUNT TO BE PAID</span>
+                  <strong>₹{totalFee}</strong>
                 </div>
               </div>
 
@@ -2769,6 +2746,57 @@ transaction.
                                             for this
                                             event.
                                           </p>
+
+                                          {(() => {
+                                            const otherEventsWithData =
+                                              selectedEvents.filter(
+                                                (ev) =>
+                                                  ev.slug !==
+                                                    eventItem.slug &&
+                                                  hasMemberData(
+                                                    ev.slug,
+                                                    form.eventRegistrations
+                                                  )
+                                              );
+
+                                            if (
+                                              otherEventsWithData.length === 0
+                                            )
+                                              return null;
+
+                                            return (
+                                              <div className="copy-team-banner">
+                                                <span className="copy-team-label">
+                                                  Team members
+                                                  already
+                                                  entered
+                                                  for
+                                                </span>
+
+                                                <div className="copy-team-row">
+                                                  <div className="copy-team-select-wrap">
+                                                    <CustomSelect
+                                                      value={""}
+                                                      onChange={(val) => {
+                                                        if (val)
+                                                          copyTeamFromEvent(
+                                                            val,
+                                                            eventItem.slug
+                                                          );
+                                                      }}
+                                                      options={otherEventsWithData.map(
+                                                        (ev) => ({
+                                                          value: ev.slug,
+                                                          label: ev.name,
+                                                        })
+                                                      )}
+                                                      placeholder="Select event..."
+                                                    />
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            );
+                                          })()}
 
                                           {errors[
                                             `event-${eventItem.slug}-members`
@@ -4857,6 +4885,52 @@ const registerStyles = `
     font-size: 0.68rem;
   }
 
+  .members-note {
+    margin: 0.5rem 0 0.75rem;
+    color: #6a6a6a;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 0.75rem;
+  }
+
+  .copy-team-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    padding: 0.65rem 0.85rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid rgba(220, 0, 0, 0.2);
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(255, 245, 245, 0.7), rgba(255, 235, 235, 0.5));
+  }
+
+  .copy-team-label {
+    color: #6a6a6a;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+  }
+
+  .copy-team-row {
+    width: 100%;
+  }
+
+  .copy-team-select-wrap {
+    width: 100%;
+  }
+
+  .copy-team-select-wrap .cs-trigger {
+    min-height: 38px;
+    padding: 0.55rem 2.2rem 0.55rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .copy-team-select-wrap .cs-option {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.78rem;
+  }
+
   .event-member-card {
     margin-top: 0.75rem;
     padding: 0.9rem;
@@ -5483,18 +5557,53 @@ const registerStyles = `
   }
 
   .success-icon {
-    width: 58px;
-    height: 58px;
+    position: relative;
+    width: 80px;
+    height: 80px;
     margin: 0 auto 1rem;
-    display: grid;
-    place-items: center;
-    border-radius: 12px;
-    border: 1px solid rgba(220, 0, 0, 0.35);
-    background: linear-gradient(135deg, rgba(220, 0, 0, 0.85), rgba(220, 0, 0, 1));
-    color: #ffffff;
-    font-size: 1.5rem;
-    font-weight: 800;
-    box-shadow: 0 4px 12px rgba(220, 0, 0, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .success-icon-web {
+    position: absolute;
+    width: 130px;
+    height: 130px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.14;
+    color: #b2aeae;
+  }
+
+  .success-icon-svg {
+    position: relative;
+    z-index: 1;
+    width: 64px;
+    height: 64px;
+  }
+
+  .suc-ck-ring {
+    transform-origin: center;
+    animation: sucRingPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+  }
+
+  .suc-ck-tick {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: sucDraw 0.3s ease 0.45s forwards;
+  }
+
+  @keyframes sucRingPop {
+    from { opacity: 0; transform: scale(0.3); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes sucDraw {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
   }
 
   .register-success-card h1 {
@@ -5513,35 +5622,35 @@ const registerStyles = `
     font-size: 0.85rem;
   }
 
-  .success-details {
+  .success-preview-info {
     display: grid;
     gap: 0;
-    border: 1px solid rgba(220, 0, 0, 0.3);
-    border-radius: 12px;
-    overflow: hidden;
-    text-align: left;
+    margin-bottom: 0.8rem;
+    border-bottom: 2px solid #1a1a1a;
   }
 
-  .success-details > div {
+  .success-preview-info > div {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     gap: 1rem;
-    padding: 0.85rem 1rem;
-    border-bottom: 1px solid rgba(220, 0, 0, 0.15);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.4));
+    padding: 0.65rem 0;
+    border-bottom: 1px solid rgba(220, 0, 0, 0.12);
   }
 
-  .success-details > div:last-child {
+  .success-preview-info > div:last-child {
     border-bottom: 0;
   }
 
-  .success-details span {
+  .success-preview-info span {
     color: #6a6a6a;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.72rem;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
-  .success-details strong {
+  .success-preview-info strong {
     color: #1a1a1a;
     font-size: 0.78rem;
     text-align: right;
@@ -5616,6 +5725,7 @@ const registerStyles = `
     border-radius: 16px;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    text-align: left;
   }
 
   .selected-events-preview-header {
@@ -5749,29 +5859,22 @@ const registerStyles = `
 
   .success-event-list {
     display: grid;
-    gap: 0.5rem;
+    gap: 0.35rem;
     text-align: left;
   }
 
   .success-event-item {
-    padding: 0.7rem 0.8rem;
+    padding: 0.4rem 0.6rem;
     border: 1px solid rgba(220, 0, 0, 0.2);
-    border-radius: 8px;
+    border-radius: 6px;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.4));
   }
 
   .success-event-item strong {
     display: block;
     color: #1a1a1a;
-    font-size: 0.78rem;
-  }
-
-  .success-event-item span {
-    display: block;
-    margin-top: 0.2rem;
-    color: #6a6a6a;
-    font-family: 'Hanken Grotesk', sans-serif;
-    font-size: 0.68rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
   }
 
   .bottom-timing-note {
@@ -6008,13 +6111,13 @@ const registerStyles = `
       padding: 0.85rem;
     }
 
-    .success-details > div {
+    .success-preview-info > div {
       align-items: flex-start;
       flex-direction: column;
       gap: 0.25rem;
     }
 
-    .success-details strong {
+    .success-preview-info strong {
       text-align: left;
     }
 
@@ -6108,6 +6211,7 @@ const registerStyles = `
   .reg-card-wrapper {
     max-width: 420px;
     margin: 0 auto;
+    container-type: inline-size;
   }
 
   .reg-card-container {
@@ -6133,15 +6237,15 @@ const registerStyles = `
   .reg-card-name-overlay {
     position: absolute;
     top: 61.7%;
-    left: 36%;
-    width: 59%;
+    left: 34%;
+    width: 58%;
     height: 7.5%;
     display: flex;
     align-items: center;
     padding: 0 2%;
     color: #ffffff;
     font-family: 'Hanken Grotesk', sans-serif;
-    font-size: clamp(0.65rem, 3vw, 1.35rem);
+    font-size: clamp(0.55rem, 3.5cqw, 1.1rem);
     font-weight: 700;
     text-transform: uppercase;
     line-height: 1.15;
@@ -6155,9 +6259,8 @@ const registerStyles = `
   .reg-card-events-overlay {
     position: absolute;
     top: 74%;
-    left: 37%;
-    right:60%;
-    width: 59%;
+    left: 38%;
+    width: 55%;
     height: 10%;
     display: flex;
     align-items: center;
@@ -6169,6 +6272,21 @@ const registerStyles = `
     overflow: hidden;
     word-break: break-word;
     white-space: normal;
+  }
+
+  .reg-card-events-overlay.events-vertical {
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    gap: 0;
+    line-height: 1.2;
+  }
+
+  .reg-card-events-overlay.events-vertical .reg-card-event-line {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
   }
 
   .reg-card-event-line {
