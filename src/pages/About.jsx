@@ -764,11 +764,9 @@ export default function About() {
           }
 
           .ws-sponsors-grid {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 24px;
           }
-
-          .ws-gallery-web--center {
             width: 380px;
             height: 380px;
           }
