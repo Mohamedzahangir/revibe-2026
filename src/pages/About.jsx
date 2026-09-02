@@ -26,6 +26,11 @@ const sponsors = [
     blurb: "Freshly made waffles, crispy on the outside and deliciously soft inside. A perfect blend of sweet toppings, rich flavors, and irresistible goodness.",
     logo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788365758/WhatsApp_Image_2026-09-02_at_9.24.29_PM_alxsiv.jpg",
   },
+  {
+    name: "Jawa - Yezdi",
+    blurb: "Iconic motorcycles built for the free spirit, blending vintage charm with modern performance. Ride bold, ride timeless — where every road tells a story.",
+    logo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788370159/WhatsApp_Image_2026-09-02_at_10.10.18_PM_cty8uu.jpg",
+  },
 ];
 
 function SponsorTier({ sponsors }) {
