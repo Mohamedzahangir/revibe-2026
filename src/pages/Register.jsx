@@ -24,6 +24,7 @@ import {
   getTotalFee,
   getFeeLabel,
 } from "../data/registrationData";
+import { coordinatorDetails } from "../data/coordinatorDetails";
 
 import RegistrationCard from "../components/registration/RegistrationCard";
 import { toPng } from "html-to-image";
@@ -81,6 +82,10 @@ function getEventConfig(slug) {
   return getRegistrationConfig(slug);
 }
 
+function getCoordinatorDetails(eventName) {
+  return coordinatorDetails[eventName] || null;
+}
+
 function getEventFromData(slug) {
   return eventData.find((event) => event.slug === slug);
 }
@@ -132,6 +137,65 @@ function getEventTime(event) {
   if (directTime) return String(directTime);
 
   return "Time TBA";
+}
+
+function parseEventTime(time) {
+  const match = String(time || "").match(
+    /(\d{1,2})(?::(\d{2}))?\s*(AM|PM)\s*[–-]\s*(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/i
+  );
+
+  if (!match) return null;
+
+  function toMinutes(hour, minute, period) {
+    let normalizedHour = Number(hour) % 12;
+
+    if (period.toUpperCase() === "PM") {
+      normalizedHour += 12;
+    }
+
+    return normalizedHour * 60 + Number(minute || 0);
+  }
+
+  return {
+    start: toMinutes(match[1], match[2], match[3]),
+    end: toMinutes(match[4], match[5], match[6]),
+  };
+}
+
+function eventsOverlap(firstEvent, secondEvent) {
+  const firstTime = parseEventTime(getEventTime(firstEvent));
+  const secondTime = parseEventTime(getEventTime(secondEvent));
+
+  if (!firstTime || !secondTime) return false;
+
+  return (
+    firstTime.start < secondTime.end &&
+    secondTime.start < firstTime.end
+  );
+}
+
+function isEventTimingConflict(event, selectedSlugs, events) {
+  const exemptSlugs = [
+    "paper-presentation",
+    "shark-tank",
+  ];
+
+  if (exemptSlugs.includes(event.slug)) return false;
+
+  return selectedSlugs.some((selectedSlug) => {
+    if (
+      selectedSlug === event.slug ||
+      exemptSlugs.includes(selectedSlug)
+    ) {
+      return false;
+    }
+
+    const selectedEvent = events.find(
+      (item) => item.slug === selectedSlug
+    );
+
+    return selectedEvent && eventsOverlap(event, selectedEvent);
+  });
 }
 
 function getEventDate(event) {
@@ -2515,20 +2579,6 @@ export default function Register() {
                             </span>
                           </div>
 
-                          <div className="event-selection-note">
-                            <strong>
-                              NOTE:
-                            </strong>{" "}
-                            Selecting more
-                            than 1 event —
-                            please check the
-                            timings carefully
-                            and make sure you
-                            are available for
-                            all your selected
-                            events.
-                          </div>
-
                           {errors.eventSlug && (
                             <p className="field-error">
                               {
@@ -2547,6 +2597,7 @@ export default function Register() {
                               events={technicalEvents(
                                 events
                               )}
+                              allEvents={events}
                               selectedSlugs={
                                 form.eventSlugs
                               }
@@ -2566,6 +2617,7 @@ export default function Register() {
                               events={nonTechnicalEvents(
                                 events
                               )}
+                              allEvents={events}
                               selectedSlugs={
                                 form.eventSlugs
                               }
@@ -3314,20 +3366,6 @@ export default function Register() {
                                 </strong>
                               </div>
                             </div>
-
-                            <div className="bottom-timing-note">
-                              <strong>
-                                NOTE:
-                              </strong>{" "}
-                              Selecting more
-                              than 1 event —
-                              please check the
-                              timings carefully
-                              and make sure you
-                              are available for
-                              all your selected
-                              events.
-                            </div>
                           </>
                         )}
                       </>
@@ -3553,6 +3591,20 @@ WhatsApp:
 }
                               </strong>
                             </div>
+                          </li>
+
+                          <li className="payment-whatsapp-note">
+                            <strong>
+                              IMPORTANT — SEND ON WHATSAPP
+                            </strong>
+
+                            <span>Send the payment screenshot along with:</span>
+
+                            <ol>
+                              <li>Mobile number used for the GPay payment</li>
+                              <li>Name / Lead Name</li>
+                              <li>Registered Events</li>
+                            </ol>
                           </li>
 
                           <li>
@@ -3855,6 +3907,7 @@ function EventCategory({
   title,
   icon,
   events,
+  allEvents,
   selectedSlugs,
   onSelect,
 }) {
@@ -3872,9 +3925,17 @@ function EventCategory({
 
       <div className="event-grid">
         {events.map((event) => {
-          const selected =
+          const isSelected =
             selectedSlugs.includes(
               event.slug
+            );
+
+          const isTimingConflict =
+            !isSelected &&
+            isEventTimingConflict(
+              event,
+              selectedSlugs,
+              allEvents
             );
 
           const fee =
@@ -3893,15 +3954,20 @@ function EventCategory({
                 event.slug
               }
               className={`event-option ${
-                selected
+                isSelected
                   ? "selected"
                   : ""
+              } ${
+                isTimingConflict
+                  ? "timing-conflict"
+                  : ""
               }`}
-              onClick={() =>
-                onSelect(
-                  event.slug
-                )
-              }
+              disabled={isTimingConflict}
+              onClick={() => {
+                if (!isTimingConflict) {
+                  onSelect(event.slug);
+                }
+              }}
             >
               <div className="event-option-top">
                 <h4>
@@ -3910,16 +3976,27 @@ function EventCategory({
 
                 <span
                   className={`event-radio ${
-                    selected
+                    isSelected
                       ? "checked"
                       : ""
                   }`}
                 >
-                  {selected
+                  {isSelected
                     ? "✓"
                     : ""}
                 </span>
               </div>
+
+              {isTimingConflict && (
+                <div className="event-timing-disabled">
+                  <span className="event-timing-disabled-icon">⚠</span>
+                  <span>
+                    SAME EVENT TIMING
+                    <br />
+                    NOT AVAILABLE
+                  </span>
+                </div>
+              )}
 
               {event.description && (
                 <p className="event-description">
@@ -3932,6 +4009,40 @@ function EventCategory({
               <p className="event-time-badge">
                 {getEventTime(event)}
               </p>
+
+              <div className="event-coordinator">
+                {(() => {
+                  const coordinator = getCoordinatorDetails(event.name);
+
+                  if (!coordinator) {
+                    return null;
+                  }
+
+                  return (
+                    <>
+                      <div className="event-coordinator-name">
+                        <span>COORDINATOR</span>
+                        <strong>{coordinator.name}</strong>
+                      </div>
+
+                      {coordinator.whatsapp && (
+                        <a
+                          href={`https://wa.me/91${String(
+                            coordinator.whatsapp
+                          ).replace(/\D/g, "")}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="event-coordinator-phone"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <span>WHATSAPP</span>
+                          <strong>{coordinator.whatsapp}</strong>
+                        </a>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
 
               <div className="event-option-bottom">
                 <strong>
@@ -4734,6 +4845,19 @@ const registerStyles = `
     box-shadow: 0 10px 30px rgba(220, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
+  .event-option.timing-conflict {
+    opacity: 0.5;
+    border-color: rgba(26, 26, 26, 0.2);
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .event-option.timing-conflict:hover {
+    border-color: rgba(26, 26, 26, 0.2);
+    transform: none;
+    box-shadow: none;
+  }
+
   .event-option-top {
     display: flex;
     align-items: flex-start;
@@ -4796,6 +4920,92 @@ const registerStyles = `
     font-size: 0.65rem;
     font-weight: 700;
     letter-spacing: 0.04em;
+  }
+
+  .event-timing-disabled {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    margin-top: 0.7rem;
+    padding: 0.55rem 0.65rem;
+    border-left: 3px solid #dc0000;
+    background: rgba(220, 0, 0, 0.06);
+    color: #dc0000;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    line-height: 1.45;
+  }
+
+  .event-timing-disabled-icon {
+    flex-shrink: 0;
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .event-coordinator {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    margin-top: 0.85rem;
+    padding: 0.7rem 0.8rem;
+    border-left: 2px solid #dc0000;
+    background: rgba(220, 0, 0, 0.035);
+  }
+
+  .event-coordinator-name,
+  .event-coordinator-phone {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .event-coordinator-name span,
+  .event-coordinator-phone span {
+    flex-shrink: 0;
+    color: rgba(0, 0, 0, 0.48);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.52rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .event-coordinator-name strong,
+  .event-coordinator-phone strong {
+    color: #1a1a1a;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-align: right;
+  }
+
+  .event-coordinator-phone {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .event-coordinator-phone strong {
+    color: #dc0000;
+  }
+
+  .event-coordinator-phone:hover strong {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 480px) {
+    .event-coordinator-name,
+    .event-coordinator-phone {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .event-coordinator-name strong,
+    .event-coordinator-phone strong {
+      text-align: left;
+    }
   }
 
   .event-option-bottom {
@@ -5427,6 +5637,34 @@ const registerStyles = `
     font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.8rem;
     line-height: 1.8;
+  }
+
+  .payment-whatsapp-note {
+    margin: 1rem 0;
+    padding: 0.8rem;
+    border-left: 3px solid #dc0000;
+    border-radius: 0 8px 8px 0;
+    background: linear-gradient(135deg, rgba(255, 235, 235, 0.8), rgba(255, 220, 220, 0.55));
+    color: #3a3a3a;
+    line-height: 1.5;
+  }
+
+  .payment-whatsapp-note > strong {
+    display: block;
+    color: #dc0000;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+  }
+
+  .payment-whatsapp-note > span {
+    display: block;
+    margin-top: 0.35rem;
+  }
+
+  .payment-whatsapp-note ol {
+    margin: 0.35rem 0 0;
+    padding-left: 1.2rem;
   }
 
   .abbas-payment-contact {

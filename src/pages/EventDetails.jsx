@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import SpiderWeb from "../components/navigation/SpiderWeb";
 import eventData from "../data/eventData";
 
 export default function EventDetails() {
   const { slug } = useParams();
+  const [showRules, setShowRules] = useState(false);
 
   const event = eventData.find((item) => item.slug === slug);
 
@@ -320,8 +322,9 @@ export default function EventDetails() {
 
             <div className="ed-hero-copy">
               <span
-                className={`ed-cat${isTech ? " ed-cat--tech" : " ed-cat--non"
-                  }`}
+                className={`ed-cat${
+                  isTech ? " ed-cat--tech" : " ed-cat--non"
+                }`}
               >
                 {event.category}
               </span>
@@ -329,6 +332,7 @@ export default function EventDetails() {
               <h1 className="ed-title">{event.description}</h1>
             </div>
           </div>
+
           {event.chibi && (
             <img src={event.chibi} alt="" className="ed-chibi" />
           )}
@@ -341,34 +345,70 @@ export default function EventDetails() {
         <section className="ed-body">
           <div className="ed-shell">
             <div className="ed-grid">
-              {/* ABOUT */}
-              <article className="ed-card">
-                <h2 className="ed-card-heading">
-                  About this event
-                </h2>
 
-                <p className="ed-card-text">
-                  {event.description}
-                </p>
-              </article>
+              {/* LEFT COLUMN */}
+              <div className="ed-left-column">
 
-              {/* DETAILS */}
+                {/* ABOUT */}
+                <article className="ed-card">
+                  <h2 className="ed-card-heading">
+                    About this event
+                  </h2>
+
+                  <p className="ed-card-text">
+                    {event.description}
+                  </p>
+                </article>
+
+                {/* RULES - DESKTOP */}
+                <article className="ed-card ed-rules-card">
+                  <h2 className="ed-card-heading">
+                    Rules
+                  </h2>
+
+                  {Array.isArray(event.rules) &&
+                  event.rules.length > 0 ? (
+                    <ol className="ed-rules-list">
+                      {event.rules.map((rule, index) => (
+                        <li key={index}>{rule}</li>
+                      ))}
+                    </ol>
+                  ) : (
+                    <p className="ed-meta-value">
+                      To be announced.
+                    </p>
+                  )}
+                </article>
+
+              </div>
+
+              {/* RIGHT COLUMN - DETAILS */}
               <article className="ed-card">
                 <h2 className="ed-card-heading">
                   Details
                 </h2>
 
                 <ul className="ed-meta">
-                  <li className="ed-meta-item">
+
+                  {/* MOBILE ONLY - VIEW RULES */}
+                  <li className="ed-meta-item ed-rules-mobile-item">
                     <span className="ed-meta-label">
                       Rules
                     </span>
 
-                    <span className="ed-meta-value">
-                      {event.rules || "To be announced."}
-                    </span>
+                    <button
+                      type="button"
+                      className="ed-rules-mobile-btn"
+                      onClick={() => setShowRules(true)}
+                    >
+                      <span>View Rules</span>
+                      <span className="ed-rules-mobile-arrow">
+                        →
+                      </span>
+                    </button>
                   </li>
 
+                  {/* TEAM SIZE */}
                   <li className="ed-meta-item">
                     <span className="ed-meta-label">
                       Team size
@@ -379,6 +419,7 @@ export default function EventDetails() {
                     </span>
                   </li>
 
+                  {/* REGISTRATION FEE */}
                   <li className="ed-meta-item">
                     <span className="ed-meta-label">
                       Registration fee
@@ -389,6 +430,7 @@ export default function EventDetails() {
                     </span>
                   </li>
 
+                  {/* VENUE */}
                   <li className="ed-meta-item">
                     <span className="ed-meta-label">
                       Venue
@@ -399,6 +441,7 @@ export default function EventDetails() {
                     </span>
                   </li>
 
+                  {/* TIME */}
                   <li className="ed-meta-item">
                     <span className="ed-meta-label">
                       Time
@@ -409,6 +452,7 @@ export default function EventDetails() {
                     </span>
                   </li>
 
+                  {/* MAX CAPACITY */}
                   <li className="ed-meta-item">
                     <span className="ed-meta-label">
                       Max capacity
@@ -419,6 +463,7 @@ export default function EventDetails() {
                     </span>
                   </li>
 
+                  {/* COORDINATOR */}
                   <li className="ed-meta-item">
                     <span className="ed-meta-label">
                       Coordinator
@@ -427,13 +472,84 @@ export default function EventDetails() {
                     <span className="ed-meta-value">
                       {event.coordinator || "To be announced."}
                     </span>
+
+                    {event.coordinatorContact && (
+                      <a
+                        href={`tel:${event.coordinatorContact.replace(
+                          /[^0-9+]/g,
+                          ""
+                        )}`}
+                        className="ed-coordinator-contact"
+                      >
+                        <span className="ed-coordinator-phone">
+                          ☎
+                        </span>
+                        {event.coordinatorContact}
+                      </a>
+                    )}
                   </li>
+
                 </ul>
               </article>
+
             </div>
 
-            {/* ACTIONS */}
+            {/* MOBILE RULES MODAL */}
+            {showRules && (
+              <div
+                className="ed-rules-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="ed-rules-modal-title"
+                onClick={() => setShowRules(false)}
+              >
+                <div
+                  className="ed-rules-modal-card"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="ed-rules-modal-header">
+                    <div>
+                      <span className="ed-meta-label">
+                        Event Rules
+                      </span>
 
+                      <h2
+                        id="ed-rules-modal-title"
+                        className="ed-rules-modal-title"
+                      >
+                        {event.description}
+                      </h2>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="ed-rules-close"
+                      onClick={() => setShowRules(false)}
+                      aria-label="Close rules"
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  <div className="ed-rules-modal-body">
+                    {Array.isArray(event.rules) &&
+                    event.rules.length > 0 ? (
+                      <ol className="ed-rules-list">
+                        {event.rules.map((rule, index) => (
+                          <li key={index}>{rule}</li>
+                        ))}
+                      </ol>
+                    ) : (
+                      <p className="ed-meta-value">
+                        Rules to be announced.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ACTIONS */}
             <div className="ed-actions">
               <Link
                 to={`/register?event=${event.slug}`}
@@ -599,6 +715,13 @@ export default function EventDetails() {
           display: grid;
           grid-template-columns: 1.1fr 0.9fr;
           gap: 24px;
+          align-items: start;
+        }
+
+        .ed-left-column {
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
         }
 
         /* ═══ GLASS CARD ═══ */
@@ -697,6 +820,143 @@ export default function EventDetails() {
           color: #1a1a1a;
         }
 
+        /* ═══ COORDINATOR CONTACT ═══ */
+
+        .ed-coordinator-contact {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          width: fit-content;
+          margin-top: 0.15rem;
+          font-family: 'Hanken Grotesk', sans-serif;
+          font-size: 0.95rem;
+          font-weight: 600;
+          color: #dc0000;
+          text-decoration: none;
+          transition:
+            color 0.2s ease,
+            transform 0.2s ease;
+        }
+
+        .ed-coordinator-contact:hover {
+          color: #0d0d0d;
+          transform: translateX(2px);
+        }
+
+        .ed-coordinator-phone {
+          font-size: 0.9rem;
+        }
+
+        /* ═══ RULES ═══ */
+
+        .ed-rules-card {
+          display: block;
+        }
+
+        .ed-rules-list {
+          margin: 0.65rem 0 0;
+          padding-left: 1.35rem;
+          font-family: 'Hanken Grotesk', sans-serif;
+          font-size: 0.95rem;
+          line-height: 1.65;
+          color: #1a1a1a;
+        }
+
+        .ed-rules-list li {
+          padding-left: 0.3rem;
+          margin-bottom: 0.65rem;
+        }
+
+        .ed-rules-list li:last-child {
+          margin-bottom: 0;
+        }
+
+        .ed-rules-mobile-item {
+          display: none;
+        }
+
+        .ed-rules-mobile-btn {
+          display: none;
+        }
+
+        /* ═══ RULES MODAL ═══ */
+
+        .ed-rules-modal {
+          position: fixed;
+          inset: 0;
+          z-index: 9999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          background: rgba(13, 13, 13, 0.7);
+          backdrop-filter: blur(6px);
+        }
+
+        .ed-rules-modal-card {
+          width: min(700px, 100%);
+          max-height: min(80vh, 700px);
+          overflow: hidden;
+          border: 1px solid rgba(220, 0, 0, 0.45);
+          border-radius: 18px;
+          background: #ffffff;
+          box-shadow: 0 25px 70px rgba(0, 0, 0, 0.35);
+        }
+
+        .ed-rules-modal-header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 1rem;
+          padding: 22px 24px;
+          border-bottom: 1px solid rgba(26, 26, 26, 0.1);
+        }
+
+        .ed-rules-modal-title {
+          margin: 0.3rem 0 0;
+          font-family: 'Anton', sans-serif;
+          font-size: 1.6rem;
+          font-weight: 400;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+          color: #dc0000;
+        }
+
+        .ed-rules-close {
+          flex: 0 0 auto;
+          width: 40px;
+          height: 40px;
+          border: 2px solid #1a1a1a;
+          border-radius: 50%;
+          background: #ffffff;
+          color: #1a1a1a;
+          font-size: 1.5rem;
+          line-height: 1;
+          cursor: pointer;
+          transition:
+            background 0.2s ease,
+            color 0.2s ease,
+            transform 0.2s ease;
+        }
+
+        .ed-rules-close:hover {
+          background: #dc0000;
+          color: #ffffff;
+          transform: rotate(90deg);
+        }
+
+        .ed-rules-modal-body {
+          max-height: calc(min(80vh, 700px) - 100px);
+          overflow-y: auto;
+          padding: 24px;
+        }
+
+        .ed-rules-modal-body .ed-rules-list {
+          margin-top: 0;
+          font-size: 1rem;
+          line-height: 1.7;
+        }
+
         /* ═══ ACTIONS ═══ */
 
         .ed-actions {
@@ -782,8 +1042,83 @@ export default function EventDetails() {
             grid-template-columns: 1fr;
           }
 
+          .ed-left-column {
+            display: contents;
+          }
+
           .ed-body {
             padding: 2rem 0 3rem;
+          }
+
+          /* Mobile: About stays visible */
+          .ed-left-column > .ed-card:first-child {
+            order: 1;
+          }
+
+          /* Mobile: Rules card becomes hidden */
+          .ed-rules-card {
+            display: none;
+          }
+
+          /* Mobile: Details comes after About */
+          .ed-grid > .ed-card {
+            order: 2;
+          }
+
+          /* Mobile: View Rules button */
+          .ed-rules-mobile-item {
+            display: grid;
+          }
+
+          .ed-rules-mobile-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 0.6rem;
+            padding: 0.8rem 1rem;
+            border: 1.5px solid #dc0000;
+            border-radius: 10px;
+            background: rgba(220, 0, 0, 0.05);
+            color: #dc0000;
+            font-family: 'Anton', sans-serif;
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+          }
+
+          .ed-rules-mobile-arrow {
+            font-size: 1.1rem;
+          }
+
+          /* Mobile rules modal */
+          .ed-rules-modal {
+            align-items: flex-end;
+            padding: 10px;
+          }
+
+          .ed-rules-modal-card {
+            max-height: 85vh;
+            border-radius: 18px 18px 10px 10px;
+          }
+
+          .ed-rules-modal-header {
+            padding: 18px;
+          }
+
+          .ed-rules-modal-title {
+            font-size: 1.3rem;
+          }
+
+          .ed-rules-modal-body {
+            max-height: calc(85vh - 90px);
+            padding: 18px;
+          }
+
+          .ed-rules-modal-body .ed-rules-list {
+            font-size: 0.92rem;
+            line-height: 1.6;
           }
         }
 
@@ -811,7 +1146,7 @@ export default function EventDetails() {
             width: 80px;
             height: 80px;
             right: 18rem;
-            bottom:18px;
+            bottom: 18px;
           }
 
           .ed-body {
@@ -845,6 +1180,10 @@ export default function EventDetails() {
           }
 
           .ed-back-arrow {
+            transition: none;
+          }
+
+          .ed-coordinator-contact {
             transition: none;
           }
         }
