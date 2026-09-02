@@ -657,7 +657,7 @@ export default function About() {
           display: grid;
           place-items: center;
           width: 100%;
-          aspect-ratio: 16 / 12;
+          aspect-ratio: 1 / 1;
           border-radius: 12px;
           overflow: hidden;
           background: #f2f2f2;
