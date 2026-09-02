@@ -20,60 +20,35 @@ const galleryItems = [
   },
 ];
 
-const eliteSponsors = [
+const sponsors = [
   {
-    name: "Sponsor 01",
-    blurb: "Powering the headline stage of REVIBE '26 and the spotlight on every champion.",
-    logo: null,
+    name: "Golden Tasty Treats",
+    blurb: "Freshly made waffles, crispy on the outside and deliciously soft inside. A perfect blend of sweet toppings, rich flavors, and irresistible goodness.",
+    logo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788365758/WhatsApp_Image_2026-09-02_at_9.24.29_PM_alxsiv.jpg",
   },
   {
-    name: "Sponsor 02",
-    blurb: "The engine behind the web — fuelling the experience, end to end.",
-    logo: null,
-  },
-  {
-    name: "Sponsor 03",
-    blurb: "Standing shoulder-to-shoulder with us across all thirteen battles.",
-    logo: null,
+    name: "Jawa - Yezdi",
+    blurb: "Iconic motorcycles built for the free spirit, blending vintage charm with modern performance. Ride bold, ride timeless — where every road tells a story.",
+    logo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788370159/WhatsApp_Image_2026-09-02_at_10.10.18_PM_cty8uu.jpg",
   },
 ];
 
-const premiumSponsors = [
-  {
-    name: "Sponsor 04",
-    blurb: "Architecting the infrastructure that keeps the web alive.",
-    logo: null,
-  },
-  {
-    name: "Sponsor 05",
-    blurb: "Helping curious minds from every corner find their way to the web.",
-    logo: null,
-  },
-  {
-    name: "Sponsor 06",
-    blurb: "Carrying the story of REVIBE '26 far beyond the auditorium walls.",
-    logo: null,
-  },
-];
-
-function SponsorTier({ tier, sponsors }) {
+function SponsorTier({ sponsors }) {
   return (
     <div className="ws-sponsors-grid">
       {sponsors.map((sponsor) => (
-        <article className="ws-card ws-gallery-card ws-sponsor-card" key={sponsor.name}>
-          <span className="ws-card-tag">{tier}</span>
-          <div
-            className="ws-sponsor-logo"
-            aria-label={`${sponsor.name} logo placeholder`}
-          >
+        <article className="ws-sponsor-card" key={sponsor.name}>
+          <div className="ws-sponsor-logo" aria-label={`${sponsor.name} logo`}>
             {sponsor.logo ? (
               <img src={sponsor.logo} alt={`${sponsor.name} logo`} />
             ) : (
               <span>LOGO</span>
             )}
           </div>
-          <h3 className="ws-sponsor-name">{sponsor.name}</h3>
-          <p className="ws-sponsor-blurb">{sponsor.blurb}</p>
+          <div className="ws-sponsor-info">
+            <h3 className="ws-sponsor-name">{sponsor.name}</h3>
+            <p className="ws-sponsor-blurb">{sponsor.blurb}</p>
+          </div>
         </article>
       ))}
     </div>
@@ -129,38 +104,15 @@ export default function About() {
         <hr className="ws-rule" aria-hidden="true" />
 
         {/* ============================================================
-            SPONSORS — ELITE WEB ALLIES
+            SPONSORS
             ============================================================ */}
-        <section className="ws-section" aria-labelledby="elite-title">
+        <section className="ws-section" aria-labelledby="sponsors-title">
           <div className="ws-container">
             <p className="ws-label">Our Partners</p>
-            <h2 id="elite-title" className="ws-headline">
-              Elite Web Allies
+            <h2 id="sponsors-title" className="ws-headline">
+              Our Sponsors
             </h2>
-            <p className="ws-body">
-              The flagship forces powering the web — the names holding the
-              strongest strands of REVIBE '26 together.
-            </p>
-            <SponsorTier tier="Elite" sponsors={eliteSponsors} />
-          </div>
-        </section>
-
-        <hr className="ws-rule" aria-hidden="true" />
-
-        {/* ============================================================
-            SPONSORS — PREMIUM WEB ALLIES
-            ============================================================ */}
-        <section className="ws-section" aria-labelledby="premium-title">
-          <div className="ws-container">
-            <p className="ws-label">Our Partners</p>
-            <h2 id="premium-title" className="ws-headline">
-              Premium Web Allies
-            </h2>
-            <p className="ws-body">
-              The specialists and storytellers weaving the finer threads of
-              the REVIBE '26 web.
-            </p>
-            <SponsorTier tier="Premium" sponsors={premiumSponsors} />
+            <SponsorTier sponsors={sponsors} />
           </div>
         </section>
 
@@ -660,54 +612,84 @@ export default function About() {
           display: block;
         }
 
-        /* ---------- sponsors (same boxes as gallery) ---------- */
+        /* ---------- sponsors ---------- */
 
         .ws-sponsors-grid {
           position: relative;
           z-index: 2;
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 16px;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 24px;
           margin-top: 32px;
         }
 
         .ws-sponsor-card {
+          position: relative;
+          display: flex;
+          flex-direction: column;
           gap: 14px;
-          min-height: 200px;
-          padding: 16px;
+          padding: 20px;
+          border: 1px solid rgba(220, 0, 0, 0.35);
+          border-radius: 16px;
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
+          box-shadow:
+            0 10px 30px rgba(0, 0, 0, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
+          overflow: hidden;
+          transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .ws-sponsor-card::after {
+          content: "";
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 3px;
+          background: linear-gradient(90deg, transparent, rgba(220, 0, 0, 0.5), transparent);
+          pointer-events: none;
+        }
+
+        .ws-sponsor-card:hover,
+        .ws-sponsor-card:focus-within {
+          transform: translateY(-3px);
+          border-color: rgba(220, 0, 0, 0.6);
+          box-shadow:
+            0 14px 34px rgba(0, 0, 0, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
         }
 
         .ws-sponsor-logo {
           display: grid;
           place-items: center;
           width: 100%;
-          min-height: 110px;
-          border: 1px dashed rgba(220, 0, 0, 0.5);
+          aspect-ratio: 1 / 1;
           border-radius: 12px;
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(220, 0, 0, 0.04));
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 0.72rem;
-          font-weight: 700;
-          letter-spacing: 0.2em;
-          color: #6a6a6a;
+          overflow: hidden;
+          background: #f2f2f2;
         }
 
         .ws-sponsor-logo img {
-          max-width: 80%;
-          max-height: 90px;
+          width: 100%;
+          height: 100%;
           object-fit: contain;
         }
 
-        .ws-sponsor-name {
+        .ws-sponsor-info {
           position: relative;
           z-index: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .ws-sponsor-name {
           margin: 0;
           font-family: 'Anton', sans-serif;
           font-weight: 400;
-          font-size: 1.35rem;
-          line-height: 1.05;
+          font-size: 1.15rem;
+          line-height: 1.1;
           letter-spacing: 0.02em;
-          color: #1a1a1a;
+          color: #b7102a;
           text-transform: uppercase;
         }
 
@@ -735,7 +717,8 @@ export default function About() {
           }
 
           .ws-sponsors-grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
           }
 
           .ws-gallery-web--center {
@@ -784,8 +767,6 @@ export default function About() {
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 24px;
           }
-
-          .ws-gallery-web--center {
             width: 380px;
             height: 380px;
           }
@@ -834,10 +815,13 @@ export default function About() {
         @media (max-width: 560px) {
           .ws-sponsors-grid {
             grid-template-columns: 1fr;
+            gap: 16px;
           }
 
           .ws-sponsor-card {
-            padding: 14px;
+            padding: 16px;
+            max-width: 340px;
+            margin: 0 auto;
           }
         }
 

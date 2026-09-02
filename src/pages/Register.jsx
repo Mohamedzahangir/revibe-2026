@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { createPortal } from "react-dom";
 
 import SpiderWeb from "../components/navigation/SpiderWeb";
@@ -2051,6 +2051,15 @@ export default function Register() {
                   <span>TOTAL AMOUNT TO BE PAID</span>
                   <strong>₹{totalFee}</strong>
                 </div>
+              </div>
+
+              <div className="success-location-section">
+                <p className="success-location-text">
+                  Not sure where your event is? Check the venue on our campus map.
+                </p>
+                <Link to="/location" className="register-location-btn">
+                  Location
+                </Link>
               </div>
                 </div>
 
@@ -6071,6 +6080,57 @@ const registerStyles = `
     color: #999999;
     font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.7rem;
+  }
+
+  .success-location-section {
+    margin-top: 1.2rem;
+    text-align: center;
+  }
+
+  .success-location-text {
+    margin: 0 0 0.6rem;
+    color: #3a3a3a;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 0.85rem;
+  }
+
+  .register-location-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 50px;
+    padding: 0.95rem 1.9rem;
+    border: 2px solid #0d0d0d;
+    border-radius: 999px;
+    font-family: 'Anton', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    background: #dc0000;
+    color: #ffffff;
+    box-shadow: 0 8px 22px rgba(220, 0, 0, 0.35);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+  }
+
+  .register-location-btn::after {
+    content: "\\2192";
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 1rem;
+    transition: transform 0.2s ease;
+  }
+
+  .register-location-btn:hover {
+    transform: translateY(-3px);
+    background: #0d0d0d;
+    color: #ffffff;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  .register-location-btn:hover::after {
+    transform: translateX(4px);
   }
 
   /* ═══ MISC ═══ */
