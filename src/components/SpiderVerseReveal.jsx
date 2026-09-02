@@ -548,7 +548,7 @@ const svrCSS = `
   .svr-check-group {
     display: flex; flex-direction: column;
     align-items: center; gap: 0.8rem;
-    top: 44%; opacity: 0;
+    top: 50%; opacity: 0;
   }
   .svr-check { width: 48px; height: 48px; opacity: 0; }
   .svr-check-group.visible { animation: svrFadeIn 0.15s ease 2.7s forwards; }
@@ -593,7 +593,7 @@ const svrCSS = `
 
   .svr-brand-wrap {
     display: flex; align-items: baseline;
-    gap: 0.08em; top: 40%; left: 50%;
+    gap: 0.08em; top: 36%; left: 50%;
     transform: translateX(-50%) scale(0.1) rotate(-8deg);
     opacity: 0;
   }
