@@ -1134,7 +1134,43 @@ export async function submitRegistration({
     await resolveSelectedEvents(
       normalizedEvents
     );
+/*
+=========================================================
+IPL AUCTION - MAXIMUM 10 TEAMS
+=========================================================
+*/
 
+const iplEvent =
+  resolvedEvents.find(
+    (event) =>
+      event.slug === "ipl-auction"
+  );
+
+if (iplEvent) {
+  const { count, error } =
+    await supabase
+      .from("registration_events")
+      .select("id", {
+        count: "exact",
+        head: true,
+      })
+      .eq(
+        "event_id",
+        iplEvent.id
+      );
+
+  if (error) {
+    throw new Error(
+      `Failed to check IPL Auction capacity: ${error.message}`
+    );
+  }
+
+  if ((count || 0) >= 10) {
+    throw new Error(
+      "IPL Auction registration is full. Maximum 10 teams are allowed."
+    );
+  }
+}
   /*
   ========================================================
   3. PRIMARY VALIDATION
