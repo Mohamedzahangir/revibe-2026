@@ -52,7 +52,7 @@ export default function Home() {
   return (
     <>
       <main className="theme-page home-page">
-        <section className="page-hero home-hero" aria-labelledby="hero-title">
+        <section className="page-hero home-hero home-grid-bg" aria-labelledby="hero-title">
           <SpiderWeb className="corner-web hero-web-tl" />
           <SpiderWeb className="corner-web hero-web-br" />
           <div className="page-shell">
@@ -610,6 +610,19 @@ export default function Home() {
           .primary-btn::after,
           .secondary-btn {
             transition: none;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .home-grid-bg::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image:
+              repeating-linear-gradient(45deg, rgba(26,26,26,0.05) 0 1px, transparent 1px 28px),
+              repeating-linear-gradient(-45deg, rgba(26,26,26,0.05) 0 1px, transparent 1px 28px);
           }
         }
       `}</style>
