@@ -660,6 +660,9 @@ export default function Register() {
     const el = cardRefs.current[index];
     if (!el) return;
     try {
+      await navigator.clipboard.writeText(
+        "Hey I registered for REVIBE '26! It's your time to register now \u{1F525} revibeofficial.in"
+      );
       const dataUrl = await toPng(el, {
         cacheBust: true,
         pixelRatio: 2,
@@ -2091,6 +2094,10 @@ export default function Register() {
                         </button>
                       )}
                     </div>
+
+                    <p className="reg-card-share-hint">
+                      Caption copied! After sharing, paste it as your story caption.
+                    </p>
                   </div>
                 );
               })()}
@@ -6609,5 +6616,14 @@ const registerStyles = `
 
   .reg-card-share-btn svg {
     flex-shrink: 0;
+  }
+
+  .reg-card-share-hint {
+    margin-top: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    color: #666;
+    text-align: center;
   }
 `;
