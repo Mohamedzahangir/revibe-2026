@@ -46,15 +46,27 @@ function buildUpiParams(amount, note) {
   const params = new URLSearchParams({
     pa: paymentData.upiId,
     pn: "Abbas",
-    am: String(amount),
+    am: Number(amount).toFixed(2),
     tn: note || "REVIBE 26 Registration",
     cu: "INR",
+    mc: "0000",
+    tr: `REVIBE${Date.now()}`,
   });
   return params.toString();
 }
 
 function getUniversalUpiLink(amount, note) {
   return `upi://pay?${buildUpiParams(amount, note)}`;
+}
+
+function getUpiAppLinks(amount, note) {
+  const params = buildUpiParams(amount, note);
+  return {
+    gpay: `gpay://upi/pay?${params}`,
+    phonepe: `phonepe://upi/pay?${params}`,
+    bhim: `bhim://upi/pay?${params}`,
+    generic: `upi://pay?${params}`,
+  };
 }
 
 const emptyMember = () => ({
@@ -3641,23 +3653,32 @@ transaction.
                       </div>
 
                       <div className="upi-pay-section">
-                        <div
-                          onClick={() => { window.location.href = getUniversalUpiLink(totalFee, paymentNote); }}
-                          className="upi-pay-banner"
-                          role="button"
-                          tabIndex={0}
-                          onKeyDown={(e) => { if (e.key === 'Enter') window.location.href = getUniversalUpiLink(totalFee, paymentNote); }}
-                        >
-                          <img src="/Upi logos/upi-payment-icon.svg" alt="UPI" className="upi-banner-logo" />
-                          <span className="upi-banner-text">PAY NOW</span>
-                          <span className="upi-banner-arrow">→</span>
-                        </div>
-                        <p className="upi-banner-subtitle">Opens your default UPI app with ₹{totalFee} pre-filled</p>
-                        <div className="upi-app-logos">
-                          <img src="/Upi logos/google-pay-icon.svg" alt="GPay" className="upi-app-logo" />
-                          <img src="/Upi logos/phonepe-icon.svg" alt="PhonePe" className="upi-app-logo" />
-                          <img src="/Upi logos/bhim-app-icon.svg" alt="BHIM" className="upi-app-logo" />
-                          <img src="/Upi logos/navi-team.png" alt="Navi" className="upi-app-logo" />
+                        <p className="upi-banner-subtitle">Pay with your preferred UPI app — ₹{totalFee}</p>
+                        <div className="upi-app-buttons">
+                          {(() => {
+                            const links = getUpiAppLinks(totalFee, paymentNote);
+                            const open = (url) => { window.location.href = url; };
+                            return (
+                              <>
+                                <button type="button" className="upi-app-btn gpay-btn" onClick={() => open(links.gpay)}>
+                                  <img src="/Upi logos/google-pay-icon.svg" alt="GPay" className="upi-app-btn-logo" />
+                                  <span>Google Pay</span>
+                                </button>
+                                <button type="button" className="upi-app-btn phonepe-btn" onClick={() => open(links.phonepe)}>
+                                  <img src="/Upi logos/phonepe-icon.svg" alt="PhonePe" className="upi-app-btn-logo" />
+                                  <span>PhonePe</span>
+                                </button>
+                                <button type="button" className="upi-app-btn bhim-btn" onClick={() => open(links.bhim)}>
+                                  <img src="/Upi logos/bhim-app-icon.svg" alt="BHIM" className="upi-app-btn-logo" />
+                                  <span>BHIM</span>
+                                </button>
+                                <button type="button" className="upi-app-btn navi-btn" onClick={() => open(links.generic)}>
+                                  <img src="/Upi logos/navi-team.png" alt="Navi" className="upi-app-btn-logo" />
+                                  <span>Navi / Other</span>
+                                </button>
+                              </>
+                            );
+                          })()}
                         </div>
                       </div>
 
@@ -5383,50 +5404,55 @@ const registerStyles = `
   }
 
   .upi-pay-banner {
+    display: none;
+  }
+
+  .upi-app-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  .upi-app-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.7rem;
-    width: 100%;
-    padding: 0.85rem 1.2rem;
-    border: 1px solid rgba(220, 0, 0, 0.3);
-    border-radius: 12px;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(220, 0, 0, 0.25);
+    border-radius: 10px;
     background: #ffffff;
-    text-decoration: none;
     cursor: pointer;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1a1a1a;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   }
 
-  .upi-pay-banner:hover {
+  .upi-app-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(220, 0, 0, 0.12);
+    box-shadow: 0 6px 18px rgba(220, 0, 0, 0.12);
     border-color: #dc0000;
   }
 
-  .upi-banner-logo {
-    height: 32px;
+  .upi-app-btn-logo {
+    height: 22px;
     width: auto;
     object-fit: contain;
     flex-shrink: 0;
   }
 
-  .upi-banner-text {
-    color: #1a1a1a;
-    font-family: 'Anton', sans-serif;
-    font-size: 1.05rem;
-    letter-spacing: 0.06em;
+  .upi-app-btn span {
+    white-space: nowrap;
   }
 
-  .upi-banner-arrow {
-    color: #dc0000;
-    font-size: 1.1rem;
-    font-weight: 700;
-    transition: transform 0.2s ease;
-  }
-
-  .upi-pay-banner:hover .upi-banner-arrow {
-    transform: translateX(3px);
-  }
+  .gpay-btn:hover { border-color: #4285f4; box-shadow: 0 6px 18px rgba(66, 133, 244, 0.15); }
+  .phonepe-btn:hover { border-color: #5f259f; box-shadow: 0 6px 18px rgba(95, 37, 159, 0.15); }
+  .bhim-btn:hover { border-color: #00baf2; box-shadow: 0 6px 18px rgba(0, 186, 242, 0.15); }
+  .navi-btn:hover { border-color: #1aaf6d; box-shadow: 0 6px 18px rgba(26, 175, 109, 0.15); }
 
   .upi-banner-subtitle {
     margin: 0.5rem 0 0;
@@ -5434,26 +5460,6 @@ const registerStyles = `
     font-family: 'Hanken Grotesk', sans-serif;
     font-size: 0.78rem;
     line-height: 1.4;
-  }
-
-  .upi-app-logos {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 12px;
-    margin-top: 0.6rem;
-  }
-
-  .upi-app-logo {
-    height: 20px;
-    width: auto;
-    object-fit: contain;
-    opacity: 0.6;
-    transition: opacity 0.2s ease;
-  }
-
-  .upi-app-logo:hover {
-    opacity: 0.9;
   }
 
   .upi-note {
