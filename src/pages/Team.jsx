@@ -134,7 +134,7 @@ const teams = [
       { name: "MOHAMMED MAAZ C", dept: "II Year CSE", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935180/Maaz_Mohammed_ykuaie.jpg" },
       { name: "Zuha Fathima. Z", dept: "II Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935204/Zuha_Fathima_apwj0d.png" },
       { name: "K Mohamed Emad UR Rahman", dept: "II Year AI-ML", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935211/MD_EMAD_K_brf3yl.png" },
-      { name: "M Samyuktha", dept: "II Year AI-ML", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788339116/Screenshot_2026-09-02-13-20-11-12_6012fa4d4ddec268fc5c7112cbb265e7_-_Murugan_r_cjsonx.jpg"},
+      { name: "M Samyuktha", dept: "II Year AI-ML", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788460205/Screenshot_2026-09-02-13-20-11-12_6012fa4d4ddec268fc5c7112cbb265e7_-_Murugan_r_xqo8ov.jpg"},
       { name: "S. Shalini", dept: "II Year AI-ML", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935204/Shalini_mm8tyg.jpg" },
       { name: "Madiha. A", dept: "II Year IT", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935202/Madiha_r249s3.jpg" },
       { name: "Mohammed Amaan. D", dept: "II Year AI-ML", photo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1787935181/Mohammed_Amaan._D_auakrw.jpg" },
