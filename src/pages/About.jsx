@@ -35,6 +35,9 @@ const sponsors = [
     name: "K.V. CAFE",
     blurb: "From crispy fry favourites and steamed momos to fresh juices, milkshakes and refreshing mojitos, K.V. CAFE serves up a tasty variety for every craving — with favourites starting from just ₹20.",
     logo: "https://res.cloudinary.com/dbqjkjl0c/image/upload/v1788458142/KVCAFE_grrify.jpg",
+    name: "Funk It",
+    blurb: "Fusing bold flavors, fun vibes, and irresistible bites.",
+    logo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788459115/Fusk_it.jpg_mlqfck.png",
   },
 ];
 
