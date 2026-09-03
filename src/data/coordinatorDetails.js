@@ -1,12 +1,12 @@
 export const coordinatorDetails = {
   "Paper Presentation": {
-    name: "Raja Rajeswari S",
+    name: "Raja Rajeswari",
     whatsapp: "9486883590",
   },
 
   "Mini Hackathon": {
-    name: "Mohamed Zahangir Ali Molla",
-    whatsapp: "9531879266",
+    name: "Mohammed Abuzar",
+    whatsapp: "9442856245",
   },
 
   "Technical Quiz": {
@@ -15,13 +15,13 @@ export const coordinatorDetails = {
   },
 
   "Coding & Debugging": {
-    name: "Gokul S",
-    whatsapp: "7604958734",
+    name: "Abdul Gaffoor Asjad",
+    whatsapp: "9486233954",
   },
 
   "Shark Tank × SGC": {
-    name: "Abdul Gaffoor Asjad",
-    whatsapp: "9486233954",
+    name: "Gokul S",
+    whatsapp: "7604958734",
   },
 
   "Prompt Wars": {
@@ -40,8 +40,8 @@ export const coordinatorDetails = {
   },
 
   "IPL Auction": {
-    name: "Mohammed Melhan",
-    whatsapp: "9600159063",
+    name: "Mudassir / Mohamed Zahangir Ali Molla",
+    whatsapp: "8072124967 / 9531879266",
   },
 
   "Art & Painting": {
@@ -55,7 +55,7 @@ export const coordinatorDetails = {
   },
 
   "Chess": {
-    name: "Abhishek",
+    name: "Abishek",
     whatsapp: "7448997356",
   },
 

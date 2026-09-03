@@ -165,6 +165,7 @@ export default function Login() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -203,6 +204,8 @@ export default function Login() {
       // =====================================================
       // 1. SUPABASE AUTHENTICATION
       // =====================================================
+
+      supabase.auth.persistSession = rememberMe;
 
       const {
         data: authData,
@@ -511,6 +514,18 @@ export default function Login() {
                   <span>{error}</span>
                 </div>
               )}
+
+              <label className="remember-me">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(event) =>
+                    setRememberMe(event.target.checked)
+                  }
+                  disabled={loading}
+                />
+                <span>Remember me</span>
+              </label>
 
               {/* Login button */}
               <button
@@ -992,6 +1007,29 @@ export default function Login() {
           font-size: 0.76rem;
 
           line-height: 1.5;
+        }
+
+        .remember-me {
+          display: flex;
+          align-items: center;
+          gap: 0.55rem;
+          margin-top: -0.15rem;
+          color: #555555;
+          font-family: 'Poppins', sans-serif;
+          font-size: 0.76rem;
+          cursor: pointer;
+        }
+
+        .remember-me input {
+          width: 16px;
+          height: 16px;
+          margin: 0;
+          accent-color: #e60000;
+          cursor: pointer;
+        }
+
+        .remember-me input:disabled {
+          cursor: not-allowed;
         }
 
         .error-mark {
