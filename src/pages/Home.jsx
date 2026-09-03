@@ -154,6 +154,23 @@ export default function Home() {
           border-bottom: 2px solid ${COLOR.black};
         }
 
+        /*
+           Diagonal cross-pattern grid overlay — desktop only.
+           Reads like a spider web; mirrors the About page grid bg.
+        */
+        @media (min-width: 1024px) {
+          .home-hero-grid::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-image:
+              repeating-linear-gradient(45deg, rgba(26,26,26,0.05) 0 1px, transparent 1px 28px),
+              repeating-linear-gradient(-45deg, rgba(26,26,26,0.05) 0 1px, transparent 1px 28px);
+          }
+        }
+
         .page-hero .page-shell {
           display: flex;
           justify-content: center;
