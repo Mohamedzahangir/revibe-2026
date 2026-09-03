@@ -31,6 +31,11 @@ const sponsors = [
     blurb: "Iconic motorcycles built for the free spirit, blending vintage charm with modern performance. Ride bold, ride timeless — where every road tells a story.",
     logo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788370159/WhatsApp_Image_2026-09-02_at_10.10.18_PM_cty8uu.jpg",
   },
+  {
+    name: "Funk It",
+    blurb: "Fusing bold flavors, fun vibes, and irresistible bites.",
+    logo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788459115/Fusk_it.jpg_mlqfck.png",
+  },
 ];
 
 function SponsorTier({ sponsors }) {
