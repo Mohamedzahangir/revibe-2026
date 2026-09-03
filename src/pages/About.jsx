@@ -32,6 +32,9 @@ const sponsors = [
     logo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788370159/WhatsApp_Image_2026-09-02_at_10.10.18_PM_cty8uu.jpg",
   },
   {
+    name: "K.V. CAFE",
+    blurb: "From crispy fry favourites and steamed momos to fresh juices, milkshakes and refreshing mojitos, K.V. CAFE serves up a tasty variety for every craving — with favourites starting from just ₹20.",
+    logo: "https://res.cloudinary.com/dbqjkjl0c/image/upload/v1788458142/KVCAFE_grrify.jpg",
     name: "Funk It",
     blurb: "Fusing bold flavors, fun vibes, and irresistible bites.",
     logo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788459115/Fusk_it.jpg_mlqfck.png",
@@ -60,7 +63,7 @@ function SponsorTier({ sponsors }) {
   );
 
   return (
-    <div className="ws-sponsors-grid" aria-label="Sponsors carousel">
+    <div className="ws-sponsors-grid" aria-label="Sponsors carousel" tabIndex={0}>
       <div className="ws-sponsors-track">
         {sponsorSet()}
         {sponsorSet(true)}
@@ -174,7 +177,7 @@ export default function About() {
         <section className="ws-section ws-grid-bg" aria-labelledby="sgc-title">
           <div className="ws-container ws-container--narrow">
             <p className="ws-label">Organized by</p>
-            <h2 id="sgc-title" className="ws-headline">About Student Guidance Cell</h2>
+            <h2 id="sgc-title" className="ws-headline">Student Guidance Cell</h2>
             <p className="ws-tagline">Zeal and Zest to be</p>
 
             <p className="ws-body-lg">
@@ -639,7 +642,7 @@ export default function About() {
         .ws-sponsors-track {
           display: flex;
           width: max-content;
-          animation: ws-sponsors-marquee 34s linear infinite;
+          animation: ws-sponsors-marquee 18s linear infinite;
           will-change: transform;
         }
 
@@ -738,9 +741,15 @@ export default function About() {
           from {
             transform: translateX(0);
           }
+
           to {
             transform: translateX(-50%);
           }
+        }
+
+        .ws-sponsors-grid:hover .ws-sponsors-track,
+        .ws-sponsors-grid:focus-within .ws-sponsors-track {
+          animation-play-state: paused;
         }
 
         /* =========================================================
@@ -803,11 +812,7 @@ export default function About() {
           }
 
           .ws-sponsors-grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 24px;
-          }
-            width: 380px;
-            height: 380px;
+            gap: 16px;
           }
 
           .ws-gallery-web--tl,
@@ -853,13 +858,11 @@ export default function About() {
 
         @media (max-width: 560px) {
           .ws-sponsors-grid {
-            width: calc(100% + 32px);
-            margin-left: -16px;
-            margin-right: -16px;
+            margin-top: 24px;
           }
 
           .ws-sponsors-track {
-            animation-duration: 42s;
+            animation-duration: 18s;
           }
 
           .ws-sponsors-set {
