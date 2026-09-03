@@ -3651,10 +3651,11 @@ transaction.
                           <span className="upi-banner-text">PAY NOW</span>
                           <span className="upi-banner-arrow">→</span>
                         </a>
-                        <p className="upi-banner-subtitle">Opens your default UPI app with ₹{totalFee} pre-filled</p>
+                        <p className="upi-banner-subtitle">
+                          Works best on <strong>BHIM</strong> and <strong>Navi</strong>.
+                          GPay / PhonePe users — scan the QR or pay to UPI ID below.
+                        </p>
                         <div className="upi-app-logos">
-                          <img src="/Upi logos/google-pay-icon.svg" alt="GPay" className="upi-app-logo" />
-                          <img src="/Upi logos/phonepe-icon.svg" alt="PhonePe" className="upi-app-logo" />
                           <img src="/Upi logos/bhim-app-icon.svg" alt="BHIM" className="upi-app-logo" />
                           <img src="/Upi logos/navi-team.png" alt="Navi" className="upi-app-logo" />
                         </div>
