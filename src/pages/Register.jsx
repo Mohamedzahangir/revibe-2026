@@ -3589,16 +3589,17 @@ transaction.
                       </div>
 
                       <div className="upi-pay-section">
-                        <a
-                          href={getUniversalUpiLink(totalFee, paymentNote)}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <div
+                          onClick={() => { window.location.href = getUniversalUpiLink(totalFee, paymentNote); }}
                           className="upi-pay-banner"
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => { if (e.key === 'Enter') window.location.href = getUniversalUpiLink(totalFee, paymentNote); }}
                         >
                           <img src="/Upi logos/upi-payment-icon.svg" alt="UPI" className="upi-banner-logo" />
                           <span className="upi-banner-text">PAY NOW</span>
                           <span className="upi-banner-arrow">→</span>
-                        </a>
+                        </div>
                         <p className="upi-banner-subtitle">Opens your default UPI app with ₹{totalFee} pre-filled</p>
                         <div className="upi-app-logos">
                           <img src="/Upi logos/google-pay-icon.svg" alt="GPay" className="upi-app-logo" />
@@ -5182,6 +5183,7 @@ const registerStyles = `
     border-radius: 12px;
     background: #ffffff;
     text-decoration: none;
+    cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   }
 
