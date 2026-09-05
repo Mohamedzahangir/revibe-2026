@@ -477,6 +477,8 @@ function RegistrationModal({
   onClose,
   onVerify,
   verifying,
+  onDelete,
+  deleting,
 }) {
   if (!row) return null;
 
@@ -756,6 +758,24 @@ function RegistrationModal({
             )}
           </section>
 
+          <section className="detail-section delete-section">
+            <div className="section-title">Danger Zone</div>
+            <p className="delete-section-desc">
+              Permanently delete this registration and all
+              associated data. This action cannot be undone.
+            </p>
+            <button
+              type="button"
+              className="delete-section-button"
+              disabled={deleting}
+              onClick={() => onDelete(row)}
+            >
+              {deleting
+                ? "Deleting..."
+                : "Delete Registration"}
+            </button>
+          </section>
+
         </div>
       </div>
     </div>
@@ -825,6 +845,81 @@ function VerificationConfirmModal({
   );
 }
 
+function DeleteConfirmModal({
+  row,
+  onCancel,
+  onConfirm,
+  deleting,
+}) {
+  if (!row) return null;
+
+  return (
+    <div
+      className="delete-modal-backdrop"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget && !deleting) {
+          onCancel();
+        }
+      }}
+    >
+      <div
+        className="delete-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-modal-title"
+      >
+        <div className="delete-modal-eyebrow">
+          DELETE REGISTRATION
+        </div>
+
+        <h2 id="delete-modal-title">
+          DELETE THIS PARTICIPANT?
+        </h2>
+
+        <p>
+          Are you sure you want to permanently delete the
+          registration for
+        </p>
+
+        <strong className="delete-modal-participant">
+          {row.full_name || "Unknown Participant"}
+        </strong>
+
+        <div className="delete-modal-reg-number">
+          {row.registration_number || "—"}
+        </div>
+
+        <div className="delete-modal-warning">
+          This will permanently remove the registration and
+          all related data including registration members,
+          events, and payment records. This action cannot be
+          undone.
+        </div>
+
+        <div className="delete-modal-actions">
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={onCancel}
+            disabled={deleting}
+          >
+            CANCEL
+          </button>
+
+          <button
+            type="button"
+            className="delete-confirm-button"
+            onClick={onConfirm}
+            disabled={deleting}
+          >
+            {deleting ? "Deleting..." : "DELETE REGISTRATION"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* =========================================================
    TABLE
 ========================================================= */
@@ -833,6 +928,8 @@ function RegistrationTable({
   rows,
   eventSlug,
   onView,
+  onDelete,
+  deletingId,
 }) {
   return (
     <>
@@ -847,6 +944,7 @@ function RegistrationTable({
               <th>Students</th>
               <th>Payment</th>
               <th>Amount</th>
+              <th />
               <th />
             </tr>
           </thead>
@@ -954,6 +1052,19 @@ function RegistrationTable({
                       View
                     </button>
                   </td>
+
+                  <td>
+                    <button
+                      type="button"
+                      className="delete-button"
+                      disabled={deletingId === row.id}
+                      onClick={() => onDelete(row)}
+                    >
+                      {deletingId === row.id
+                        ? "Deleting..."
+                        : "Delete"}
+                    </button>
+                  </td>
                 </tr>
               );
             })}
@@ -973,11 +1084,18 @@ function RegistrationTable({
               : 1;
 
           return (
-            <button
-              type="button"
+            <div
               className="mobile-registration-card"
               key={row.id}
               onClick={() => onView(row)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onView(row);
+                }
+              }}
             >
               <div className="mobile-card-top">
                 <div className="student-cell">
@@ -1042,7 +1160,23 @@ function RegistrationTable({
                     .join(" • ")}
                 </div>
               )}
-            </button>
+
+              <div className="mobile-card-actions">
+                <button
+                  type="button"
+                  className="delete-button"
+                  disabled={deletingId === row.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(row);
+                  }}
+                >
+                  {deletingId === row.id
+                    ? "Deleting..."
+                    : "Delete"}
+                </button>
+              </div>
+            </div>
           );
         })}
       </div>
@@ -1070,6 +1204,10 @@ export default function AdminDashboard() {
   const [selectedRow, setSelectedRow] = useState(null);
   const [verifyingId, setVerifyingId] = useState(null);
   const [verificationCandidate, setVerificationCandidate] =
+    useState(null);
+
+  const [deletingId, setDeletingId] = useState(null);
+  const [deleteCandidate, setDeleteCandidate] =
     useState(null);
 
   /* =======================================================
@@ -1408,6 +1546,149 @@ export default function AdminDashboard() {
   };
 
   /* =======================================================
+     DELETE REGISTRATION
+  ======================================================= */
+
+  const requestDelete = (row) => {
+    setDeleteCandidate(row);
+  };
+
+  const deleteParticipant = async (row) => {
+    if (!row?.id) return;
+
+    try {
+      setDeletingId(row.id);
+
+      const {
+        data: registrationRow,
+        error: regLookupError,
+      } = await supabase
+        .from("registrations")
+        .select("id, primary_participant_id")
+        .eq("registration_number", row.registration_number)
+        .maybeSingle();
+
+      if (regLookupError) {
+        console.error(
+          "[AdminDashboard] Failed to look up registration:",
+          regLookupError
+        );
+        throw new Error(
+          "Could not find the associated registration record."
+        );
+      }
+
+      if (!registrationRow) {
+        throw new Error(
+          "No matching registration found for " +
+            (row.registration_number || "this record") +
+            ". The registration data may have already been removed."
+        );
+      }
+
+      const registrationId = registrationRow.id;
+      const primaryParticipantId =
+        registrationRow.primary_participant_id;
+
+      const { data: memberRows } = await supabase
+        .from("registration_members")
+        .select("participant_id")
+        .eq("registration_id", registrationId);
+
+      const memberParticipantIds = (memberRows || [])
+        .map((m) => m.participant_id)
+        .filter(Boolean);
+
+      const allParticipantIds = [
+        ...new Set([
+          primaryParticipantId,
+          ...memberParticipantIds,
+        ].filter(Boolean)),
+      ];
+
+      await supabase
+        .from("registration_members")
+        .delete()
+        .eq("registration_id", registrationId);
+
+      await supabase
+        .from("registration_events")
+        .delete()
+        .eq("registration_id", registrationId);
+
+      await supabase
+        .from("payments")
+        .delete()
+        .eq("registration_id", registrationId);
+
+      await supabase
+        .from("registrations")
+        .delete()
+        .eq("id", registrationId);
+
+      for (const pid of allParticipantIds) {
+        const { data: otherReg } = await supabase
+          .from("registrations")
+          .select("id")
+          .eq("primary_participant_id", pid)
+          .neq("id", registrationId)
+          .limit(1);
+
+        if (otherReg && otherReg.length > 0) continue;
+
+        const { data: otherMember } = await supabase
+          .from("registration_members")
+          .select("id")
+          .eq("participant_id", pid)
+          .neq("registration_id", registrationId)
+          .limit(1);
+
+        if (otherMember && otherMember.length > 0) continue;
+
+        await supabase
+          .from("participants")
+          .delete()
+          .eq("id", pid);
+      }
+
+      await supabase
+        .from("overall")
+        .delete()
+        .eq("id", row.id);
+
+      setRows((currentRows) =>
+        currentRows.filter((r) => r.id !== row.id)
+      );
+
+      setSelectedRow((current) =>
+        current?.id === row.id ? null : current
+      );
+
+      setDeleteCandidate(null);
+
+      alert(
+        "Registration " +
+          (row.registration_number || "") +
+          " has been deleted."
+      );
+    } catch (error) {
+      console.error(
+        "[AdminDashboard] Delete failed:",
+        error
+      );
+
+      alert(
+        error.message ||
+          "Failed to delete registration. Please try again."
+      );
+
+      fetchRegistrations({ showRefresh: true });
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  /* =======================================================
      LOGOUT
   ======================================================= */
 
@@ -1644,6 +1925,8 @@ export default function AdminDashboard() {
                 rows={eventRows}
                 eventSlug={selectedEventSlug}
                 onView={setSelectedRow}
+                onDelete={requestDelete}
+                deletingId={deletingId}
               />
             )}
           </section>
@@ -1657,6 +1940,10 @@ export default function AdminDashboard() {
           verifying={
             selectedRow?.id === verifyingId
           }
+          onDelete={requestDelete}
+          deleting={
+            selectedRow?.id === deletingId
+          }
         />
 
         <VerificationConfirmModal
@@ -1664,6 +1951,13 @@ export default function AdminDashboard() {
           onCancel={() => setVerificationCandidate(null)}
           onConfirm={() => verifyPayment(verificationCandidate)}
           verifying={verificationCandidate?.id === verifyingId}
+        />
+
+        <DeleteConfirmModal
+          row={deleteCandidate}
+          onCancel={() => setDeleteCandidate(null)}
+          onConfirm={() => deleteParticipant(deleteCandidate)}
+          deleting={deleteCandidate?.id === deletingId}
         />
       </div>
     );
@@ -1810,6 +2104,10 @@ export default function AdminDashboard() {
         verifying={
           selectedRow?.id === verifyingId
         }
+        onDelete={requestDelete}
+        deleting={
+          selectedRow?.id === deletingId
+        }
       />
 
       <VerificationConfirmModal
@@ -1817,6 +2115,13 @@ export default function AdminDashboard() {
         onCancel={() => setVerificationCandidate(null)}
         onConfirm={() => verifyPayment(verificationCandidate)}
         verifying={verificationCandidate?.id === verifyingId}
+      />
+
+      <DeleteConfirmModal
+        row={deleteCandidate}
+        onCancel={() => setDeleteCandidate(null)}
+        onConfirm={() => deleteParticipant(deleteCandidate)}
+        deleting={deleteCandidate?.id === deletingId}
       />
     </div>
   );
@@ -2609,6 +2914,35 @@ const styles = `
     color: #dc2626;
   }
 
+  .delete-button {
+    min-height: 32px;
+    padding: 0 11px;
+    border: 1px solid #e0e2e7;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #9ca0a8;
+    font-size: 9px;
+    font-weight: 900;
+    transition:
+      transform 0.15s ease,
+      background 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .delete-button:hover {
+    transform: translateY(-1px);
+    border-color: #dc2626;
+    background: #dc2626;
+    color: #ffffff;
+  }
+
+  .delete-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    transform: none;
+  }
+
   /* =========================================================
      MOBILE REGISTRATION LIST
   ========================================================= */
@@ -2624,6 +2958,7 @@ const styles = `
     border: 0;
     border-top: 1px solid #eceef1;
     background: #ffffff;
+    cursor: pointer;
   }
 
   .mobile-card-top {
@@ -2665,6 +3000,20 @@ const styles = `
     font-size: 9px;
     font-weight: 750;
     line-height: 1.5;
+  }
+
+  .mobile-card-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #eceef1;
+  }
+
+  .mobile-card-actions .delete-button {
+    min-height: 30px;
+    padding: 0 14px;
+    font-size: 9px;
   }
 
   /* =========================================================
@@ -2817,6 +3166,165 @@ const styles = `
   .verification-modal-actions .secondary-button {
     width: auto;
     min-width: 130px;
+  }
+
+  /* =========================================================
+     DELETE MODAL
+  ========================================================= */
+
+  .delete-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(13, 15, 21, 0.7);
+    backdrop-filter: blur(9px);
+  }
+
+  .delete-modal {
+    width: min(460px, 100%);
+    padding: 28px;
+    border: 1px solid rgba(220, 38, 38, 0.25);
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 35px 90px rgba(0, 0, 0, 0.3);
+    animation: modal-in 0.2s ease-out;
+  }
+
+  .delete-modal-eyebrow {
+    color: #dc2626;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+  }
+
+  .delete-modal h2 {
+    margin: 8px 0 16px;
+    color: #171922;
+    font-size: 24px;
+    line-height: 1;
+    font-weight: 950;
+    letter-spacing: -0.04em;
+  }
+
+  .delete-modal p {
+    margin: 0;
+    color: #656a74;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .delete-modal-participant {
+    display: block;
+    margin-top: 6px;
+    color: #171922;
+    font-size: 15px;
+    font-weight: 900;
+    overflow-wrap: anywhere;
+  }
+
+  .delete-modal-reg-number {
+    margin-top: 2px;
+    color: #9ca0a8;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .delete-modal-warning {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border: 1px solid rgba(220, 38, 38, 0.18);
+    border-radius: 10px;
+    background: #fef2f2;
+    color: #991b1b;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .delete-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+    margin-top: 24px;
+  }
+
+  .delete-modal-actions .delete-confirm-button,
+  .delete-modal-actions .secondary-button {
+    width: auto;
+    min-width: 130px;
+  }
+
+  .delete-confirm-button {
+    width: 100%;
+    min-height: 43px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 11px;
+    background: linear-gradient(135deg, #dc2626, #991b1b);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.03em;
+    box-shadow: 0 8px 22px rgba(220, 38, 38, 0.25);
+    transition: transform 0.17s ease, box-shadow 0.17s ease, opacity 0.17s ease;
+  }
+
+  .delete-confirm-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 13px 30px rgba(220, 38, 38, 0.32);
+  }
+
+  .delete-confirm-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    transform: none;
+  }
+
+  /* =========================================================
+     DELETE SECTION IN MODAL
+  ========================================================= */
+
+  .delete-section {
+    margin-top: 8px;
+    padding-top: 20px;
+    border-top: 1px dashed rgba(220, 38, 38, 0.2);
+  }
+
+  .delete-section-desc {
+    margin: 6px 0 14px;
+    color: #9ca0a8;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .delete-section-button {
+    width: 100%;
+    min-height: 43px;
+    padding: 0 16px;
+    border: 1px solid rgba(220, 38, 38, 0.25);
+    border-radius: 11px;
+    background: #ffffff;
+    color: #dc2626;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.03em;
+    transition: transform 0.17s ease, background 0.17s ease, color 0.17s ease;
+  }
+
+  .delete-section-button:hover {
+    background: #dc2626;
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+
+  .delete-section-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    transform: none;
   }
 
   @keyframes modal-in {
@@ -3935,7 +4443,8 @@ const styles = `
   .admin-header h1,
   .section-header h2,
   .modal-header h2,
-  .verification-modal h2 {
+  .verification-modal h2,
+  .delete-modal h2 {
     font-family: 'Anton', sans-serif;
     font-weight: 400;
     letter-spacing: 0.025em;
@@ -4292,6 +4801,11 @@ const styles = `
     padding: 0 13px;
   }
 
+  .delete-button {
+    min-height: 34px;
+    padding: 0 13px;
+  }
+
   .mobile-registration-card {
     padding: 18px 16px;
     border-top-color: var(--revibe-line);
@@ -4318,7 +4832,8 @@ const styles = `
   }
 
   .modal-backdrop,
-  .verification-modal-backdrop {
+  .verification-modal-backdrop,
+  .delete-modal-backdrop {
     background: rgba(23, 23, 23, 0.78);
     backdrop-filter: blur(10px);
   }
@@ -4342,6 +4857,7 @@ const styles = `
 
   .modal-eyebrow,
   .verification-modal-eyebrow,
+  .delete-modal-eyebrow,
   .section-title,
   .screenshot-heading {
     color: var(--revibe-red);
@@ -4482,17 +4998,21 @@ const styles = `
     text-transform: uppercase;
   }
 
-  .verification-modal {
+  .verification-modal,
+  .delete-modal {
     border-radius: 12px;
     border-top: 5px solid var(--revibe-red);
   }
 
-  .verification-modal h2 {
+  .verification-modal h2,
+  .delete-modal h2 {
     color: var(--revibe-ink);
   }
 
   .verification-modal-actions .verify-button,
-  .verification-modal-actions .secondary-button {
+  .verification-modal-actions .secondary-button,
+  .delete-modal-actions .delete-confirm-button,
+  .delete-modal-actions .secondary-button {
     min-height: 43px;
   }
 
@@ -4600,6 +5120,19 @@ const styles = `
 
     .verification-modal-actions .verify-button,
     .verification-modal-actions .secondary-button {
+      width: 100%;
+    }
+
+    .delete-modal {
+      padding: 23px 19px;
+    }
+
+    .delete-modal-actions {
+      flex-direction: column-reverse;
+    }
+
+    .delete-modal-actions .delete-confirm-button,
+    .delete-modal-actions .secondary-button {
       width: 100%;
     }
   }
