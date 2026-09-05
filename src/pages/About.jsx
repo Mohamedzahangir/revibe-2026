@@ -41,6 +41,11 @@ const sponsors = [
     blurb: "Fusing bold flavors, fun vibes, and irresistible bites.",
     logo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788459115/Fusk_it.jpg_mlqfck.png",
   },
+  {
+    name: "Tibet Momo",
+    blurb: "Authentic Tibetan momos with savory fillings and traditional steamed preparation, bringing the taste of the Himalayas to every bite.",
+    logo: "https://res.cloudinary.com/djm8qhle1/image/upload/v1788628223/ChatGPT_Image_Sep_5_2026_10_40_05_PM_iwxbjz.png",
+  },
 ];
 
 function SponsorTier({ sponsors }) {
